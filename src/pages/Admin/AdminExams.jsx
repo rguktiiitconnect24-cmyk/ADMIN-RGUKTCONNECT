@@ -126,6 +126,12 @@ const AdminExams = () => {
     const [schedules, setSchedules] = useState([]);
 
     useEffect(() => {
+        if (allowedDepartments.length > 0 && !allowedDepartments.find(d => d.value === activeTab)) {
+            setActiveTab(allowedDepartments[0].value);
+        }
+    }, [user, activeTab]);
+
+    useEffect(() => {
         const fetchExamSchedules = async () => {
             try {
                 const docSnap = await getDoc(doc(db, 'settings', 'exam_schedule'));
