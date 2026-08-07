@@ -99,13 +99,13 @@ RGUKT CONNECT Administration Team`;
 
                         <p>Please keep your login credentials confidential and use this account only for official RGUKT CONNECT purposes.</p>
                         
-                        <p style={{ marginTop: '1.5rem' }}>We welcome you to the <strong>RGUKT CONNECT Administration Team</strong> and wish you success in your role.</p>
+                        <p style={{ marginTop: '1.5rem' }}>We welcome you to the <strong>RGUKT CONNECT ADMIN</strong> and wish you success in your role.</p>
                     </div>
 
                     <div className="letter-signatures" style={{ marginTop: '3rem', justifyContent: 'flex-start' }}>
                         <div className="signature-block">
                             <h4>Authorized By</h4>
-                            <p><strong>RGUKT CONNECT Administration Team</strong></p>
+                            <p><strong>RGUKT CONNECT ADMIN</strong></p>
                         </div>
                     </div>
                 </div>
