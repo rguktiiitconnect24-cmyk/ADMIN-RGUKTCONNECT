@@ -235,6 +235,14 @@
         background-color: #ffffff !important;
     }
 
+    /* Force the printed document to exactly 1 page height */
+    html, body {
+        height: 100vh !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
     body * {
         visibility: hidden;
     }
