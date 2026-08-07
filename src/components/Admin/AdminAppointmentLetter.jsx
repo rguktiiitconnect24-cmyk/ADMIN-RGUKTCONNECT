@@ -2,6 +2,8 @@ import React from 'react';
 import { Copy, CheckCircle2, Download, X } from 'lucide-react';
 import './AdminAppointmentLetter.css';
 
+const LOGO_DATA_URI = `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMjgiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcikiLz4KICA8cGF0aCBkPSJNMjU2IDEyMEw2NCAyMTBMMjU2IDMwMEw0NDggMjEwTDI1NiAxMjBaIiBmaWxsPSJ3aGl0ZSIvPgogIDxwYXRoIGQ9Ik0xMjggMjQwVjMyMEMxMjggMzIwIDE4MCAzNzAgMjU2IDM3MEMzMzIgMzcwIDM4NCAzMjAgMzg0IDMyMFYyNDBMMjU2IDMwMEwxMjggMjQwWiIgZmlsbD0id2hpdGUiLz4KICA8cGF0aCBkPSJNNDE2IDIxMFYzNDAiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMjAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogIDxjaXJjbGUgY3g9IjQxNiIgY3k9IjM1MCIgcj0iMTUiIGZpbGw9IndoaGl0ZSIvPgogIDxkZWZzPgog   PGxpbmVhckdyYWRpZW50IGlkPSJwYWludDBfbGluZWFyIiB4MT0iMCIgeTE9IjAiIHgyPSI1MTIiIHkyPSI1MTIiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KICAgICAgPHN0b3Agc3RvcC1jb2xvcj0iIzRmNDZlNSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNzMwYTMiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgo8L3N2Zz4=`;
+
 const AdminAppointmentLetter = ({ adminData, onClose }) => {
     const [copied, setCopied] = React.useState(false);
 
@@ -60,13 +62,13 @@ RGUKT CONNECT Administration Team`;
                 </div>
 
                 <div className="appointment-letter-content printable-area">
-                    <div className="letter-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '2rem', borderBottom: '2px solid #000', paddingBottom: '1.5rem' }}>
-                        <img src="/logo.svg" alt="Logo" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
-                        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, color: '#000000', letterSpacing: '1px' }}>RGUKT CONNECT</h1>
+                    <div className="letter-header-brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '1.5rem', borderBottom: '2px solid #000', paddingBottom: '1.5rem' }}>
+                        <img src={LOGO_DATA_URI} alt="Logo" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+                        <span style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, color: '#000000', letterSpacing: '1px', fontFamily: 'inherit' }}>RGUKT CONNECT</span>
                     </div>
 
-                    <div className="letter-date" style={{ textAlign: 'left', marginBottom: '2rem' }}>
-                        <h2>Semi Administrator Appointment Letter</h2>
+                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                        <span style={{ fontSize: '1.25rem', fontWeight: 'bold', textDecoration: 'underline' }}>Semi Administrator Appointment Letter</span>
                     </div>
 
                     <div className="letter-date" style={{ textAlign: 'left', marginBottom: '2rem' }}>
