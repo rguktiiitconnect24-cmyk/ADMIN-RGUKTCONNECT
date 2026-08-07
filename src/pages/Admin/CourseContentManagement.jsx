@@ -95,6 +95,19 @@ const CourseContentManagement = () => {
     const { user } = useAuth();
     const [adminUser, setAdminUser] = useState(null);
 
+    const isSuperAdmin = !user?.targetDepartments || user.targetDepartments.length === 0 || user.permissions?.includes('all');
+    
+    const allowedPrograms = PROGRAMS.filter(p => {
+        if (isSuperAdmin) return true;
+        if (p.id === 'puc') {
+            return user.targetDepartments.some(d => d.toLowerCase() === 'puc');
+        }
+        if (p.id === 'btech') {
+            return user.targetDepartments.some(d => d.toLowerCase() !== 'puc');
+        }
+        return true;
+    });
+
     // Clipboard State
     const [clipboard, setClipboard] = useState(null); // { type: 'subject' | 'unit' | 'module', id: '...' }
 
@@ -111,6 +124,17 @@ const CourseContentManagement = () => {
     };
 
     // --- Effects ---
+
+    // Ensure selected program is an allowed program
+    useEffect(() => {
+        if (allowedPrograms.length > 0 && !allowedPrograms.find(p => p.id === selectedProgram.id)) {
+            const firstAllowed = allowedPrograms[0];
+            setSelectedProgram(firstAllowed);
+            setSelectedYear(firstAllowed.years[0]);
+            
+            // Allow the other useEffect (on line 234) to handle branch/semester init
+        }
+    }, [user, selectedProgram]);
 
     // Load Subjects when hierarchy changes
     useEffect(() => {
@@ -604,7 +628,7 @@ const CourseContentManagement = () => {
                 <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                     <CustomSelect 
                         label="Degree Program"
-                        options={PROGRAMS.map(p => ({ value: p.id, label: p.label }))} 
+                        options={allowedPrograms.map(p => ({ value: p.id, label: p.label }))} 
                         value={selectedProgram.id} 
                         onChange={handleProgramChange} 
                     />
