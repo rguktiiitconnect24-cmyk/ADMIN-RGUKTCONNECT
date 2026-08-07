@@ -29,7 +29,7 @@ const CreateAdminAccount = lazy(() => import('./pages/Admin/CreateAdminAccount')
 const ContentManagement = lazy(() => import('./pages/Admin/ContentManagement'));
 const CourseContentManagement = lazy(() => import('./pages/Admin/CourseContentManagement'));
 const ComplaintsManagement = lazy(() => import('./pages/Admin/ComplaintsManagement'));
-const Welcome = lazy(() => import('./pages/Welcome'));
+
 const TimetableManagement = lazy(() => import('./pages/Admin/TimetableManagement'));
 const AdminExams = lazy(() => import('./pages/Admin/AdminExams'));
 const AdminExamSettings = lazy(() => import('./pages/Admin/AdminExamSettings'));
@@ -275,7 +275,7 @@ const App = () => {
           <NavigationProvider>
             <NotificationWatcher />
             <Routes>
-              <Route path="/" element={<Welcome />} />
+              <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgetPassword />} />
               <Route element={<Layout />}>
