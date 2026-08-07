@@ -253,7 +253,7 @@ const CreateNotice = () => {
                                 <label style={{ fontSize: '0.95rem', color: 'var(--color-text-main)' }}>Target Sections</label>
                                 <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Select specific sections, or type custom ones below.</p>
                                 <div className="cn-chip-container" style={{ marginBottom: '1rem' }}>
-                                    {['A', 'B', 'C', 'D', 'AIML'].map(sec => {
+                                    {['A', 'B', 'C', 'D', 'AIML'].filter(sec => sec !== 'AIML' || allowedDepts.includes('CSE(AI&ML)')).map(sec => {
                                         const isSelected = formData.targetClasses.includes(sec);
                                         return (
                                             <div 
