@@ -224,6 +224,15 @@
 
 /* Print Styles */
 @media print {
+    @page {
+        margin: 20mm;
+    }
+
+    body {
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+    }
+
     body * {
         visibility: hidden;
     }
@@ -249,6 +258,7 @@
     
     .printable-area, .printable-area * {
         visibility: visible;
+        color: #000000 !important;
     }
     
     .printable-area {
@@ -257,6 +267,7 @@
         top: 0;
         width: 100%;
         padding: 0;
+        background: #ffffff !important;
     }
     
     .no-print {
