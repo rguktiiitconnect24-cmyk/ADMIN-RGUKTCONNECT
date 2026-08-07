@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { noticeService } from '../../services/noticeService';
+import { isDepartmentAllowed } from '../../utils/rbacUtils';
 import './CreateNotice.css';
 
 const CATEGORIES = ['Academic', 'Exams', 'Events', 'Placements', 'Circulars', 'Assignments'];
@@ -12,6 +13,11 @@ const CreateNotice = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const { user } = useAuth();
+    
+    const isSuperAdmin = !user?.targetDepartments || user.targetDepartments.length === 0 || user.permissions?.includes('all');
+    const ALL_DEPTS = ['CSE(AI&ML)', 'CSE', 'ECE', 'EEE', 'CE', 'ME', 'MME', 'CHE'];
+    const allowedDepts = isSuperAdmin ? ALL_DEPTS : ALL_DEPTS.filter(dept => isDepartmentAllowed(dept, user));
+
     const fileInputRef = useRef(null);
 
     const [loading, setLoading] = useState(false);
@@ -21,10 +27,10 @@ const CreateNotice = () => {
         category: 'Academic',
         priority: 'Normal',
         expiryDate: '',
-        targetAll: true,
+        targetAll: isSuperAdmin ? true : false,
         targetRoles: [],
         targetClasses: [],
-        targetDepartments: []
+        targetDepartments: isSuperAdmin ? [] : allowedDepts
     });
     
     const [driveLink, setDriveLink] = useState('');
@@ -49,10 +55,10 @@ const CreateNotice = () => {
                         category: notice.category || 'Academic',
                         priority: notice.priority || 'Normal',
                         expiryDate: notice.expiryDate ? (notice.expiryDate.toDate ? notice.expiryDate.toDate().toISOString().split('T')[0] : new Date(notice.expiryDate.seconds * 1000).toISOString().split('T')[0]) : '',
-                        targetAll: notice.targetAudience?.targetAll ?? true,
+                        targetAll: isSuperAdmin ? (notice.targetAudience?.targetAll ?? true) : false,
                         targetRoles: notice.targetAudience?.roles || [],
                         targetClasses: notice.targetAudience?.classes || [],
-                        targetDepartments: notice.targetAudience?.departments || []
+                        targetDepartments: isSuperAdmin ? (notice.targetAudience?.departments || []) : (notice.targetAudience?.departments?.length > 0 ? notice.targetAudience.departments.filter(d => allowedDepts.includes(d)) : allowedDepts)
                     });
                     if (notice.attachments && notice.attachments.length > 0) {
                         setDriveLink(notice.attachments[0].url || '');
@@ -80,10 +86,10 @@ const CreateNotice = () => {
                 postedBy: user?.displayName || user?.fullName || 'Admin',
                 status: status,
                 targetAudience: {
-                    targetAll: formData.targetAll,
+                    targetAll: isSuperAdmin ? formData.targetAll : false,
                     roles: formData.targetRoles,
                     classes: formData.targetClasses,
-                    departments: formData.targetDepartments
+                    departments: isSuperAdmin ? formData.targetDepartments : formData.targetDepartments.filter(d => allowedDepts.includes(d))
                 }
             };
 
@@ -197,23 +203,25 @@ const CreateNotice = () => {
 
                 <div className="cn-section">
                     <h2 className="cn-section-title">Target Audience</h2>
-                    <div className="cn-form-group">
-                        <label className="cn-premium-checkbox">
-                            <input 
-                                type="checkbox" 
-                                name="targetAll"
-                                checked={formData.targetAll}
-                                onChange={handleInputChange}
-                                className="cn-premium-input"
-                            />
-                            <div className="cn-premium-box">
-                                <svg viewBox="0 0 24 24" className="cn-premium-check">
-                                    <path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                            </div>
-                            <span className="cn-premium-text">Publish to All Students & Faculty</span>
-                        </label>
-                    </div>
+                    {isSuperAdmin && (
+                        <div className="cn-form-group">
+                            <label className="cn-premium-checkbox">
+                                <input 
+                                    type="checkbox" 
+                                    name="targetAll"
+                                    checked={formData.targetAll}
+                                    onChange={handleInputChange}
+                                    className="cn-premium-input"
+                                />
+                                <div className="cn-premium-box">
+                                    <svg viewBox="0 0 24 24" className="cn-premium-check">
+                                        <path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </div>
+                                <span className="cn-premium-text">Publish to All Students & Faculty</span>
+                            </label>
+                        </div>
+                    )}
                     
                     {!formData.targetAll && (
                         <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -221,7 +229,7 @@ const CreateNotice = () => {
                                 <label style={{ fontSize: '0.95rem', color: 'var(--color-text-main)' }}>Target Departments</label>
                                 <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Select which departments should see this notice. Leave empty for all.</p>
                                 <div className="cn-chip-container">
-                                    {['CSE(AI&ML)', 'CSE', 'ECE', 'EEE', 'CE', 'ME', 'MME', 'CHE'].map(dept => {
+                                    {allowedDepts.map(dept => {
                                         const isSelected = formData.targetDepartments.includes(dept);
                                         return (
                                             <div 
