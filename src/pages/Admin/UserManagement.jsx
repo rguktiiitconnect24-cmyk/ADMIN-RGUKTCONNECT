@@ -5,7 +5,8 @@ import BulkUpdater from '../../components/Admin/BulkUpdater';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { db } from '../../config/firebase';
+import { db, functions } from '../../config/firebase';
+import { httpsCallable } from 'firebase/functions';
 import { collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -200,6 +201,18 @@ const UserManagement = () => {
             }
 
             let collectionName = activeTab === 'master' ? 'students_master' : 'users';
+            
+            // If deleting an admin, completely wipe their Firebase Authentication account via our Cloud Function
+            if (activeTab === 'administrators' && collectionName === 'users') {
+                try {
+                    const deleteAdminFn = httpsCallable(functions, 'deleteAdminUser');
+                    await deleteAdminFn({ uid: userToDelete.id });
+                } catch (fnError) {
+                    console.error("Cloud Function failed:", fnError);
+                    showToast("Warning: Could not wipe Auth account. Is the Cloud Function deployed?", "error");
+                }
+            }
+
             await deleteDoc(doc(db, collectionName, userToDelete.id));
             
             showToast("User record deleted successfully.");
