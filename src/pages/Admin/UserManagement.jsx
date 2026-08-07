@@ -1,4 +1,4 @@
-import { MoreVertical, Search, Filter, Mail, Download, Eye, MailCheck, Edit2, Trash2, X, AlertCircle, Monitor, AlertTriangle, Check } from 'lucide-react';
+import { MoreVertical, Search, Filter, Mail, Download, Eye, MailCheck, Edit2, Trash2, X, AlertCircle, Monitor, AlertTriangle, Check, LogIn } from 'lucide-react';
 import CustomSelect from '../../components/Common/CustomSelect';
 import LoadingTransition from '../../components/Common/LoadingTransition';
 import BulkUpdater from '../../components/Admin/BulkUpdater';
@@ -19,7 +19,8 @@ import AdminAppointmentLetter from '../../components/Admin/AdminAppointmentLette
 
 const UserManagement = () => {
     const navigate = useNavigate();
-    const { user, register, logout } = useAuth();
+    const { user, register, logout, forceLoginAsUser } = useAuth();
+    const isSuperAdmin = !user?.targetDepartments || user.targetDepartments.length === 0 || user.permissions?.includes('all');
     const { theme } = useTheme();
     const [users, setUsers] = useState([]);
     const [masterStudents, setMasterStudents] = useState([]);
@@ -672,6 +673,25 @@ const UserManagement = () => {
                                             </td>
                                             <td>
                                                 <div className="action-buttons">
+                                                    {isSuperAdmin && item.id !== user.uid && (
+                                                        <button
+                                                            className="action-btn"
+                                                            title="Direct Login as this Admin"
+                                                            onClick={async () => {
+                                                                if (window.confirm(`Are you sure you want to log in as ${item.fullName}? Your current super admin session will be suspended.`)) {
+                                                                    try {
+                                                                        await forceLoginAsUser(item.id);
+                                                                        navigate('/admin/dashboard');
+                                                                    } catch(e) {
+                                                                        alert("Failed to spoof login: " + e.message);
+                                                                    }
+                                                                }
+                                                            }}
+                                                            style={{ color: 'var(--color-primary)' }}
+                                                        >
+                                                            <LogIn size={18} />
+                                                        </button>
+                                                    )}
                                                     <button
                                                         className="action-btn view"
                                                         title="View Details"
