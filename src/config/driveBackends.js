@@ -20,10 +20,10 @@ export const DRIVE_BACKENDS = {
     'btech_btech4_che': 'https://script.google.com/macros/s/AKfycbxVjDF7lKdSZqgAbyS1zy14H_qPjuU-tDXkZ-gUlnNZoz11h0umSJqrYt6htfFLx0KVIA/exec',
 
     // MME Endpoints (Update these URLs after deploying your new MME Apps Script)
-    'btech_btech1_mme': '',
-    'btech_btech2_mme': '',
-    'btech_btech3_mme': '',
-    'btech_btech4_mme': '',
+    'btech_btech1_mme': 'https://script.google.com/macros/s/AKfycbxgAh_mxxgbPnWzVIn2YWDDuvMZrKSSemGNXUJAHKJebVRaF3RHCVWKpS8U1xgLgL2a/exec',
+    'btech_btech2_mme': 'https://script.google.com/macros/s/AKfycbxgAh_mxxgbPnWzVIn2YWDDuvMZrKSSemGNXUJAHKJebVRaF3RHCVWKpS8U1xgLgL2a/exec',
+    'btech_btech3_mme': 'https://script.google.com/macros/s/AKfycbxgAh_mxxgbPnWzVIn2YWDDuvMZrKSSemGNXUJAHKJebVRaF3RHCVWKpS8U1xgLgL2a/exec',
+    'btech_btech4_mme': 'https://script.google.com/macros/s/AKfycbxgAh_mxxgbPnWzVIn2YWDDuvMZrKSSemGNXUJAHKJebVRaF3RHCVWKpS8U1xgLgL2a/exec',
 };
 
 /**
