@@ -104,7 +104,6 @@ RGUKT CONNECT Administration Team`;
 
                     <div className="letter-signatures" style={{ marginTop: '3rem', justifyContent: 'flex-end' }}>
                         <div className="signature-block" style={{ textAlign: 'center' }}>
-                            <p style={{ marginBottom: '2rem' }}>BEST REGARDS,</p>
                             <h4 style={{ marginBottom: '0.25rem' }}>B.NAGESH</h4>
                             <p><strong>RGUKT CONNECT SUPER ADMIN</strong></p>
                         </div>
