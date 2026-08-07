@@ -18,6 +18,12 @@ export const DRIVE_BACKENDS = {
     'btech_btech2_che': 'https://script.google.com/macros/s/AKfycbxVjDF7lKdSZqgAbyS1zy14H_qPjuU-tDXkZ-gUlnNZoz11h0umSJqrYt6htfFLx0KVIA/exec',
     'btech_btech3_che': 'https://script.google.com/macros/s/AKfycbxVjDF7lKdSZqgAbyS1zy14H_qPjuU-tDXkZ-gUlnNZoz11h0umSJqrYt6htfFLx0KVIA/exec',
     'btech_btech4_che': 'https://script.google.com/macros/s/AKfycbxVjDF7lKdSZqgAbyS1zy14H_qPjuU-tDXkZ-gUlnNZoz11h0umSJqrYt6htfFLx0KVIA/exec',
+
+    // MME Endpoints (Update these URLs after deploying your new MME Apps Script)
+    'btech_btech1_mme': '',
+    'btech_btech2_mme': '',
+    'btech_btech3_mme': '',
+    'btech_btech4_mme': '',
 };
 
 /**
