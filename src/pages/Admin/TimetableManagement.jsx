@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { db } from '../../config/firebase';
 import { doc, getDoc, setDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
 import { useToast } from '../../context/ToastContext';
+import { isDepartmentAllowed } from '../../utils/rbacUtils';
 import './Admin.css';
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -28,7 +29,8 @@ const TimetableManagement = () => {
     const { user } = useAuth();
     const [adminUser, setAdminUser] = useState(null);
     
-    const branches = ['CSE(AI&ML)', 'CSE', 'ECE', 'EEE', 'CE', 'ME', 'MME', 'CHE'];
+    const branches = ['CSE(AI&ML)', 'CSE', 'ECE', 'EEE', 'CE', 'ME', 'MME', 'CHE']
+        .filter(dept => isDepartmentAllowed(dept, user));
     const branchFullNames = {
         'CSE(AI&ML)': 'Computer Science & Engineering (AI & ML)',
         'CSE': 'Computer Science & Engineering',
