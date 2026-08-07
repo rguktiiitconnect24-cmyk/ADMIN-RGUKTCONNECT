@@ -15,6 +15,7 @@ import {
     duplicateSubject, duplicateUnit, duplicateModule
 } from '../../utils/academicsUtils';
 import { pdfService } from '../../services/pdfService';
+import { isDepartmentAllowed } from '../../utils/rbacUtils';
 import './Admin.css';
 
 const convertDriveLink = (url) => {
@@ -527,14 +528,20 @@ const CourseContentManagement = () => {
 
     // --- Helpers ---
 
+    const getAllowedBranches = (branches) => {
+        if (!branches) return null;
+        return branches.filter(b => isDepartmentAllowed(b.id, user) || isDepartmentAllowed(b.label, user));
+    };
+
     const handleProgramChange = (val) => {
         const prog = PROGRAMS.find(p => p.id === val);
         const firstYear = prog.years[0];
         setSelectedProgram(prog);
         setSelectedYear(firstYear);
-        if (firstYear.branches) {
-            setSelectedBranch(firstYear.branches[0]);
-            setSelectedSemester(firstYear.branches[0].semesters[0]);
+        const allowedBranches = getAllowedBranches(firstYear.branches);
+        if (allowedBranches && allowedBranches.length > 0) {
+            setSelectedBranch(allowedBranches[0]);
+            setSelectedSemester(allowedBranches[0].semesters[0]);
         } else {
             setSelectedBranch(null);
             setSelectedSemester(firstYear.semesters[0]);
@@ -544,9 +551,10 @@ const CourseContentManagement = () => {
     const handleYearChange = (val) => {
         const yr = selectedProgram.years.find(y => y.id === val);
         setSelectedYear(yr);
-        if (yr.branches) {
-            setSelectedBranch(yr.branches[0]);
-            setSelectedSemester(yr.branches[0].semesters[0]);
+        const allowedBranches = getAllowedBranches(yr.branches);
+        if (allowedBranches && allowedBranches.length > 0) {
+            setSelectedBranch(allowedBranches[0]);
+            setSelectedSemester(allowedBranches[0].semesters[0]);
         } else {
             setSelectedBranch(null);
             setSelectedSemester(yr.semesters[0]);
@@ -609,7 +617,7 @@ const CourseContentManagement = () => {
                     {selectedYear.branches && (
                         <CustomSelect 
                             label="Branch"
-                            options={selectedYear.branches.map(b => ({ value: b.id, label: b.label }))} 
+                            options={getAllowedBranches(selectedYear.branches).map(b => ({ value: b.id, label: b.label }))} 
                             value={selectedBranch?.id || ''} 
                             onChange={handleBranchChange} 
                         />
