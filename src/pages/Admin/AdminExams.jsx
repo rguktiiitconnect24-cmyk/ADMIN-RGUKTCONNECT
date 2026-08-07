@@ -91,7 +91,7 @@ const DEFAULT_EXAM_ITEM = {
 
 const makeSchedule = (overrides = {}) => ({
     id: Date.now() + Math.random(),
-    isVisible: true,
+    isVisible: false,
     type: 'others',
     title: 'New Schedule',
     subtitle: '',
