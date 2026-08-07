@@ -19,6 +19,23 @@ export const isDepartmentAllowed = (department, user) => {
     // (As per CreateAdminAccount logic: "Leave empty for all departments")
     if (!user.targetDepartments || user.targetDepartments.length === 0) return true;
 
-    // Finally, check if the specific department is in their allowed list
-    return user.targetDepartments.includes(department);
+    // Normalize the input department string to handle synonyms across modules
+    const normalize = (dept) => {
+        if (!dept) return '';
+        const d = dept.toString().toLowerCase().trim();
+        if (d === 'aiml' || d === 'cse(ai&ml)') return 'aiml';
+        if (d === 'cse') return 'cse';
+        if (d === 'ece') return 'ece';
+        if (d === 'eee') return 'eee';
+        if (d === 'ce' || d === 'civil') return 'ce';
+        if (d === 'me' || d === 'mech') return 'me';
+        if (d === 'mme') return 'mme';
+        if (d === 'che' || d === 'chem') return 'che';
+        return d;
+    };
+
+    const targetNormalized = user.targetDepartments.map(normalize);
+    const deptNormalized = normalize(department);
+
+    return targetNormalized.includes(deptNormalized);
 };
