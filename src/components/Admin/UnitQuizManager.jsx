@@ -1,5 +1,5 @@
-import { ChevronDown, X, List, Settings, Loader2, Save, Plus, Edit2, Trash2, Check, Lightbulb } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { ChevronDown, X, List, Settings, Loader2, Save, Plus, Edit2, Trash2, Check, Lightbulb, Sigma } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { getQuestionsForQuiz, addQuestion, deleteQuestion, updateQuestion } from '../../services/quizService';
 import { generateQuizForTopic } from '../../services/aiQuizService';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -46,6 +46,96 @@ const CustomDropdown = ({ value, onChange, options, className }) => {
     );
 };
 
+const MathFieldRenderer = ({ math, inline }) => {
+    const ref = useRef(null);
+    useEffect(() => {
+        // Inject custom CSS into the MathLive shadow DOM to increase fraction spacing
+        const injectStyle = () => {
+            if (ref.current && ref.current.shadowRoot) {
+                let styleEl = ref.current.shadowRoot.querySelector('#custom-frac-style');
+                if (!styleEl) {
+                    styleEl = document.createElement('style');
+                    styleEl.id = 'custom-frac-style';
+                    styleEl.textContent = `
+                        .ML__num { transform: translateY(-0.15em) !important; display: inline-block; }
+                        .ML__den { transform: translateY(0.15em) !important; display: inline-block; }
+                        .ML__frac-line { height: 1.5px !important; background-color: currentColor !important; }
+                    `;
+                    ref.current.shadowRoot.appendChild(styleEl);
+                }
+            }
+        };
+
+        // It might take a moment for the shadow root to initialize
+        if (ref.current) {
+            injectStyle();
+            // Retry after a short delay in case it's not ready
+            setTimeout(injectStyle, 50);
+        }
+    }, [math]);
+
+    return (
+        <math-field 
+            ref={ref}
+            style={{ 
+                display: inline ? 'inline-block' : 'block', 
+                backgroundColor: 'transparent', 
+                border: 'none', 
+                padding: 0, 
+                outline: 'none', 
+                pointerEvents: 'none', 
+                color: 'var(--color-text-main, #000)', 
+                verticalAlign: 'middle', 
+                margin: inline ? '0 4px' : '0',
+                fontSize: inline ? '1.1em' : '1.2em'
+            }}
+        >
+            {inline ? `\\displaystyle ${math}` : math}
+        </math-field>
+    );
+};
+
+const MixedMathText = ({ text }) => {
+    if (!text) return null;
+    
+    // Normalize delimiters
+    let normalizedText = text
+        .replace(/\\\(/g, '$')
+        .replace(/\\\)/g, '$')
+        .replace(/\\\[/g, '$$')
+        .replace(/\\\]/g, '$$');
+
+    // Split by block math $$...$$
+    const blockParts = normalizedText.split(/(\$\$[\s\S]*?\$\$)/);
+    
+    return (
+        <div style={{ lineHeight: '1.6', fontSize: '1rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: 'var(--color-text-main, #000)' }}>
+            {blockParts.map((bPart, bIdx) => {
+                if (bPart.startsWith('$$') && bPart.endsWith('$$')) {
+                    const math = bPart.slice(2, -2).trim();
+                    return (
+                        <div key={bIdx} className="my-4 flex justify-center w-full" style={{ overflowX: 'auto', overflowY: 'hidden' }}>
+                            <MathFieldRenderer math={math} inline={false} />
+                        </div>
+                    );
+                }
+                
+                // Split inline math $...$
+                const inlineParts = bPart.split(/(\$[\s\S]*?\$)/);
+                return inlineParts.map((iPart, iIdx) => {
+                    if (iPart.startsWith('$') && iPart.endsWith('$') && iPart !== '$') {
+                        const math = iPart.slice(1, -1).trim();
+                        return (
+                            <MathFieldRenderer key={`${bIdx}-${iIdx}`} math={math} inline={true} />
+                        );
+                    }
+                    return <span key={`${bIdx}-${iIdx}`}>{iPart}</span>;
+                });
+            })}
+        </div>
+    );
+};
+
 const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
     const [activeTab, setActiveTab] = useState('questions'); // 'questions', 'settings'
     const [questions, setQuestions] = useState([]);
@@ -74,48 +164,69 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
     const [isSavingQuestion, setIsSavingQuestion] = useState(false);
     const [generateDifficulty, setGenerateDifficulty] = useState('Moderate');
 
-    const setMathFieldRef = (element) => {
+    // Math Modal State
+    const [showMathModal, setShowMathModal] = useState(false);
+    const [mathTarget, setMathTarget] = useState(null);
+    const [tempMathValue, setTempMathValue] = useState('');
+    const inputRefs = useRef({});
+
+    const openMathModal = (target) => {
+        setMathTarget(target);
+        setTempMathValue('');
+        setShowMathModal(true);
+    };
+
+    const handleInsertMath = () => {
+        const mathToInsert = `$$${tempMathValue}$$`;
+        
+        let currentValue = '';
+        if (mathTarget === 'questionText') {
+            currentValue = newQuestion.questionText;
+        } else if (mathTarget && mathTarget.startsWith('option-')) {
+            const idx = parseInt(mathTarget.split('-')[1]);
+            currentValue = newQuestion.options[idx];
+        }
+
+        const ref = inputRefs.current[mathTarget];
+        let newValue = currentValue;
+        if (ref) {
+            const cursorStart = ref.selectionStart;
+            newValue = currentValue.substring(0, cursorStart) + ' ' + mathToInsert + ' ' + currentValue.substring(cursorStart);
+        } else {
+            newValue = currentValue + ' ' + mathToInsert;
+        }
+
+        if (mathTarget === 'questionText') {
+            setNewQuestion({ ...newQuestion, questionText: newValue });
+        } else if (mathTarget && mathTarget.startsWith('option-')) {
+            const idx = parseInt(mathTarget.split('-')[1]);
+            const updatedOptions = [...newQuestion.options];
+            updatedOptions[idx] = newValue;
+            setNewQuestion({ ...newQuestion, options: updatedOptions });
+        }
+        setShowMathModal(false);
+    };
+
+    const setMathModalRef = (element) => {
         if (element && !element.hasAttribute('data-configured')) {
             element.smartMode = true;
             element.mathVirtualKeyboardPolicy = "manual";
-            element.inlineShortcuts = {
-                ...element.inlineShortcuts,
-                'alpha': '\\alpha',
-                'beta': '\\beta',
-                'gamma': '\\gamma',
-                'delta': '\\delta',
-                'theta': '\\theta',
-                'lambda': '\\lambda',
-                'pi': '\\pi',
-                'sigma': '\\sigma',
-                'omega': '\\omega',
-                'mu': '\\mu',
-                'phi': '\\phi',
-                'int': '\\int',
-                'sum': '\\sum',
-                'prod': '\\prod',
-                'lim': '\\lim',
-                'inf': '\\infty',
-                '->': '\\rightarrow',
-                '<=': '\\leq',
-                '>=': '\\geq',
-                '!=': '\\neq',
-                '+-': '\\pm',
-                'xx': '\\times',
-                'sqrt': '\\sqrt',
-                'root3': '\\sqrt[3]',
-                'root4': '\\sqrt[4]',
-                'sin': '\\sin',
-                'cos': '\\cos',
-                'tan': '\\tan',
-                'cot': '\\cot',
-                'sec': '\\sec',
-                'cosec': '\\csc',
-                'log': '\\log',
-                'ln': '\\ln',
-                'vec': '\\vec'
-            };
             element.setAttribute('data-configured', 'true');
+            
+            // Inject fraction spacing CSS into Modal
+            if (element.shadowRoot) {
+                let styleEl = element.shadowRoot.querySelector('#custom-frac-style');
+                if (!styleEl) {
+                    styleEl = document.createElement('style');
+                    styleEl.id = 'custom-frac-style';
+                    styleEl.textContent = `
+                        .ML__num { transform: translateY(-0.15em) !important; display: inline-block; }
+                        .ML__den { transform: translateY(0.15em) !important; display: inline-block; }
+                        .ML__frac-line { height: 1.5px !important; background-color: currentColor !important; }
+                    `;
+                    element.shadowRoot.appendChild(styleEl);
+                }
+            }
         }
     };
 
@@ -710,6 +821,66 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
     border-radius: 16px;
     padding: 1.5rem;
 }
+
+.uqm-math-modal {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 650px;
+    padding: 1.5rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.uqm-math-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.uqm-math-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+.uqm-math-title svg {
+    color: var(--color-primary-400);
+}
+
+.uqm-math-editor-container {
+    background: var(--color-background);
+    border-radius: 8px;
+    padding: 0.5rem;
+    border: 1px solid var(--color-border);
+    min-height: 120px;
+}
+
+.uqm-math-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+math-field::part(menu-toggle) {
+    display: none !important;
+}
+
+math-field::part(virtual-keyboard-toggle) {
+    display: none !important;
+}
+
+math-field::part(mode-toggle) {
+    display: none !important;
+}
         `}} />
         <div className="uqm-overlay">
             <div className="uqm-modal">
@@ -815,21 +986,30 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
                                     <h3 className="uqm-form-title">{editingQuestion ? 'Edit Question' : 'New Question'}</h3>
                                     
                                     <div className="uqm-input-group">
-                                        <label className="uqm-label">Question Text (Math Equation)</label>
-                                        <math-field 
-                                            ref={setMathFieldRef}
-                                            class="uqm-input"
-                                            style={{ 
-                                                minHeight: '60px', 
-                                                fontSize: '1.2rem', 
-                                                width: '100%', 
-                                                backgroundColor: 'var(--color-surface, #ffffff)', 
-                                                color: 'var(--color-text, #000000)',
-                                                border: '1px solid var(--color-border)'
-                                            }}
-                                            onInput={(e) => setNewQuestion({...newQuestion, questionText: e.target.value})}
+                                        <div className="flex justify-between items-center mb-2">
+                                            <label className="uqm-label mb-0">Question Text</label>
+                                            <button type="button" onClick={() => openMathModal('questionText')} className="uqm-btn-primary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', gap: '0.25rem' }}>
+                                                <Sigma size={14} /> Insert Math
+                                            </button>
+                                        </div>
+                                        <textarea 
+                                            ref={el => inputRefs.current['questionText'] = el}
+                                            className="uqm-textarea"
+                                            rows="2"
                                             value={newQuestion.questionText}
+                                            onChange={(e) => setNewQuestion({...newQuestion, questionText: e.target.value})}
+                                            placeholder="Type the problem statement here (use LaTeX for math)"
+                                            spellCheck="false"
+                                            autoCorrect="off"
+                                            autoCapitalize="off"
+                                            autoComplete="off"
                                         />
+                                        {newQuestion.questionText && (
+                                            <div className="mt-2 p-3 bg-white/5 border border-white/10 rounded-lg">
+                                                <div className="text-xs text-slate-400 mb-2 font-semibold">Math Preview:</div>
+                                                <MixedMathText text={newQuestion.questionText} />
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="uqm-input-group">
                                         <label className="uqm-label">Difficulty Level</label>
@@ -850,13 +1030,20 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
                                                     onChange={() => setNewQuestion({...newQuestion, correctAnswerIndex: idx})}
                                                     className="w-5 h-5 text-purple-600 bg-slate-100 border-slate-300 dark:bg-slate-800 dark:border-slate-600 focus:ring-purple-500 focus:ring-2"
                                                 />
-                                                <input 
-                                                    type="text" 
-                                                    className="uqm-input flex-1"
-                                                    value={opt}
-                                                    onChange={(e) => handleOptionChange(idx, e.target.value)}
-                                                    placeholder={`Option ${String.fromCharCode(65 + idx)}`}
-                                                />
+                                                <div className="relative flex-1 flex">
+                                                    <input 
+                                                        ref={el => inputRefs.current[`option-${idx}`] = el}
+                                                        type="text" 
+                                                        className="uqm-input flex-1"
+                                                        style={{ paddingRight: '2.5rem' }}
+                                                        value={opt}
+                                                        onChange={(e) => handleOptionChange(idx, e.target.value)}
+                                                        placeholder={`Option ${String.fromCharCode(65 + idx)}`}
+                                                    />
+                                                    <button type="button" onClick={() => openMathModal(`option-${idx}`)} className="uqm-action-btn" style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent' }} title="Insert Math">
+                                                        <Sigma size={16} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -917,7 +1104,7 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
                                                 <div className="flex items-start">
                                                     <span className="uqm-q-badge">Q{index + 1}</span>
                                                     <div className="uqm-q-title flex-1">
-                                                        <math-field read-only style={{ display: 'inline-block', backgroundColor: 'transparent', border: 'none', padding: 0, outline: 'none', pointerEvents: 'none', color: 'var(--color-text, #000)' }} value={q.questionText} />
+                                                        <MixedMathText text={q.questionText} />
                                                     </div>
                                                     {q.difficulty && (
                                                         <span className={`ml-3 px-2 py-0.5 text-xs font-semibold rounded-full ${q.difficulty === 'Easy' ? 'bg-green-500/20 text-green-400' : q.difficulty === 'Moderate' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'}`}>
@@ -969,6 +1156,31 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
                 </div>
             </div>
         </div>
+
+        {showMathModal && (
+            <div className="uqm-overlay" style={{ zIndex: 80000 }}>
+                <div className="uqm-math-modal">
+                    <div className="uqm-math-header">
+                        <h3 className="uqm-math-title"><Sigma size={20} /> Equation Builder</h3>
+                        <button onClick={() => setShowMathModal(false)} className="uqm-close-btn" style={{ width: '32px', height: '32px' }}><X size={18}/></button>
+                    </div>
+                    <div className="uqm-math-editor-container">
+                        <math-field 
+                            ref={setMathModalRef} 
+                            style={{ width: '100%', fontSize: '1.5rem', minHeight: '80px', outline: 'none', border: 'none', color: 'var(--color-text-main, #fff)', backgroundColor: 'transparent' }} 
+                            onInput={(e) => setTempMathValue(e.target.value)} 
+                            value={tempMathValue} 
+                        />
+                    </div>
+                    <div className="uqm-math-actions">
+                        <button onClick={() => setShowMathModal(false)} className="uqm-btn-outline">Cancel</button>
+                        <button onClick={handleInsertMath} className="uqm-btn-save flex items-center gap-2">
+                            <Sigma size={16} /> Insert Formula
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
         </>
     );
 };
