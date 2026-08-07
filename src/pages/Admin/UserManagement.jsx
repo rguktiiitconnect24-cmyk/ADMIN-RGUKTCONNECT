@@ -673,7 +673,7 @@ const UserManagement = () => {
                                             </td>
                                             <td>
                                                 <div className="action-buttons">
-                                                    {isSuperAdmin && item.id !== user.uid && (
+                                                    {isSuperAdmin && item.role === 'admin' && item.id !== user.uid && (
                                                         <button
                                                             className="action-btn"
                                                             title="Direct Login as this Admin"
