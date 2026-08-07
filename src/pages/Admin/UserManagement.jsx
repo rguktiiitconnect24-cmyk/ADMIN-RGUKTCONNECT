@@ -179,7 +179,10 @@ const UserManagement = () => {
         }
     };
     const handleOpenEdit = (userToEdit) => {
-        setEditUser(userToEdit);
+        setEditUser({
+            ...userToEdit,
+            targetDepartments: userToEdit.targetDepartments || []
+        });
     };
 
     const handleDeleteUser = async () => {
@@ -989,6 +992,50 @@ const UserManagement = () => {
                                         </select>
                                     </div>
                                 </div>
+
+                                {editUser.role === 'admin' && (
+                                    <div className="admin-form-group" style={{ marginTop: '1rem' }}>
+                                        <label className="admin-form-label">Target Departments (Max 3)</label>
+                                        <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>
+                                            Restrict this admin to specific departments. Leave empty for all.
+                                        </p>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                            {['CSE(AI&ML)', 'CSE', 'ECE', 'EEE', 'CE', 'ME', 'MME', 'CHE'].map(dept => {
+                                                const isSelected = editUser.targetDepartments?.includes(dept);
+                                                const isDisabled = !isSelected && (editUser.targetDepartments?.length >= 3);
+                                                return (
+                                                    <div 
+                                                        key={dept}
+                                                        onClick={() => {
+                                                            if (isDisabled) return;
+                                                            const current = editUser.targetDepartments || [];
+                                                            setEditUser({
+                                                                ...editUser,
+                                                                targetDepartments: isSelected 
+                                                                    ? current.filter(d => d !== dept)
+                                                                    : [...current, dept]
+                                                            });
+                                                        }}
+                                                        style={{
+                                                            padding: '0.35rem 0.75rem',
+                                                            borderRadius: '1rem',
+                                                            fontSize: '0.75rem',
+                                                            fontWeight: '600',
+                                                            cursor: isDisabled ? 'not-allowed' : 'pointer',
+                                                            border: `1px solid ${isSelected ? 'var(--color-brand, #6366f1)' : 'var(--color-border)'}`,
+                                                            backgroundColor: isSelected ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
+                                                            color: isSelected ? 'var(--color-brand, #6366f1)' : (isDisabled ? 'var(--color-text-muted)' : 'inherit'),
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                    >
+                                                        {dept}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="admin-form-group">
                                     <label className="admin-form-label">Bio (Short summary)</label>
                                     <textarea
