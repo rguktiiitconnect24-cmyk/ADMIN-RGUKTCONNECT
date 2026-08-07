@@ -60,8 +60,12 @@ RGUKT CONNECT Administration Team`;
                 </div>
 
                 <div className="appointment-letter-content printable-area">
-                    <div className="letter-header">
-                        <h1>RGUKT CONNECT</h1>
+                    <div className="letter-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '2rem', borderBottom: '2px solid #000', paddingBottom: '1.5rem' }}>
+                        <img src="/logo.svg" alt="Logo" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+                        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0, color: '#000000', letterSpacing: '1px' }}>RGUKT CONNECT</h1>
+                    </div>
+
+                    <div className="letter-date" style={{ textAlign: 'left', marginBottom: '2rem' }}>
                         <h2>Semi Administrator Appointment Letter</h2>
                     </div>
 
