@@ -125,6 +125,11 @@ const CourseContentManagement = () => {
 
     // --- Effects ---
 
+    const getAllowedBranches = (branches) => {
+        if (!branches) return null;
+        return branches.filter(b => isDepartmentAllowed(b.id, user) || isDepartmentAllowed(b.label, user));
+    };
+
     // Ensure selected program is an allowed program
     useEffect(() => {
         if (allowedPrograms.length > 0 && !allowedPrograms.find(p => p.id === selectedProgram.id)) {
@@ -135,6 +140,17 @@ const CourseContentManagement = () => {
             // Allow the other useEffect (on line 234) to handle branch/semester init
         }
     }, [user, selectedProgram]);
+
+    // Ensure selected branch is auto-selected if available and currently null
+    useEffect(() => {
+        if (selectedYear?.branches && !selectedBranch) {
+            const branches = getAllowedBranches(selectedYear.branches);
+            if (branches && branches.length > 0) {
+                setSelectedBranch(branches[0]);
+                setSelectedSemester(branches[0].semesters[0]);
+            }
+        }
+    }, [user, selectedYear, selectedBranch]);
 
     // Load Subjects when hierarchy changes
     useEffect(() => {
@@ -551,11 +567,6 @@ const CourseContentManagement = () => {
     };
 
     // --- Helpers ---
-
-    const getAllowedBranches = (branches) => {
-        if (!branches) return null;
-        return branches.filter(b => isDepartmentAllowed(b.id, user) || isDepartmentAllowed(b.label, user));
-    };
 
     const handleProgramChange = (val) => {
         const prog = PROGRAMS.find(p => p.id === val);
