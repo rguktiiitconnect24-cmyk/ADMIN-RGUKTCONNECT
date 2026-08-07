@@ -24,6 +24,12 @@ export const DRIVE_BACKENDS = {
     'btech_btech2_mme': 'https://script.google.com/macros/s/AKfycbxgAh_mxxgbPnWzVIn2YWDDuvMZrKSSemGNXUJAHKJebVRaF3RHCVWKpS8U1xgLgL2a/exec',
     'btech_btech3_mme': 'https://script.google.com/macros/s/AKfycbxgAh_mxxgbPnWzVIn2YWDDuvMZrKSSemGNXUJAHKJebVRaF3RHCVWKpS8U1xgLgL2a/exec',
     'btech_btech4_mme': 'https://script.google.com/macros/s/AKfycbxgAh_mxxgbPnWzVIn2YWDDuvMZrKSSemGNXUJAHKJebVRaF3RHCVWKpS8U1xgLgL2a/exec',
+
+    // EEE Endpoints (Update these URLs after deploying your new EEE Apps Script)
+    'btech_btech1_eee': '',
+    'btech_btech2_eee': '',
+    'btech_btech3_eee': '',
+    'btech_btech4_eee': '',
 };
 
 /**
