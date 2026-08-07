@@ -4,6 +4,7 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getDatabase } from "firebase/database";
+import { getFunctions } from "firebase/functions";
 
 export const firebaseConfig = {
     apiKey: "AIzaSyBx2D31HmZ2mQ2ZztvHoLArXoNSQ1e7wCo",
@@ -92,10 +93,11 @@ try {
 
 const storage = getStorage(app);
 const rtdb = getDatabase(app);
+const functions = getFunctions(app);
 const googleProvider = new GoogleAuthProvider();
 
 export { 
-    app, analytics, auth, db, storage, rtdb, googleProvider, GoogleAuthProvider,
+    app, analytics, auth, db, storage, rtdb, googleProvider, GoogleAuthProvider, functions,
     complaintsDb,
     contentDb, contentStorage,
     bulkUploadDb,
