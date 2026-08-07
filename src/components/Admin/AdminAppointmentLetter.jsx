@@ -85,6 +85,7 @@ RGUKT CONNECT Administration Team`;
                         <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginTop: '2rem', marginBottom: '1rem' }}>Details:</h3>
                         <ul style={{ listStyleType: 'disc', marginLeft: '3rem', marginBottom: '2.5rem' }}>
                             <li style={{ marginBottom: '0.75rem' }}><strong>Name:</strong> {adminData.fullName}</li>
+                            <li style={{ marginBottom: '0.75rem' }}><strong>Mobile Number:</strong> {adminData.mobileNumber || 'N/A'}</li>
                             <li style={{ marginBottom: '0.75rem' }}><strong>Admin ID:</strong> {adminData.adminId || 'N/A'}</li>
                             <li style={{ marginBottom: '0.75rem' }}><strong>Official Email:</strong> {adminData.email}</li>
                             <li style={{ marginBottom: '0.75rem' }}><strong>Username:</strong> {adminData.adminId || adminData.email.split('@')[0]}</li>

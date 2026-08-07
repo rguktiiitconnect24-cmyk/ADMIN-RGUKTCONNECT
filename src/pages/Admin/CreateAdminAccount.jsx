@@ -120,6 +120,7 @@ const CreateAdminAccount = () => {
             await setDoc(doc(db, 'users', user.uid), {
                 fullName: formData.fullName,
                 email: formData.email,
+                mobileNumber: formData.mobileNumber,
                 role: 'admin',
                 adminId: formData.adminId || '',
                 permissions: permissionsToSave,
@@ -133,12 +134,13 @@ const CreateAdminAccount = () => {
             setCreatedAdminData({
                 fullName: formData.fullName,
                 email: formData.email,
+                mobileNumber: formData.mobileNumber,
                 adminId: formData.adminId || '',
                 password: formData.password,
                 departments: departmentsToSave,
                 campus: 'RGUKT RK Valley'
             });
-            setFormData({ fullName: '', email: '', password: '', adminId: '' });
+            setFormData({ fullName: '', email: '', mobileNumber: '', password: '', adminId: '' });
             setSelectedPermissions([]);
             setSelectedDepartments([]);
             setIsSuperAdmin(true);
