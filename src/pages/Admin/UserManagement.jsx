@@ -289,7 +289,10 @@ const UserManagement = () => {
                 currentClass: formatClassID(editUser.currentClass),
                 rcId: editUser.rcId || '',
                 status: editUser.status || 'active',
-                ...(editUser.role === 'admin' && { permissions: editUser.permissions || [] })
+                ...(editUser.role === 'admin' && { 
+                    permissions: editUser.permissions || [],
+                    targetDepartments: editUser.targetDepartments || [] 
+                })
             });
 
             showToast("User updated successfully!");
