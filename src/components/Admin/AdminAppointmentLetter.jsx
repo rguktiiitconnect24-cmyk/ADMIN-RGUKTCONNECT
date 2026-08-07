@@ -88,7 +88,7 @@ RGUKT CONNECT Administration Team`;
                             <li style={{ marginBottom: '0.75rem' }}><strong>Admin ID:</strong> {adminData.adminId || 'N/A'}</li>
                             <li style={{ marginBottom: '0.75rem' }}><strong>Official Email:</strong> {adminData.email}</li>
                             <li style={{ marginBottom: '0.75rem' }}><strong>Username:</strong> {adminData.adminId || adminData.email.split('@')[0]}</li>
-                            <li style={{ marginBottom: '0.75rem' }}><strong>Temporary Password:</strong> {adminData.password || '****** (Not Stored)'}</li>
+                            <li style={{ marginBottom: '0.75rem' }}><strong>Password:</strong> {adminData.password || '****** (Not Stored)'}</li>
                         </ul>
 
                         <p>Please keep your login credentials confidential and use this account only for official RGUKT CONNECT purposes.</p>
