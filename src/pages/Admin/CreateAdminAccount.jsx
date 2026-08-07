@@ -22,6 +22,7 @@ const CreateAdminAccount = () => {
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
+        mobileNumber: '',
         password: '',
         adminId: '',
         adminIdCustomized: false
@@ -81,8 +82,8 @@ const CreateAdminAccount = () => {
         setError(null);
         setSuccess(false);
 
-        if (!formData.fullName || !formData.email || !formData.password || !formData.adminId) {
-            setError("Please fill in all required fields (Name, Email, Password, Admin ID).");
+        if (!formData.fullName || !formData.email || !formData.mobileNumber || !formData.password || !formData.adminId) {
+            setError("Please fill in all required fields (Name, Email, Mobile Number, Password, Admin ID).");
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
@@ -204,6 +205,18 @@ const CreateAdminAccount = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     placeholder="admin@rgukt.ac.in"
+                                    required
+                                />
+                            </div>
+                            <div className="admin-form-group">
+                                <label className="admin-form-label">Mobile Number *</label>
+                                <input
+                                    type="tel"
+                                    name="mobileNumber"
+                                    className="admin-form-input"
+                                    value={formData.mobileNumber}
+                                    onChange={handleChange}
+                                    placeholder="e.g. 9876543210"
                                     required
                                 />
                             </div>
