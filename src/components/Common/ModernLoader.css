@@ -1,0 +1,124 @@
+/* ModernLoader.css */
+.modern-loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.inline-block {
+    display: inline-block;
+}
+
+.loader-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.brand-text-svg {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    min-height: 80px;
+    overflow: visible;
+}
+
+.animate-brand-text {
+    font-family: 'Bungee', cursive;
+    font-size: 38px;
+    fill: none;
+    stroke: url(#brand-gradient);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    letter-spacing: 0.15em;
+    animation: dashArray 3s ease-in-out infinite,
+        dashOffset 3s linear infinite;
+    filter: drop-shadow(0 0 15px rgba(79, 70, 229, 0.4)) drop-shadow(0 0 25px rgba(59, 130, 246, 0.2));
+}
+
+@media (max-width: 768px) {
+    .animate-brand-text {
+        font-size: 42px;
+    }
+    .brand-text-svg {
+        min-height: 90px;
+    }
+}
+
+.loader-brand {
+    display: none;
+}
+
+@keyframes dashArray {
+    0% {
+        stroke-dasharray: 0 1 359 0;
+    }
+
+    50% {
+        stroke-dasharray: 0 359 1 0;
+    }
+
+    100% {
+        stroke-dasharray: 359 1 0 0;
+    }
+}
+
+@keyframes spinDashArray {
+    0% {
+        stroke-dasharray: 270 90;
+    }
+
+    50% {
+        stroke-dasharray: 0 360;
+    }
+
+    100% {
+        stroke-dasharray: 270 90;
+    }
+}
+
+@keyframes dashOffset {
+    0% {
+        stroke-dashoffset: 365;
+    }
+
+    100% {
+        stroke-dashoffset: 5;
+    }
+}
+
+@keyframes spin {
+    0% {
+        rotate: 0deg;
+    }
+
+    12.5%,
+    25% {
+        rotate: 270deg;
+    }
+
+    37.5%,
+    50% {
+        rotate: 540deg;
+    }
+
+    62.5%,
+    75% {
+        rotate: 810deg;
+    }
+
+    87.5%,
+    100% {
+        rotate: 1080deg;
+    }
+}

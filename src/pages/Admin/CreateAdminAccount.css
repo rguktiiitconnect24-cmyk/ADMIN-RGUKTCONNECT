@@ -1,0 +1,226 @@
+.create-admin-page {
+    padding: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.create-admin-content {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    margin-top: 1.5rem;
+}
+
+.create-admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.form-section {
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 1.5rem;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Permission Type Selector */
+.permission-type-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.perm-type-card {
+    position: relative;
+    cursor: pointer;
+    display: block;
+}
+
+.hidden-radio {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.perm-card-content {
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+    height: 100%;
+}
+
+.perm-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.radio-circle {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--color-border);
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.perm-type-card.active .perm-card-content {
+    border-color: var(--color-primary);
+    background: var(--color-primary-light, rgba(79, 70, 229, 0.05));
+}
+
+.perm-type-card.active .radio-circle {
+    border-color: var(--color-primary);
+}
+
+.perm-type-card.active .radio-circle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-primary);
+}
+
+.perm-card-header h4 {
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+}
+
+.perm-card-content p {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    margin: 0;
+    padding-left: calc(18px + 0.75rem);
+}
+
+/* Permissions Grid */
+.permissions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.permission-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    padding: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.permission-item:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.permission-item.selected {
+    background: var(--color-primary-light, rgba(79, 70, 229, 0.05));
+    border-color: var(--color-primary);
+}
+
+.hidden-checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.perm-item-icon {
+    color: var(--color-text-muted);
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.permission-item.selected .perm-item-icon {
+    color: var(--color-primary);
+}
+
+.perm-item-details {
+    flex: 1;
+}
+
+.perm-name {
+    font-weight: 500;
+    color: var(--color-text);
+    font-size: 0.9rem;
+}
+
+.perm-checkbox-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 2px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    transition: all 0.2s ease;
+}
+
+.permission-item.selected .perm-checkbox-indicator {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+    .permission-type-selector {
+        grid-template-columns: 1fr;
+    }
+    
+    .create-admin-content {
+        padding: 1rem;
+    }
+}

@@ -1,0 +1,51 @@
+.app-build-footer {
+    padding: 3rem 1rem 4rem;
+    text-align: center;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: auto;
+}
+
+.footer-divider {
+    width: 32px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-primary-400), var(--color-primary-600));
+    border-radius: 10px;
+    margin-bottom: 1.25rem;
+    opacity: 0.4;
+}
+
+.footer-text-premium {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    opacity: 0.7;
+}
+
+.footer-text-premium .highlight-tag {
+    background: linear-gradient(135deg, var(--color-primary-50), #fff);
+    color: var(--color-primary-600);
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-weight: 800;
+    font-size: 0.65rem;
+    border: 1px solid var(--color-primary-100);
+    letter-spacing: 0.15em;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
+}
+
+[data-theme='dark'] .footer-text-premium .highlight-tag {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.2);
+    box-shadow: none;
+}

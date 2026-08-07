@@ -1,0 +1,295 @@
+.premium-splash-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #050505;
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    color: white;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Cinematic Background */
+.cinematic-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.glow-mesh {
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(circle at 50% 50%, rgba(79, 70, 229, 0.15) 0%, transparent 70%),
+        radial-gradient(circle at 20% 80%, rgba(49, 46, 129, 0.1) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 2s ease-in-out;
+}
+
+.step-1 .glow-mesh, .step-2 .glow-mesh, .step-3 .glow-mesh {
+    opacity: 1;
+}
+
+/* Particles */
+.particles-container {
+    position: absolute;
+    inset: 0;
+}
+
+.particle {
+    position: absolute;
+    top: var(--top);
+    left: var(--left);
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0;
+    filter: blur(1px);
+    animation: floatParticle var(--duration) linear infinite;
+    animation-delay: var(--delay);
+}
+
+@keyframes floatParticle {
+    0% { transform: translateY(0) scale(0); opacity: 0; }
+    20% { opacity: 0.6; }
+    80% { opacity: 0.6; }
+    100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+}
+
+/* Logo Assembly Zone */
+.logo-assembly-zone {
+    position: relative;
+    width: 512px;
+    height: 512px;
+    perspective: 1000px;
+    z-index: 1;
+}
+
+.logo-main-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.premium-logo-svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 30px rgba(79, 70, 229, 0));
+    transition: filter 1s ease;
+}
+
+.step-3 .premium-logo-svg {
+    filter: drop-shadow(0 0 40px rgba(79, 70, 229, 0.5));
+}
+
+/* Logo Pieces Initial States */
+.logo-plate {
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cap-top {
+    transform: translateX(-500px) opacity(0);
+    transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 1s;
+}
+
+.cap-bottom {
+    transform: translateY(500px) opacity(0);
+    transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 1s;
+    transition-delay: 0.2s;
+}
+
+.tassel-line {
+    stroke-dasharray: 150;
+    stroke-dashoffset: 150;
+    transition: stroke-dashoffset 1.5s ease-out;
+    transition-delay: 1.2s;
+}
+
+.tassel-dot {
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition-delay: 2.5s;
+}
+
+/* Animation Steps */
+.step-1 .cap-top { transform: translateX(0); opacity: 1; }
+.step-1 .cap-bottom { transform: translateY(0); opacity: 1; }
+.step-1 .tassel-line { stroke-dashoffset: 0; }
+.step-1 .tassel-dot { opacity: 1; transform: scale(1); }
+
+.step-2 .logo-main-wrapper {
+    transform: rotateY(15deg) rotateX(10deg) scale(1.1);
+}
+
+.step-3 .logo-plate {
+    opacity: 1;
+    transform: scale(1);
+    backdrop-filter: blur(10px);
+}
+
+.step-3 .logo-main-wrapper {
+    transform: scale(1.05) translateZ(50px);
+    animation: floatingLogo 4s ease-in-out infinite;
+}
+
+@keyframes floatingLogo {
+    0%, 100% { transform: scale(1.05) translateZ(50px) translateY(0); }
+    50% { transform: scale(1.05) translateZ(50px) translateY(-15px); }
+}
+
+/* Energy Ring */
+.energy-ring {
+    position: absolute;
+    inset: -50px;
+    border: 2px solid rgba(79, 70, 229, 0.3);
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0.5) rotate(0deg);
+    transition: all 1s ease;
+}
+
+.step-2 .energy-ring {
+    opacity: 1;
+    transform: scale(1.2) rotate(360deg);
+    animation: rotateRing 10s linear infinite;
+}
+
+@keyframes rotateRing {
+    from { transform: scale(1.2) rotate(0deg); }
+    to { transform: scale(1.2) rotate(360deg); }
+}
+
+/* Ripple Waves */
+.ripple-waves {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ripple {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border: 1px solid rgba(79, 70, 229, 0.5);
+    border-radius: 50%;
+    opacity: 0;
+}
+
+.step-3 .ripple {
+    animation: rippleEffect 2s ease-out infinite;
+}
+
+.ripple:nth-child(2) { animation-delay: 0.6s; }
+.ripple:nth-child(3) { animation-delay: 1.2s; }
+
+@keyframes rippleEffect {
+    0% { transform: scale(0.5); opacity: 0.8; }
+    100% { transform: scale(3); opacity: 0; }
+}
+
+/* Shine Streak */
+.shine-streak {
+    animation: shine 3s infinite;
+    animation-delay: 4s;
+}
+
+@keyframes shine {
+    0% { transform: translateX(-1000px) rotate(25deg); }
+    20%, 100% { transform: translateX(1000px) rotate(25deg); }
+}
+
+/* Brand Text */
+.brand-text-reveal {
+    position: absolute;
+    bottom: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    opacity: 0;
+    transition: all 1s ease;
+}
+
+.step-1 .brand-text-reveal {
+    opacity: 1;
+    bottom: -60px;
+}
+
+.main-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: 0.5rem;
+    margin: 0;
+    background: linear-gradient(to right, #fff, #4F46E5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.accent-line {
+    width: 0;
+    height: 3px;
+    background: #4F46E5;
+    margin: 10px auto;
+    transition: width 1s ease 1s;
+}
+
+.step-1 .accent-line {
+    width: 100px;
+}
+
+/* Cinematic Flash */
+.cinematic-flash {
+    position: absolute;
+    inset: 0;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.step-3 .cinematic-flash {
+    animation: flashTransition 1s ease-out forwards;
+}
+
+@keyframes flashTransition {
+    0% { opacity: 0; }
+    20% { opacity: 0.8; }
+    100% { opacity: 0; }
+}
+
+/* Exit Animation */
+.step-4 {
+    opacity: 1;
+    transition: opacity 1s ease-out;
+}
+
+.step-4 .logo-assembly-zone {
+    transform: scale(2) translateZ(100px);
+    transition: transform 1s ease-in;
+}
+
+.step-4 {
+    opacity: 0;
+}
+
+/* Responsive Scaling */
+@media (max-width: 600px) {
+    .logo-assembly-zone {
+        transform: scale(0.6);
+    }
+    .main-title {
+        font-size: 1.5rem;
+    }
+}

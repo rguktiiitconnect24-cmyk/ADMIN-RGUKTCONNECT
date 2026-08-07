@@ -1,0 +1,291 @@
+.create-notice-page {
+    padding-top: max(2rem, var(--safe-area-top));
+    padding-bottom: max(5rem, var(--safe-area-bottom));
+    min-height: 100vh;
+}
+
+.cn-form-container {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+}
+
+.cn-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px dashed var(--color-border);
+}
+
+.cn-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.cn-section-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+    margin: 0 0 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cn-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.cn-form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.cn-input, .cn-textarea, .cn-select {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    color: var(--color-text-main);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.cn-textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.cn-input:focus, .cn-textarea:focus, .cn-select:focus {
+    outline: none;
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.cn-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .cn-grid-2 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Premium Animated Checkbox */
+.cn-form-group label.cn-premium-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    user-select: none;
+    padding: 4px 0;
+}
+
+.cn-premium-input {
+    display: none;
+}
+
+.cn-premium-box {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 2px solid var(--color-border);
+    background-color: transparent;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cn-premium-checkbox:hover .cn-premium-box {
+    border-color: var(--color-primary-400);
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+.cn-premium-check {
+    width: 16px;
+    height: 16px;
+    color: white;
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
+    transition: stroke-dashoffset 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cn-premium-input:checked + .cn-premium-box {
+    background-color: var(--color-primary-500);
+    border-color: var(--color-primary-500);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    transform: scale(1.05);
+}
+
+.cn-premium-input:checked + .cn-premium-box .cn-premium-check {
+    stroke-dashoffset: 0;
+}
+
+.cn-premium-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    transition: color 0.2s ease;
+}
+
+.cn-premium-input:checked ~ .cn-premium-text {
+    color: var(--color-primary-600);
+}
+
+.cn-file-upload-box {
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    text-align: center;
+    background: var(--color-surface-hover);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cn-file-upload-box:hover {
+    border-color: var(--color-brand);
+    background: rgba(99, 102, 241, 0.02);
+}
+
+.cn-file-upload-icon {
+    color: var(--color-text-muted);
+    margin-bottom: 1rem;
+}
+
+.cn-file-upload-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin: 0;
+}
+
+.cn-file-upload-subtext {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin: 0.5rem 0 0 0;
+}
+
+.cn-selected-files {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.cn-file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.cn-file-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.cn-file-remove {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+}
+
+.cn-file-remove:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.cn-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.cn-btn {
+    padding: 0.85rem 1.5rem;
+    border-radius: var(--radius-lg);
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.cn-btn-secondary {
+    background: var(--color-surface-hover);
+    color: var(--color-text-main);
+    border: 1px solid var(--color-border);
+}
+
+.cn-btn-secondary:hover {
+    background: var(--color-background);
+}
+
+.cn-btn-primary {
+    background: linear-gradient(135deg, var(--color-brand), var(--color-primary-600));
+    color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.cn-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+.cn-btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Custom Chip Styles for Multi-Select */
+.cn-chip-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.cn-chip {
+    padding: 0.5rem 1.25rem;
+    border-radius: 2rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    display: inline-block;
+}
+
+.cn-chip:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text-main);
+}
+
+.cn-chip.active {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: var(--color-brand);
+    color: var(--color-brand);
+}

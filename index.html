@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="google-site-verification" content="0myoAQKhf9Q94YVIRO9CL79C3KyON9AiCdCD9ncCIgA" />
+  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="RGUKT Student Connect Platform" />
+  <meta name="theme-color" content="#4f46e5" />
+  <link rel="apple-touch-icon" href="/pwa-192x192.png" />
+  <title>RGUKT CONNECT</title>
+  
+  <!-- Network Pre-fetching for Speed -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Bungee&family=Faculty+Glyphic&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://iiit-connect-d4b88.firebaseapp.com">
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+
+  <meta name="google-site-verification" content="RBjDzD_h9kA-IdgeIBYYpO-gfkI-hdkPgAwtF4ZLieU" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=flights_and_hotels" />
+</head>
+
+<body>
+  <script>
+    (function() {
+      try {
+        var mode = localStorage.getItem('themeMode') || 'system';
+        var theme = mode;
+        if (mode === 'system') {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f8fafc;
+    }
+    html[data-theme="dark"] body {
+      background-color: #0f172a;
+    }
+    @media (prefers-color-scheme: dark) {
+      html:not([data-theme="light"]) body {
+        background-color: #0f172a;
+      }
+    }
+    .app-preloader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      width: 100vw;
+    }
+    .app-preloader img {
+      width: 100px;
+      height: 100px;
+      animation: preloader-pulse 2s infinite ease-in-out;
+    }
+    @keyframes preloader-pulse {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.8; }
+    }
+  </style>
+  <div id="root">
+    <div class="app-preloader">
+      <img src="/logo.svg" alt="RGUKT CONNECT Loading..." />
+    </div>
+  </div>
+  <div id="loader-root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>

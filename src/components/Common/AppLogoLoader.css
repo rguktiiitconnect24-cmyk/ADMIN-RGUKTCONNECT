@@ -1,0 +1,76 @@
+.app-logo-loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.logo-spinner-wrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+.css-spinner-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 5px solid var(--color-loader-bar-bg);
+    border-top-color: var(--color-loader-bar-fill);
+    animation: ring-rotate 0.8s linear infinite;
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+.center-logo {
+    width: 40px;
+    height: 40px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.center-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.loader-message-v2 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-loader-text);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    animation: text-fade 2s ease-in-out infinite;
+    text-align: center;
+    max-width: 280px;
+}
+
+@keyframes ring-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes text-fade {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}

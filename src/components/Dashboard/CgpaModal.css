@@ -1,0 +1,413 @@
+.cgpa-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.95); /* Darker backdrop for full screen */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    padding: 0; /* Removed padding for full screen */
+}
+
+.cgpa-modal-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.cgpa-modal-content {
+    background: rgba(255, 255, 255, 0.95); /* More solid background for full screen */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: none;
+    border-radius: 0;
+    width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 48px 24px 80px 24px; /* Added more padding for top/bottom */
+    position: relative;
+    box-shadow: none;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Inter', 'Poppins', sans-serif;
+}
+
+/* Dark mode support */
+html[data-theme="dark"] .cgpa-modal-content {
+        background: rgba(15, 23, 42, 1); /* Solid dark for full screen */
+        border: none;
+        box-shadow: none;
+        color: #f1f5f9;
+    }
+
+.cgpa-modal-content.visible {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* Hide scrollbar for modal content */
+.cgpa-modal-content::-webkit-scrollbar {
+    display: none;
+}
+.cgpa-modal-content {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.cgpa-close-btn {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: rgba(148, 163, 184, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.cgpa-close-btn:hover {
+    background: rgba(148, 163, 184, 0.2);
+    color: #0f172a;
+    transform: scale(1.1);
+}
+
+html[data-theme="dark"] .cgpa-close-btn {
+        color: #94a3b8;
+    }html[data-theme="dark"] .cgpa-close-btn:hover {
+        color: #f8fafc;
+    }
+
+.cgpa-modal-header {
+    text-align: center;
+    margin-bottom: 32px;
+    margin-top: 16px;
+}
+
+.cgpa-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(59, 130, 246, 0.2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    box-shadow: 0 8px 16px -4px rgba(168, 85, 247, 0.3);
+}
+
+.floating-icon {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
+}
+
+.cgpa-modal-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    background: linear-gradient(135deg, #3b82f6, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.cgpa-modal-header p {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+    font-weight: 500;
+}
+
+html[data-theme="dark"] .cgpa-modal-header p {
+        color: #94a3b8;
+    }
+
+.cgpa-progress-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.cgpa-ring-container {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin-bottom: 16px;
+}
+
+.cgpa-progress-ring {
+    transform: rotate(-90deg);
+}
+
+.cgpa-ring-bg {
+    fill: none;
+    stroke: rgba(148, 163, 184, 0.2);
+    stroke-width: 12;
+}
+
+.cgpa-ring-fill {
+    fill: none;
+    stroke: url(#cgpa-gradient) #a855f7; /* Fallback color */
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke-dasharray: 440; /* 2 * pi * r (70) */
+    stroke-dashoffset: 440;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* We need an SVG gradient definition in the JS, but for CSS fallback we can use a solid color or let React render the gradient def */
+
+.cgpa-ring-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.cgpa-number {
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+    color: #0f172a;
+}
+
+html[data-theme="dark"] .cgpa-number {
+        color: #f8fafc;
+    }
+
+.glow-text {
+    animation: textGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes textGlow {
+    from { text-shadow: 0 0 10px rgba(168, 85, 247, 0.2); }
+    to { text-shadow: 0 0 20px rgba(168, 85, 247, 0.6); }
+}
+
+.cgpa-max {
+    font-size: 14px;
+    color: #94a3b8;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.cgpa-badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cgpa-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+.cgpa-stat-card {
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cgpa-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme="dark"] .cgpa-stat-card {
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }html[data-theme="dark"] .cgpa-stat-card:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    }
+
+.stat-icon-wrapper {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.stat-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+html[data-theme="dark"] .stat-label { color: #94a3b8; }
+
+.stat-val {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+html[data-theme="dark"] .stat-val { color: #f8fafc; }
+
+.cgpa-semesters-section {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 24px;
+}
+
+html[data-theme="dark"] .cgpa-semesters-section {
+        background: rgba(15, 23, 42, 0.3);
+    }
+
+.cgpa-semesters-section h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    color: #334155;
+}
+
+html[data-theme="dark"] .cgpa-semesters-section h3 { color: #cbd5e1; }
+
+.cgpa-sem-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cgpa-sem-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+html[data-theme="dark"] .cgpa-sem-item {
+        background: rgba(30, 41, 59, 0.5);
+    }
+
+.sem-name {
+    color: #475569;
+}
+
+html[data-theme="dark"] .sem-name { color: #94a3b8; }
+
+.sem-gpa {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+html[data-theme="dark"] .sem-gpa { color: #f8fafc; }
+
+.cgpa-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.cgpa-btn-primary, .cgpa-btn-secondary {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.cgpa-btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: white;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.cgpa-btn-primary:hover {
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+    transform: translateY(-2px);
+}
+
+.cgpa-btn-secondary {
+    background: rgba(241, 245, 249, 0.8);
+    color: #334155;
+}
+
+.cgpa-btn-secondary:hover {
+    background: rgba(226, 232, 240, 1);
+    transform: translateY(-2px);
+}
+
+html[data-theme="dark"] .cgpa-btn-secondary {
+        background: rgba(51, 65, 85, 0.6);
+        color: #e2e8f0;
+    }html[data-theme="dark"] .cgpa-btn-secondary:hover {
+        background: rgba(71, 85, 105, 0.8);
+    }
+
+.ripple {
+    position: relative;
+}
+
+.cgpa-footer {
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+    width: 100%;
+}

@@ -1,0 +1,17 @@
+@keyframes navPop {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1.1) translateY(-4px);
+    }
+}
+
+.animate-nav-pop {
+    animation: navPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}

@@ -1,0 +1,577 @@
+/* ============================================================
+   StudentIDCard.css — Premium Digital Student ID Card
+   ============================================================ */
+
+/* Overlay backdrop */
+.id-card-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(10, 15, 30, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    animation: idOverlayIn 0.25s ease;
+}
+
+@keyframes idOverlayIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Modal container */
+.id-card-modal {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    animation: idModalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: 100%;
+    max-width: 480px; /* Wider for landscape */
+}
+
+@keyframes idModalIn {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.id-card-close {
+    position: absolute;
+    top: -0.5rem;
+    right: -0.5rem;
+    z-index: 10;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+}
+
+.id-card-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+}
+
+/* ── THE CARD (Premium Glass & Flip Mechanics) ── */
+.id-card-scene {
+    width: 100%;
+    perspective: 1500px;
+    cursor: pointer;
+}
+
+.id-card-wrapper {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.id-card-scene.is-flipped .id-card-wrapper {
+    transform: rotateY(180deg);
+}
+
+.flip-card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.flip-card-back {
+    transform: rotateY(180deg);
+}
+
+.premium-glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+}
+
+[data-theme='dark'] .premium-glass-card {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Move hover tilt to the wrapper to prevent overriding the backface rotation */
+.id-card-scene:not(.is-flipped):hover .id-card-wrapper {
+    transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
+}
+
+.id-card-scene.is-flipped:hover .id-card-wrapper {
+    transform: translateY(-5px) rotateX(2deg) rotateY(182deg);
+}
+
+/* Apply box shadow hover to the faces instead of wrapper */
+.id-card-scene:hover .flip-card-face {
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+[data-theme='dark'] .id-card-scene:hover .flip-card-face {
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Decorative Background Elements */
+.glass-blob {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(40px);
+    opacity: 0.6;
+}
+
+.glass-blob-tr {
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, #f9a8d4 0%, transparent 70%);
+    top: -80px;
+    right: -80px;
+}
+
+.glass-blob-bl {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, #fdba74 0%, transparent 70%);
+    bottom: -60px;
+    left: -60px;
+}
+
+[data-theme='dark'] .glass-blob-tr {
+    background: radial-gradient(circle, #818cf8 0%, transparent 70%);
+    opacity: 0.4;
+}
+
+[data-theme='dark'] .glass-blob-bl {
+    background: radial-gradient(circle, #34d399 0%, transparent 70%);
+    opacity: 0.3;
+}
+
+.glass-noise-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    opacity: 0.03;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Header */
+.glass-card-header {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .glass-card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-logo-container {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f43f5e, #f97316);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4);
+}
+
+[data-theme='dark'] .glass-logo-container {
+    background: linear-gradient(135deg, #6366f1, #10b981);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.glass-header-text h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: 0.5px;
+}
+
+.glass-header-text p {
+    margin: 0;
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 1.5px;
+}
+
+[data-theme='dark'] .glass-header-text h3 { color: #f8fafc; }
+[data-theme='dark'] .glass-header-text p { color: #94a3b8; }
+
+/* Body */
+.glass-card-body {
+    position: relative;
+    z-index: 2;
+    padding: 24px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.glass-avatar-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.glass-avatar-ring {
+    width: 90px;
+    height: 90px;
+    border-radius: 20px;
+    padding: 4px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.2));
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] .glass-avatar-ring {
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02));
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.glass-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+}
+
+.glass-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+}
+
+[data-theme='dark'] .glass-avatar-placeholder {
+    background: linear-gradient(135deg, #334155, #1e293b);
+}
+
+.glass-verified-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    padding: 4px 10px;
+    border-radius: 20px;
+    color: #059669;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='dark'] .glass-verified-pill {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34d399;
+}
+
+.glass-student-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.glass-student-name {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.1;
+}
+
+[data-theme='dark'] .glass-student-name { color: #f8fafc; }
+
+.glass-id-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #f1f5f9;
+    color: #3b82f6;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+}
+
+[data-theme='dark'] .glass-id-badge {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+}
+
+.glass-details-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.glass-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+}
+
+[data-theme='dark'] .glass-detail-item { color: #cbd5e1; }
+
+.glass-detail-icon-wrapper {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+}
+
+[data-theme='dark'] .glass-detail-icon-wrapper {
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+}
+
+.glass-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 140px;
+}
+
+/* Landscape Formatting */
+.landscape-layout {
+    display: flex;
+    flex-direction: column;
+}
+
+.landscape-header {
+    padding: 14px 20px 10px;
+}
+
+.landscape-body {
+    flex: 1;
+    padding: 10px 20px;
+    align-items: flex-start;
+}
+
+.landscape-avatar {
+    margin-top: 4px;
+}
+
+.landscape-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 16px;
+    row-gap: 6px;
+    margin-top: 10px;
+}
+
+.glass-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 130px;
+}
+
+/* Back of Card */
+.glass-back-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.glass-back-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0 0 12px;
+}
+[data-theme='dark'] .glass-back-title { color: #f8fafc; }
+
+.glass-qr-container-large {
+    background: #ffffff;
+    padding: 8px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    margin-bottom: auto;
+}
+
+.glass-back-footer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.glass-barcode-aesthetic {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 24px;
+}
+
+.back-barcode {
+    width: 70%;
+    justify-content: center;
+    height: 28px;
+}
+
+.glass-bar {
+    flex: 1;
+    background: #0f172a;
+    border-radius: 1px;
+    max-width: 3px;
+}
+
+[data-theme='dark'] .glass-bar {
+    background: #ffffff;
+}
+
+.glass-back-uid {
+    font-size: 10px;
+    font-family: 'Courier New', monospace;
+    font-weight: 800;
+    color: #64748b;
+    letter-spacing: 1px;
+}
+
+[data-theme='dark'] .glass-back-uid {
+    color: #94a3b8;
+}
+
+/* Action buttons */
+.id-card-actions {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.id-card-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.65rem 1rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    backdrop-filter: blur(8px);
+    transition: background 0.2s;
+}
+.id-card-action-btn:active { opacity: 0.8; }
+.id-card-action-btn:disabled { opacity: 0.55; cursor: default; }
+
+.id-card-action-share {
+    background: linear-gradient(135deg, rgba(99,102,241,0.5), rgba(67,56,202,0.4));
+    border-color: rgba(99,102,241,0.5);
+}
+
+/* Spinner utility */
+.animate-spin {
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* --- RESPONSIVENESS FOR SMALL SCREENS --- */
+@media (max-width: 400px) {
+    .id-card-wrapper {
+        height: 220px;
+    }
+    
+    .landscape-header {
+        padding: 10px 16px 8px;
+    }
+    
+    .glass-header-text h3 {
+        font-size: 14px;
+    }
+    
+    .landscape-body {
+        padding: 8px 16px;
+    }
+    
+    .glass-avatar-ring {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .glass-student-name {
+        font-size: 16px;
+        margin-bottom: 4px;
+    }
+    
+    .glass-id-badge {
+        font-size: 10px;
+        padding: 2px 8px;
+        margin-bottom: 10px;
+    }
+    
+    .glass-detail-item {
+        font-size: 10px;
+        gap: 6px;
+    }
+    
+    .glass-detail-icon-wrapper {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .glass-qr-container-large {
+        padding: 6px;
+    }
+    
+    .glass-qr-code-large {
+        width: 100px !important;
+        height: 100px !important;
+    }
+}

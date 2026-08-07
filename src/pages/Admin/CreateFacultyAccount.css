@@ -1,0 +1,480 @@
+/* Advanced Material Design 3 Styling for Create Faculty Account */
+
+.create-faculty-container {
+    padding: clamp(1rem, 5vw, 3rem);
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Stunning Stepper Design */
+.stepper-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    position: relative;
+    padding: 0 2rem;
+}
+
+.stepper-container::before {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: 60px;
+    right: 60px;
+    height: 4px;
+    background: var(--color-border, #e2e8f0);
+    border-radius: 4px;
+    z-index: 1;
+}
+
+.stepper-progress-bar {
+    position: absolute;
+    top: 28px;
+    left: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--color-primary, #3b82f6), #60a5fa);
+    border-radius: 4px;
+    z-index: 2;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 3;
+    width: 100px;
+}
+
+.step-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--color-surface, #ffffff);
+    border: 4px solid var(--color-border, #e2e8f0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--color-text-muted, #64748b);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 4;
+}
+
+.step-item.active .step-circle {
+    border-color: var(--color-primary, #3b82f6);
+    background: var(--color-primary, #3b82f6);
+    color: #ffffff;
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.15), 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+    transform: scale(1.1);
+}
+
+.step-item.completed .step-circle {
+    border-color: var(--color-primary, #3b82f6);
+    background: linear-gradient(135deg, var(--color-primary, #3b82f6), #2563eb);
+    color: #ffffff;
+    transform: scale(1.05);
+}
+
+.step-label {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-text-muted, #64748b);
+    text-align: center;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.step-item.active .step-label {
+    color: var(--color-primary);
+    transform: translateY(2px);
+}
+
+.step-item.completed .step-label {
+    color: var(--color-text);
+}
+
+/* Glassmorphism Form Card */
+.form-card {
+    background: var(--color-surface);
+    border-radius: 24px;
+    border: 1px solid rgba(var(--color-border-rgb), 0.5);
+    padding: clamp(1.5rem, 4vw, 3rem);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0,0,0,0.02);
+    min-height: 450px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.form-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--color-primary), #8b5cf6, #ec4899);
+}
+
+.form-card-title {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--color-text) 0%, var(--color-text-muted) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+}
+
+.form-card-subtitle {
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+    margin-bottom: 2.5rem;
+}
+
+/* Premium Form Layouts & Inputs */
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    position: relative;
+}
+
+.form-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-left: 0.25rem;
+    transition: color 0.3s ease;
+}
+
+.form-group:focus-within .form-label {
+    color: var(--color-primary);
+}
+
+.form-label.required::after {
+    content: '*';
+    color: #ef4444;
+    margin-left: 4px;
+}
+
+.form-input {
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background: var(--color-background);
+    color: var(--color-text);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 1rem;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.form-input:hover {
+    background: rgba(var(--color-primary-rgb), 0.02);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background: var(--color-surface);
+    box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb), 0.1), inset 0 2px 4px rgba(0,0,0,0.02);
+    transform: translateY(-2px);
+}
+
+.input-with-button {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.input-with-button .form-input {
+    flex: 1;
+}
+
+.input-with-button button {
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 0 1.5rem;
+    white-space: nowrap;
+}
+
+/* Photo Upload - Modernized */
+.photo-upload-container {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    padding: 2rem;
+    background: linear-gradient(to right, rgba(var(--color-primary-rgb), 0.05), transparent);
+    border-radius: 16px;
+    border: 2px dashed rgba(var(--color-primary-rgb), 0.3);
+    transition: all 0.3s ease;
+}
+
+.photo-upload-container:hover {
+    border-color: var(--color-primary);
+    background: linear-gradient(to right, rgba(var(--color-primary-rgb), 0.08), rgba(var(--color-primary-rgb), 0.02));
+}
+
+.photo-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--color-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 4px solid white;
+    box-shadow: 0 8px 16px -4px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.photo-upload-container:hover .photo-preview {
+    transform: scale(1.05);
+}
+
+/* Beautiful Permission Checkboxes */
+.permissions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+}
+
+.permission-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--color-background);
+    border: 2px solid transparent;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.permission-checkbox::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--color-primary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.permission-checkbox:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px -6px rgba(0,0,0,0.1);
+}
+
+.permission-checkbox.checked {
+    border-color: var(--color-primary);
+    background: rgba(var(--color-primary-rgb), 0.03);
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.permission-checkbox input {
+    margin-top: 0.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    accent-color: var(--color-primary);
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    transform: scale(1.2);
+}
+
+.permission-info {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+}
+
+.permission-title {
+    font-weight: 700;
+    color: var(--color-text);
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.permission-desc {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+}
+
+/* Restricted Permissions */
+.restricted-permission {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.restricted-permission:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.restricted-permission input {
+    accent-color: #ef4444;
+}
+
+.restricted-permission .permission-title {
+    color: #ef4444;
+}
+
+/* Action Buttons Footer */
+.form-actions {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    border-top: 2px solid var(--color-background);
+}
+
+.btn-navigation {
+    padding: 0.875rem 2rem;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+}
+
+.btn-navigation:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px -4px rgba(var(--color-primary-rgb), 0.3);
+}
+
+.btn-navigation:active {
+    transform: translateY(0);
+}
+
+/* Credentials Box */
+.creds-box {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-top: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme="dark"] .creds-box {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    border-color: #334155;
+}
+
+.creds-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 4px; height: 100%;
+    background: var(--color-primary);
+}
+
+.creds-code {
+    display: block;
+    padding: 1.5rem;
+    background: white;
+    border: 2px dashed rgba(var(--color-primary-rgb), 0.3);
+    border-radius: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.2rem;
+    margin: 1.5rem 0;
+    color: var(--color-primary);
+    font-weight: 800;
+    letter-spacing: 1px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+[data-theme="dark"] .creds-code {
+    background: #020617;
+}
+
+/* Success Animation Screen */
+.success-card {
+    background: var(--color-surface);
+    border-radius: 24px;
+    padding: 4rem 2rem;
+    text-align: center;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    box-shadow: 0 20px 40px -15px rgba(16, 185, 129, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.success-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 6px;
+    background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+/* Responsive Overrides */
+@media (max-width: 768px) {
+    .stepper-container {
+        padding: 0 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .step-label {
+        display: none;
+    }
+    
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
+    }
+    
+    .stepper-container::before, .stepper-progress-bar {
+        top: 20px;
+        left: 30px;
+        right: 30px;
+    }
+    
+    .form-card {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+    
+    .photo-upload-container {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+}

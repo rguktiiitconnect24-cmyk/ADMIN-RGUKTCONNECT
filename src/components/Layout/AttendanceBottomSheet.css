@@ -1,0 +1,336 @@
+.attendance-sheet-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.attendance-sheet-content {
+    width: 100%;
+    max-width: 500px;
+    background: var(--color-surface);
+    border-radius: 2.5rem 2.5rem 0 0;
+    padding: 1.5rem;
+    position: relative;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.attendance-sheet-grabber {
+    width: 40px;
+    height: 4px;
+    background: var(--color-border);
+    border-radius: 2px;
+    position: absolute;
+    top: 0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0.5;
+}
+
+.attendance-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    margin-top: 0.5rem;
+}
+
+.header-title-box {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.icon-circle {
+    width: 2.75rem;
+    height: 2.75rem;
+    background: var(--color-primary-50);
+    color: var(--color-primary-600);
+    border-radius: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.text-box h3 {
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+    letter-spacing: -0.02em;
+}
+
+.text-box p {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.close-circle-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: var(--color-surface-hover);
+    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+    transition: all 0.2s;
+}
+
+/* Data Container */
+.sheet-main-card {
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 2rem;
+    padding: 2rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.circular-progress-box {
+    position: relative;
+    width: 140px;
+    height: 140px;
+}
+
+.circular-progress-box svg {
+    transform: rotate(-90deg);
+}
+
+.circular-progress-box .bg {
+    fill: none;
+    stroke: var(--color-border);
+    stroke-width: 8;
+    opacity: 0.3;
+}
+
+.circular-progress-box .progress {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s ease-out;
+}
+
+.progress-value-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.progress-value-box .value {
+    display: block;
+    font-size: 1.75rem;
+    color: var(--color-text-main);
+}
+
+.progress-value-box .label {
+    font-size: 0.625rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+}
+
+.quick-stats-grid {
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.q-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.q-val {
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: var(--color-text-main);
+}
+
+.q-lab {
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.q-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--color-border);
+    opacity: 0.5;
+}
+
+/* Info List & Sections */
+.sheet-section {
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0 0.5rem;
+}
+
+.section-title span {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+}
+
+.sheet-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--color-surface-hover);
+    border-radius: 1.25rem;
+    border: 1px solid var(--color-border);
+}
+
+.info-details {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.info-label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.125rem;
+}
+
+.info-value {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.text-right {
+    text-align: right;
+    align-items: flex-end;
+}
+
+.sheet-footer-box {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.sheet-footer-notice {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
+
+.sheet-update-ts {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-align: center;
+    opacity: 0.6;
+    margin-bottom: 1rem;
+}
+
+/* Loading & Empty */
+.sheet-loading-state {
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.sheet-loader {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-primary-600);
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    animation: spin 1s linear infinite;
+}
+
+.sheet-empty-state {
+    padding: 4rem 0;
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+/* Animations */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.animate-slide-up {
+    animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-down {
+    animation: slide-down 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slide-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+@keyframes slide-down {
+    from { transform: translateY(0); }
+    to { transform: translateY(100%); }
+}
+
+.is-closing {
+    animation: fade-out 0.4s ease-out forwards;
+}
+
+@keyframes fade-out {
+    from { opacity: 1; background: rgba(15, 23, 42, 0.4); }
+    to { opacity: 0; background: transparent; }
+}
+
+/* Dark Mode Overrides */
+[data-theme='dark'] .info-icon {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='dark'] .circular-progress-box .bg {
+    stroke: rgba(255, 255, 255, 0.1);
+}

@@ -1,0 +1,422 @@
+[
+  {
+    "id": "O240635",
+    "name": "KONDAKRINDI NAVYAKALA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "O240685",
+    "name": "TIRUMANYAM AISHWARYA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "O241267",
+    "name": "KELAVATH GAYATHRI",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240006",
+    "name": "DEVANAKONDA THRIVENI",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240019",
+    "name": "YACHAM JOSHNA DEVI",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240021",
+    "name": "KURAKULA MANJULA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240027",
+    "name": "POLU GOWTHAMI",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240030",
+    "name": "MALI ZEBA FATHIMA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240041",
+    "name": "BELUPALLI MUNASWAMY HARIKA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240062",
+    "name": "NEMALI HARIKA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240127",
+    "name": "GADDAM LOKA RAKSHITHA REDDY",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240148",
+    "name": "MULLA MOMIN",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240149",
+    "name": "PALEM POOJITHA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240150",
+    "name": "KANCHI JYOTHSNA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240192",
+    "name": "THATIPARTHI MOUNIKA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240298",
+    "name": "THUMMALA SRI SRAVYA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240336",
+    "name": "KUNATI POOJA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240347",
+    "name": "SHAIK NOOREUZMA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240350",
+    "name": "THAMMISETTY DIVYA SREE",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240366",
+    "name": "GADIDALA SUSMITHA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240387",
+    "name": "TATTE NAGAVENI",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240435",
+    "name": "VEMPALLA YASWANTHI",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240457",
+    "name": "CHINTHALA MEGHANA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240489",
+    "name": "BASIREDDY MADHU LATHA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240521",
+    "name": "KURUVA BENDALA SHYAMALA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240583",
+    "name": "VENNAPUSA NAGESWARI",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240657",
+    "name": "BUCHIREDDYGARI YOJANA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240667",
+    "name": "BALAM PUJITHA PRABHA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240685",
+    "name": "CHERIVI DAYANA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240724",
+    "name": "DURGAM JANAKI",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240845",
+    "name": "NAKKALA SPANDANA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240846",
+    "name": "NALLAPUREDDY LASYA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240874",
+    "name": "MANGALAPURI DRAKSHAYANI",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240876",
+    "name": "SENJI SRAVYA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240913",
+    "name": "N ASWITHA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240966",
+    "name": "MALA THIRUMALAMMA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240996",
+    "name": "BUKYA NANDINI",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R241022",
+    "name": "KAMBAM VENKATA LAKSHMI LEKHA",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "S240374",
+    "name": "SHAIK SAFIA SIDIKH",
+    "gender": "F",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "N240088",
+    "name": "KUNDA MADHUSUDAN",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240018",
+    "name": "YEDDULA SUSHANTH REDDY",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240026",
+    "name": "KAPPETA SURYATEJA REDDY",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240049",
+    "name": "JADAPALLI CHARAN",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240120",
+    "name": "NIMMAKAYALA HEMANTH KUMAR REDDY",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240157",
+    "name": "CHANDUR BHARATH",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240184",
+    "name": "KHIMAVATH NAVADEEP NAIK",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240203",
+    "name": "GANDLA SHIVATEJA",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240229",
+    "name": "VENDIPALLI ABHIRAM",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240296",
+    "name": "GONIGANDLA JAKIR BASHA",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240342",
+    "name": "BANGI ARIF",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240353",
+    "name": "BOJJA THEJA",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240376",
+    "name": "KUMALAGUNTA  MOHITH",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240384",
+    "name": "B NAGESH",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240419",
+    "name": "MANCHALA KOMALESWARA",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240616",
+    "name": "M PUVI KUMAR",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240623",
+    "name": "PERIKALA NAVADEEP",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240689",
+    "name": "PUJARI HIMA TEJA",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240964",
+    "name": "GUMMITHI JESWITH SAI",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R240988",
+    "name": "KANURU AKASH",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  },
+  {
+    "id": "R241003",
+    "name": "KUNDAVARAM JAMES RYAN MANVITH",
+    "gender": "M",
+    "branch": "CSC (AI&ML)",
+    "section": ""
+  }
+]
