@@ -6,6 +6,8 @@ import { GraduationCap, FileText, ClipboardList, Zap, MapPinIcon, Trash2, Loader
 import { db } from '../../config/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
+import { isDepartmentAllowed } from '../../utils/rbacUtils';
 import './Admin.css';
 import './AdminExams.css';
 
@@ -110,9 +112,17 @@ const convertDateFormat = (dateStr) => {
 const AdminExams = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
+    const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [activeTab, setActiveTab] = useState('all');
+
+    const allowedDepartments = DEPARTMENT_OPTIONS.filter(dept => {
+        if (dept.value === 'all') {
+            return !user?.targetDepartments || user.targetDepartments.length === 0 || user.permissions?.includes('all');
+        }
+        return isDepartmentAllowed(dept.value, user);
+    });
     const [schedules, setSchedules] = useState([]);
 
     useEffect(() => {
@@ -264,9 +274,9 @@ const AdminExams = () => {
                 </div>
             </div>
 
-            <div className="admin-tabs mb-6">
-                {DEPARTMENT_OPTIONS.map(dept => (
-                    <button
+            <div className="admin-tabs scrollable-tabs mb-6">
+                {allowedDepartments.map(dept => (
+                    <button 
                         key={dept.value}
                         className={`admin-tab ${activeTab === dept.value ? 'active' : ''}`}
                         onClick={() => setActiveTab(dept.value)}
@@ -315,6 +325,9 @@ const AdminExams = () => {
                 )}
                 {schedules.map((schedule, sIdx) => {
                     if (activeTab !== 'all' && schedule.department !== activeTab) return null;
+                    if (schedule.department === 'all' && (!user?.targetDepartments || user.targetDepartments.length === 0 || user.permissions?.includes('all')) === false) return null;
+                    if (schedule.department !== 'all' && !isDepartmentAllowed(schedule.department, user)) return null;
+                    
                     
                     const typeInfo = getTypeInfo(schedule.type);
                     const TypeIcon = typeInfo.icon;
@@ -409,7 +422,7 @@ const AdminExams = () => {
                                         <div className="admin-form-group mb-0">
                                             <CustomSelect
                                                 label="Target Department"
-                                                options={DEPARTMENT_OPTIONS}
+                                                options={allowedDepartments}
                                                 value={schedule.department || 'all'}
                                                 onChange={(val) => handleScheduleChange(sIdx, 'department', val)}
                                                 upward={true}
