@@ -52,6 +52,19 @@ const TimetableManagement = () => {
             : selectedBranch === 'CHE'
                 ? ['A']
                 : ['A', 'B', 'C', 'D'];
+
+    // Auto-select initial branch and section
+    useEffect(() => {
+        if (branches.length > 0 && !selectedBranch) {
+            setSelectedBranch(branches[0]);
+        }
+    }, [branches, selectedBranch]);
+
+    useEffect(() => {
+        if (selectedBranch && availableSections.length > 0 && !selectedSection) {
+            setSelectedSection(availableSections[0]);
+        }
+    }, [selectedBranch, availableSections, selectedSection]);
     
     const [schedule, setSchedule] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
