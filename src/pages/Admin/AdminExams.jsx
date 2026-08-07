@@ -113,6 +113,7 @@ const AdminExams = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
     const { user } = useAuth();
+    const isSuperAdmin = !user?.targetDepartments || user.targetDepartments.length === 0 || user.permissions?.includes('all');
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [activeTab, setActiveTab] = useState('all');
@@ -247,27 +248,31 @@ const AdminExams = () => {
                     <p className="page-subtitle-v2">Configure and release examination schedules for all students.</p>
                 </div>
                 <div className="header-action-btn">
-                    <button
-                        className="btn-labeled"
-                        onClick={() => navigate('/admin/exams/settings')}
-                        title="Exam Seating Settings"
-                    >
-                        <MapPinIcon size={18} />
-                        <span>Seating</span>
-                    </button>
-                    <button
-                        className="btn-labeled danger"
-                        onClick={() => {
-                            if (window.confirm('Are you sure you want to PERMANENTLY delete ALL exam schedules? This cannot be undone.')) {
-                                setSchedules([makeSchedule()]);
-                                handleSave();
-                            }
-                        }}
-                        title="Clear All Schedules"
-                    >
-                        <Trash2 size={18} />
-                        <span>Clear All</span>
-                    </button>
+                    {isSuperAdmin && (
+                        <>
+                            <button
+                                className="btn-labeled"
+                                onClick={() => navigate('/admin/exams/settings')}
+                                title="Exam Seating Settings"
+                            >
+                                <MapPinIcon size={18} />
+                                <span>Seating</span>
+                            </button>
+                            <button
+                                className="btn-labeled danger"
+                                onClick={() => {
+                                    if (window.confirm('Are you sure you want to PERMANENTLY delete ALL exam schedules? This cannot be undone.')) {
+                                        setSchedules([makeSchedule()]);
+                                        handleSave();
+                                    }
+                                }}
+                                title="Clear All Schedules"
+                            >
+                                <Trash2 size={18} />
+                                <span>Clear All</span>
+                            </button>
+                        </>
+                    )}
                     <button
                         className="btn-labeled primary"
                         onClick={handleSave}
