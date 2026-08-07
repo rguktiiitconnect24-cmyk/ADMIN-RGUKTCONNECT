@@ -314,7 +314,12 @@ const AdminExams = () => {
             </div>
 
             <div className="flex flex-col gap-10">
-                {schedules.filter(s => activeTab === 'all' || s.department === activeTab).length === 0 && (
+                {schedules.filter(s => {
+                    if (activeTab !== 'all' && s.department !== activeTab) return false;
+                    if (s.department === 'all' && (!user?.targetDepartments || user.targetDepartments.length === 0 || user.permissions?.includes('all')) === false) return false;
+                    if (s.department !== 'all' && !isDepartmentAllowed(s.department, user)) return false;
+                    return true;
+                }).length === 0 && (
                     <div className="empty-exams-state">
                         <div className="empty-exams-icon">
                             <Calendar size={48} strokeWidth={1.5} />
