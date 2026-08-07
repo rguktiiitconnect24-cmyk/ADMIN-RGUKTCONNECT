@@ -273,7 +273,6 @@
     /* orange-700 */
 }
 
-/* Modal */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -283,6 +282,15 @@
     justify-content: center;
     z-index: 999999;
     backdrop-filter: blur(4px);
+}
+
+@media (min-width: 768px) {
+    .app-layout:not(.sidebar-collapsed) .modal-overlay:not(.full-screen-overlay) {
+        padding-left: 250px;
+    }
+    .app-layout.sidebar-collapsed .modal-overlay:not(.full-screen-overlay) {
+        padding-left: 4.5rem;
+    }
 }
 
 .modal-content {

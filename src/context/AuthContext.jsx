@@ -389,12 +389,22 @@ export const AuthProvider = ({ children }) => {
                     // Comprehensive search criteria: Try Student ID, RC ID, and Email
                     let foundDoc = null;
                     
-                    // Search by studentId (e.g. R240456)
-                    const qStudentId = query(usersRef, where("studentId", "==", cleanId));
-                    const sStudent = await getDocs(qStudentId);
-                    if (!sStudent.empty) {
-                        foundDoc = sStudent.docs[0];
-                        console.log("ID Match found via studentId");
+                    // Search by adminId (e.g. ADM-JOHN)
+                    const qAdminId = query(usersRef, where("adminId", "==", cleanId));
+                    const sAdmin = await getDocs(qAdminId);
+                    if (!sAdmin.empty) {
+                        foundDoc = sAdmin.docs[0];
+                        console.log("ID Match found via adminId");
+                    }
+
+                    if (!foundDoc) {
+                        // Search by studentId (e.g. R240456)
+                        const qStudentId = query(usersRef, where("studentId", "==", cleanId));
+                        const sStudent = await getDocs(qStudentId);
+                        if (!sStudent.empty) {
+                            foundDoc = sStudent.docs[0];
+                            console.log("ID Match found via studentId");
+                        }
                     }
                     
                     if (!foundDoc) {

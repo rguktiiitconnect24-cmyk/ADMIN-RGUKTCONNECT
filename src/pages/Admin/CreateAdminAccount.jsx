@@ -8,6 +8,7 @@ import { firebaseConfig } from '../../config/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import { NAV_ITEMS } from '../../config/navigation';
+import AdminAppointmentLetter from '../../components/Admin/AdminAppointmentLetter';
 import './CreateAdminAccount.css';
 
 const CreateAdminAccount = () => {
@@ -16,18 +17,21 @@ const CreateAdminAccount = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
+    const [createdAdminData, setCreatedAdminData] = useState(null);
     
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
         password: '',
-        adminId: ''
+        adminId: '',
+        adminIdCustomized: false
     });
 
     // We get all admin specific nav items from configuration
     const availablePermissions = NAV_ITEMS.filter(item => item.adminOnly && item.id !== 'admin-dashboard');
 
     const [selectedPermissions, setSelectedPermissions] = useState([]);
+    const [selectedDepartments, setSelectedDepartments] = useState([]);
     const [isSuperAdmin, setIsSuperAdmin] = useState(true);
 
     const handlePermissionToggle = (id) => {
@@ -42,10 +46,34 @@ const CreateAdminAccount = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        setFormData(prev => {
+            const newData = { ...prev, [name]: value };
+            
+            // Auto-generate adminId if it hasn't been manually customized
+            if (name === 'fullName' || name === 'email') {
+                if (!prev.adminIdCustomized) {
+                    const namePart = newData.fullName ? newData.fullName.split(' ')[0].replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : '';
+                    const emailPart = newData.email ? newData.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : '';
+                    
+                    if (namePart) {
+                        newData.adminId = `ADM-${namePart}`;
+                    } else if (emailPart) {
+                        newData.adminId = `ADM-${emailPart.substring(0, 5)}`;
+                    } else {
+                        newData.adminId = '';
+                    }
+                }
+            } else if (name === 'adminId') {
+                // If user types manually, mark as customized to stop auto-generation
+                newData.adminIdCustomized = true;
+                // If they clear it entirely, reset customization so it can auto-generate again
+                if (value.trim() === '') {
+                    newData.adminIdCustomized = false;
+                }
+            }
+            
+            return newData;
+        });
     };
 
     const handleSubmit = async (e) => {
@@ -53,13 +81,15 @@ const CreateAdminAccount = () => {
         setError(null);
         setSuccess(false);
 
-        if (!formData.fullName || !formData.email || !formData.password) {
-            setError("Please fill in all required fields.");
+        if (!formData.fullName || !formData.email || !formData.password || !formData.adminId) {
+            setError("Please fill in all required fields (Name, Email, Password, Admin ID).");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
 
         if (!isSuperAdmin && selectedPermissions.length === 0) {
-            setError("Please select at least one permission for the semi-admin.");
+            setError("Please select at least one module access permission for the semi-admin.");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
 
@@ -84,6 +114,7 @@ const CreateAdminAccount = () => {
 
             // 3. Save to Firestore
             const permissionsToSave = isSuperAdmin ? ['all'] : selectedPermissions;
+            const departmentsToSave = isSuperAdmin ? [] : selectedDepartments;
             
             await setDoc(doc(db, 'users', user.uid), {
                 fullName: formData.fullName,
@@ -91,20 +122,27 @@ const CreateAdminAccount = () => {
                 role: 'admin',
                 adminId: formData.adminId || '',
                 permissions: permissionsToSave,
+                targetDepartments: departmentsToSave,
                 createdAt: serverTimestamp(),
                 createdBy: currentUser?.uid,
                 status: 'active'
             });
 
             setSuccess(true);
+            setCreatedAdminData({
+                fullName: formData.fullName,
+                email: formData.email,
+                adminId: formData.adminId || '',
+                password: formData.password,
+                departments: departmentsToSave,
+                campus: 'RGUKT RK Valley'
+            });
             setFormData({ fullName: '', email: '', password: '', adminId: '' });
             setSelectedPermissions([]);
+            setSelectedDepartments([]);
             setIsSuperAdmin(true);
             
-            setTimeout(() => {
-                navigate('/admin/users');
-            }, 2000);
-            
+            // Remove the auto-navigate to let them see the letter
         } catch (err) {
             console.error("Error creating admin account:", err);
             // Translate Firebase Auth errors to readable messages
@@ -115,12 +153,14 @@ const CreateAdminAccount = () => {
             } else {
                 setError(err.message || "Failed to create admin account. Please try again.");
             }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
+        <>
         <div className="admin-container create-admin-page">
             <div className="page-header-v2">
                 <div className="header-accent-bar"></div>
@@ -168,18 +208,19 @@ const CreateAdminAccount = () => {
                                 />
                             </div>
                             <div className="admin-form-group">
-                                <label className="admin-form-label">Admin ID (Optional)</label>
+                                <label className="admin-form-label">Admin ID *</label>
                                 <input
                                     type="text"
                                     name="adminId"
                                     className="admin-form-input"
                                     value={formData.adminId}
                                     onChange={handleChange}
-                                    placeholder="e.g. ADM-001"
+                                    placeholder="e.g. ADM-JOHN"
+                                    required
                                 />
                             </div>
                             <div className="admin-form-group">
-                                <label className="admin-form-label">Temporary Password *</label>
+                                <label className="admin-form-label">Password *</label>
                                 <input
                                     type="password"
                                     name="password"
@@ -259,28 +300,83 @@ const CreateAdminAccount = () => {
                                 ))}
                             </div>
                         )}
+                        
+                        {!isSuperAdmin && (
+                            <div className="admin-form-group" style={{ marginTop: '2rem' }}>
+                                <label className="admin-form-label">Target Departments (Max 3)</label>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
+                                    Restrict this admin to specific departments. Leave empty for all departments.
+                                </p>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                    {['CSE(AI&ML)', 'CSE', 'ECE', 'EEE', 'CE', 'ME', 'MME', 'CHE'].map(dept => {
+                                        const isSelected = selectedDepartments.includes(dept);
+                                        const isDisabled = !isSelected && selectedDepartments.length >= 3;
+                                        return (
+                                            <div 
+                                                key={dept}
+                                                style={{
+                                                    padding: '0.5rem 1.25rem',
+                                                    borderRadius: '2rem',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: '600',
+                                                    cursor: isDisabled ? 'not-allowed' : 'pointer',
+                                                    border: `1px solid ${isSelected ? 'var(--color-brand, #6366f1)' : 'var(--color-border)'}`,
+                                                    backgroundColor: isSelected ? 'rgba(99, 102, 241, 0.15)' : 'var(--color-surface)',
+                                                    color: isSelected ? 'var(--color-brand, #6366f1)' : (isDisabled ? 'var(--color-text-muted)' : 'var(--color-text-main)'),
+                                                    opacity: isDisabled ? 0.5 : 1,
+                                                    transition: 'all 0.2s ease',
+                                                    userSelect: 'none'
+                                                }}
+                                                onClick={() => {
+                                                    if (isSelected) {
+                                                        setSelectedDepartments(prev => prev.filter(d => d !== dept));
+                                                    } else if (!isDisabled) {
+                                                        setSelectedDepartments(prev => [...prev, dept]);
+                                                    }
+                                                }}
+                                            >
+                                                {dept}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    <div className="form-actions">
-                        <button 
-                            type="button" 
-                            className="btn-secondary" 
-                            onClick={() => navigate(-1)}
-                            disabled={isLoading}
-                        >
-                            Cancel
-                        </button>
-                        <button 
-                            type="submit" 
-                            className="btn-primary" 
-                            disabled={isLoading}
-                        >
-                            {isLoading ? 'Creating Account...' : 'Create Admin Account'}
-                        </button>
+                    <div className="form-actions" style={{ flexDirection: 'column', alignItems: 'flex-end', gap: '1rem' }}>
+                        {error && <div className="admin-alert error" style={{ width: '100%', marginBottom: '1rem' }}>{error}</div>}
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button 
+                                type="button" 
+                                className="btn-secondary" 
+                                onClick={() => navigate(-1)}
+                                disabled={isLoading}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                type="submit" 
+                                className="btn-primary" 
+                                disabled={isLoading}
+                            >
+                                {isLoading ? 'Creating Account...' : 'Create Admin Account'}
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
+        {createdAdminData && (
+            <AdminAppointmentLetter 
+                adminData={createdAdminData} 
+                onClose={() => {
+                    setCreatedAdminData(null);
+                    navigate('/admin/users');
+                }} 
+            />
+        )}
+        </>
     );
 };
 

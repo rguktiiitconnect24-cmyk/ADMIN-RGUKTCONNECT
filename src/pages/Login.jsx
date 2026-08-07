@@ -425,7 +425,7 @@ const Login = () => {
 
                         <form onSubmit={handleLogin} className="space-y-4" noValidate>
                             <div className="login-form-group">
-                                <label className="login-label" htmlFor="email">Institutional ID / Email</label>
+                                <label className="login-label" htmlFor="email">Admin ID / Email ID</label>
                                 <div className="login-input-wrapper">
                                     <div className="login-input-icon">
                                         <Mail size={18} />
@@ -435,7 +435,7 @@ const Login = () => {
                                         name="email"
                                         type="text"
                                         className="login-input"
-                                        placeholder="R240387 or student@rguktrkv.ac.in"
+                                        placeholder="ADM-XXXX or admin@rgukt.ac.in"
                                         value={formData.email}
                                         onChange={handleChange}
                                         required

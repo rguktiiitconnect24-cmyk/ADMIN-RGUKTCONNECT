@@ -1,0 +1,274 @@
+.appointment-letter-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.appointment-letter-container {
+    background: #ffffff;
+    width: 100%;
+    max-width: 800px;
+    border-radius: 1rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+.appointment-letter-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.letter-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.print-btn {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.print-btn:hover {
+    background: #bfdbfe;
+}
+
+.copy-btn {
+    background: #e0e7ff;
+    color: #4338ca;
+}
+
+.copy-btn:hover {
+    background: #c7d2fe;
+}
+
+.close-btn {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.close-btn:hover {
+    background: #cbd5e1;
+}
+
+.appointment-letter-content {
+    padding: 3rem 4rem;
+    overflow-y: auto;
+    color: #000000;
+    background: #ffffff;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.appointment-letter-content h1,
+.appointment-letter-content h2,
+.appointment-letter-content h3,
+.appointment-letter-content h4,
+.appointment-letter-content h5,
+.appointment-letter-content h6,
+.appointment-letter-content strong,
+.appointment-letter-content b {
+    color: #000000 !important;
+}
+
+.letter-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.letter-header h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #000;
+}
+
+.letter-header h2 {
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-decoration: underline;
+    color: #333;
+}
+
+.letter-date {
+    text-align: right;
+    margin-bottom: 1.5rem;
+}
+
+.letter-to {
+    margin-bottom: 2rem;
+}
+
+.letter-subject h3 {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    text-decoration: underline;
+}
+
+.letter-body p {
+    margin-bottom: 1rem;
+}
+
+.letter-body ul {
+    list-style-type: disc;
+    margin-left: 2rem;
+    margin-bottom: 2rem;
+}
+
+.letter-body li {
+    margin-bottom: 0.5rem;
+}
+
+.letter-details-table-wrapper {
+    margin: 2.5rem 0;
+}
+
+.letter-details-table-wrapper h3 {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: #000;
+}
+
+.letter-details-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.letter-details-table th,
+.letter-details-table td {
+    border: 1px solid #ccc;
+    padding: 0.75rem 1rem;
+    text-align: left;
+}
+
+.letter-details-table td:first-child {
+    width: 30%;
+    background-color: #f9fafb;
+}
+
+.letter-terms h3 {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: #000;
+}
+
+.letter-terms ol {
+    margin-left: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.letter-terms li {
+    margin-bottom: 0.5rem;
+}
+
+.letter-divider {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 2rem 0;
+}
+
+.letter-signatures {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+.signature-block {
+    text-align: left;
+    width: 300px;
+}
+
+.signature-block h4 {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.letter-acknowledgement h3 {
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.ack-signatures {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+}
+
+/* Print Styles */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    
+    .appointment-letter-overlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        width: 100%;
+        height: auto;
+    }
+    
+    .appointment-letter-container {
+        box-shadow: none;
+        max-width: 100%;
+        max-height: none;
+        overflow: visible;
+        border-radius: 0;
+    }
+    
+    .printable-area, .printable-area * {
+        visibility: visible;
+    }
+    
+    .printable-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 0;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+    
+    /* Ensure page breaks don't happen inside critical elements */
+    .letter-details-table-wrapper,
+    .letter-signatures,
+    .letter-acknowledgement {
+        page-break-inside: avoid;
+    }
+}
+
+

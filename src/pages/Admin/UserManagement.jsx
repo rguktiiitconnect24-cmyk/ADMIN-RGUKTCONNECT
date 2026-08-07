@@ -14,6 +14,7 @@ import './Admin.css';
 import './CreateAdminAccount.css';
 import { deleteProfileImage } from '../../services/imageService';
 import { NAV_ITEMS } from '../../config/navigation';
+import AdminAppointmentLetter from '../../components/Admin/AdminAppointmentLetter';
 
 const UserManagement = () => {
     const navigate = useNavigate();
@@ -757,6 +758,20 @@ const UserManagement = () => {
 
             {/* View User Modal */}
             {viewUser && createPortal(
+                viewUser.role === 'admin' ? (
+                    <AdminAppointmentLetter 
+                        adminData={{
+                            fullName: viewUser.fullName,
+                            email: viewUser.email,
+                            adminId: viewUser.adminId || '',
+                            password: viewUser.password || '',
+                            departments: viewUser.targetDepartments || [],
+                            campus: viewUser.campus || 'RGUKT RK Valley',
+                            date: viewUser.createdAt ? new Date(viewUser.createdAt).toLocaleDateString() : new Date().toLocaleDateString()
+                        }}
+                        onClose={() => setViewUser(null)}
+                    />
+                ) : (
                 <div className="modal-overlay" onClick={() => setViewUser(null)}>
                     <div className="modal-content full-screen max-w-4xl user-details-modal" onClick={e => e.stopPropagation()}>
                         <div className="user-details-header">
@@ -893,7 +908,8 @@ const UserManagement = () => {
                             </button>
                         </div>
                     </div>
-                </div>,
+                </div>
+                ),
                 document.body
             )}
 
