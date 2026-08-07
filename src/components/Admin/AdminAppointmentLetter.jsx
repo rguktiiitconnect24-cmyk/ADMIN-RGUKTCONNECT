@@ -102,9 +102,9 @@ RGUKT CONNECT Administration Team`;
                         <p style={{ marginTop: '1.5rem' }}>We welcome you to the <strong>RGUKT CONNECT Administration Team</strong> and wish you success in your role.</p>
                     </div>
 
-                    <div className="letter-signatures" style={{ marginTop: '3rem', justifyContent: 'flex-end' }}>
+                    <div className="letter-signatures" style={{ marginTop: '3rem', display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
                         <div className="signature-block" style={{ textAlign: 'center' }}>
-                            <h4 style={{ marginBottom: '0.25rem' }}>B.NAGESH</h4>
+                            <h4 style={{ marginBottom: '0.25rem' }}>BEST REGARDS</h4>
                             <p><strong>RGUKT CONNECT SUPER ADMIN</strong></p>
                         </div>
                     </div>
