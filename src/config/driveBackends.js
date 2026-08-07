@@ -14,10 +14,10 @@ export const DRIVE_BACKENDS = {
     'btech_btech4_ece': 'https://script.google.com/macros/s/AKfycbwD3utehQNLsONRaTsbQhkHH34nE5d6Rl7YT4KGBcgfhJ5hGAUcT_rg3DmjfqSsdmJb/exec',
     
     // CHE Endpoints (Update these URLs after deploying your new CHE Apps Script)
-    'btech_btech1_che': '',
-    'btech_btech2_che': '',
-    'btech_btech3_che': '',
-    'btech_btech4_che': '',
+    'btech_btech1_che': 'https://script.google.com/macros/s/AKfycbxVjDF7lKdSZqgAbyS1zy14H_qPjuU-tDXkZ-gUlnNZoz11h0umSJqrYt6htfFLx0KVIA/exec',
+    'btech_btech2_che': 'https://script.google.com/macros/s/AKfycbxVjDF7lKdSZqgAbyS1zy14H_qPjuU-tDXkZ-gUlnNZoz11h0umSJqrYt6htfFLx0KVIA/exec',
+    'btech_btech3_che': 'https://script.google.com/macros/s/AKfycbxVjDF7lKdSZqgAbyS1zy14H_qPjuU-tDXkZ-gUlnNZoz11h0umSJqrYt6htfFLx0KVIA/exec',
+    'btech_btech4_che': 'https://script.google.com/macros/s/AKfycbxVjDF7lKdSZqgAbyS1zy14H_qPjuU-tDXkZ-gUlnNZoz11h0umSJqrYt6htfFLx0KVIA/exec',
 };
 
 /**
