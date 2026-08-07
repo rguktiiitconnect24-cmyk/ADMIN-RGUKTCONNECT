@@ -225,7 +225,7 @@
 /* Print Styles */
 @media print {
     @page {
-        margin: 20mm;
+        margin: 15mm;
     }
 
     body {
@@ -238,6 +238,7 @@
     
     .appointment-letter-overlay {
         visibility: visible;
+        display: block !important;
         position: absolute !important;
         left: 0 !important;
         top: 0 !important;
