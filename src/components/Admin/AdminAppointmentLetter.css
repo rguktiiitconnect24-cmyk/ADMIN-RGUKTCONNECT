@@ -80,7 +80,10 @@
     overflow-y: auto;
     color: #000000;
     background: #ffffff;
-    font-family: "Times New Roman", Times, serif;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
     font-size: 1.1rem;
     line-height: 1.6;
 }
