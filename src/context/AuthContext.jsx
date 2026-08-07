@@ -1035,6 +1035,44 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const forceLoginAsUser = async (targetUid) => {
+        try {
+            console.log("Super Admin spoofing login for:", targetUid);
+            
+            if (user?.uid && currentSessionId) {
+                try {
+                    await deleteSession(user.uid, currentSessionId);
+                } catch (e) {}
+            }
+            localStorage.removeItem('rgukt_connect_session_id');
+            setCurrentSessionId(null);
+            
+            localStorage.setItem('rgukt_hybrid_uid', targetUid);
+            
+            isIntentionalLogout.current = true;
+            if (auth.currentUser) {
+                await signOut(auth); 
+            } else {
+                const userRef = doc(db, 'users', targetUid);
+                const userDoc = await getDoc(userRef);
+                if (userDoc.exists()) {
+                    setUser({ uid: targetUid, ...userDoc.data() });
+                }
+            }
+            isIntentionalLogout.current = false;
+            
+            createSession(targetUid).then(({ sessionData }) => {
+                if (sessionData) {
+                    localStorage.setItem('rgukt_connect_session_id', sessionData.id);
+                    setCurrentSessionId(sessionData.id);
+                }
+            }).catch(e => console.error("Session creation error:", e));
+        } catch (error) {
+            console.error("Error in forceLoginAsUser:", error);
+            throw error;
+        }
+    };
+
     return (
         <AuthContext.Provider value={{
             user,
@@ -1051,6 +1089,7 @@ export const AuthProvider = ({ children }) => {
             recoverRcId,
             verifyPin,
             verifyFace,
+            forceLoginAsUser,
 
             loading
         }}>
