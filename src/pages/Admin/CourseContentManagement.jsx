@@ -1,4 +1,4 @@
-import { ClipboardPaste, Copy, Scissors, ChevronRight, Trash2, Plus, Edit2, HelpCircle, Video, FileText, X, BookOpen, AlertCircle, Loader2, GripVertical, CheckCircle, XCircle } from 'lucide-react';
+import { ClipboardPaste, Copy, Scissors, ChevronRight, Trash2, Plus, Edit2, HelpCircle, Video, FileText, X, BookOpen, AlertCircle, Loader2, GripVertical, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import UnitQuizManager from '../../components/Admin/UnitQuizManager';
 import FileUploadWidget from '../../components/Admin/FileUploadWidget';
 import CustomSelect from '../../components/Common/CustomSelect';
