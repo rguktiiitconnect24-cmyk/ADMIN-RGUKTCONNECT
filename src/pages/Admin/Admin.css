@@ -183,6 +183,30 @@
     color: #818cf8; /* indigo-400 */
 }
 
+/* Drag and Drop Styling */
+.drag-handle {
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.manager-item.dragging {
+    opacity: 0.5;
+    background: var(--color-surface-hover);
+    border: 1px dashed var(--color-primary-400);
+}
+
+.manager-item.drag-over {
+    border-top: 2px solid var(--color-primary-500);
+    transform: translateY(2px);
+}
+
 .add-btn {
     display: flex;
     align-items: center;
