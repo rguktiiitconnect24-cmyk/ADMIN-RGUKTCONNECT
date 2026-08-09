@@ -340,17 +340,11 @@
     padding: 0 !important;
 }
 
-.modal-content.full-screen {
-    max-width: none !important;
-    width: 100% !important;
-    height: 100% !important;
-    max-height: none !important;
-    border-radius: 0 !important;
-    border: none !important;
-    display: flex;
-    flex-direction: column;
-    margin: 0;
-    box-sizing: border-box;
+.modal-content.large-modal {
+    max-width: 800px !important;
+    width: 95% !important;
+    height: auto !important;
+    max-height: 90vh !important;
 }
 
 /* Premium Dashboard UI Styles */
