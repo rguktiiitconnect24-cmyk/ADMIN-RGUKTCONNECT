@@ -316,7 +316,10 @@ const TimetableManagement = () => {
                         <p className="text-sm text-center max-w-sm mt-2">Choose a branch and section from the dropdowns above to view or edit the timetable.</p>
                     </div>
                 ) : isLoading ? (
-                    <LoadingTransition message="Loading Timetable..." persistent />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center animate-fade-in z-10">
+                        <Loader2 size={40} className="animate-spin text-[var(--color-primary-500)] mb-4" />
+                        <h3 className="text-lg font-bold" style={{ color: 'var(--color-text-muted)' }}>Loading Timetable...</h3>
+                    </div>
                 ) : !schedule ? (
                     // Create Timetable Prompt
                     <div className="absolute inset-0 flex flex-col items-center justify-center animate-fade-in" style={{ color: 'var(--color-text-muted)' }}>
