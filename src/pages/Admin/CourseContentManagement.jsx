@@ -1,4 +1,4 @@
-import { ClipboardPaste, Copy, Scissors, ChevronRight, Trash2, Plus, Edit2, HelpCircle, Video, FileText, X, BookOpen, AlertCircle, Loader2, ChevronDown, ChevronUp, CheckCircle, XCircle } from 'lucide-react';
+import { ClipboardPaste, Copy, Scissors, ChevronRight, Trash2, Plus, Edit2, HelpCircle, Video, FileText, X, BookOpen, AlertCircle, Loader2, GripVertical, CheckCircle, XCircle } from 'lucide-react';
 import UnitQuizManager from '../../components/Admin/UnitQuizManager';
 import FileUploadWidget from '../../components/Admin/FileUploadWidget';
 import CustomSelect from '../../components/Common/CustomSelect';
@@ -43,6 +43,10 @@ const CourseContentManagement = () => {
     const [units, setUnits] = useState([]);
     const [selectedUnit, setSelectedUnit] = useState(null);
     const [modules, setModules] = useState([]);
+    
+    // Drag state
+    const [draggedSubjectIndex, setDraggedSubjectIndex] = useState(null);
+    const [dragOverSubjectIndex, setDragOverSubjectIndex] = useState(null);
 
     // Multi-select State
     const [selectedSubjectIds, setSelectedSubjectIds] = useState(new Set()); // Set of IDs
@@ -527,50 +531,62 @@ const CourseContentManagement = () => {
         setSelectedSubjectIds(new Set());
     };
 
-    const handleMoveSubject = async (index, direction) => {
-        if (
-            (direction === -1 && index === 0) || 
-            (direction === 1 && index === subjects.length - 1)
-        ) return;
+    const handleDragStart = (e, index) => {
+        setDraggedSubjectIndex(index);
+        e.dataTransfer.effectAllowed = 'move';
+        // Add a class after a tiny delay so the dragged ghost image looks normal
+        setTimeout(() => {
+            if (e.target) e.target.classList.add('dragging');
+        }, 0);
+    };
+
+    const handleDragOver = (e, index) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (draggedSubjectIndex === null) return;
+        if (dragOverSubjectIndex !== index) {
+            setDragOverSubjectIndex(index);
+        }
+    };
+
+    const handleDragEnd = (e) => {
+        setDraggedSubjectIndex(null);
+        setDragOverSubjectIndex(null);
+        if (e.target) e.target.classList.remove('dragging');
+    };
+
+    const handleDropSubject = async (e, dropIndex) => {
+        e.preventDefault();
+        const dragIndex = draggedSubjectIndex;
+        setDraggedSubjectIndex(null);
+        setDragOverSubjectIndex(null);
+        if (e.target) e.target.classList.remove('dragging');
+
+        if (dragIndex === null || dragIndex === dropIndex) return;
 
         const newSubjects = [...subjects];
-        
-        // Ensure all subjects have an order assigned if they don't already
+        const [movedItem] = newSubjects.splice(dragIndex, 1);
+        newSubjects.splice(dropIndex, 0, movedItem);
+
+        // Reassign all orders based on new array
         let orderChanged = false;
         newSubjects.forEach((sub, i) => {
-            if (sub.order === undefined || sub.order === null) {
+            if (sub.order !== i) {
                 sub.order = i;
                 orderChanged = true;
             }
         });
 
-        const targetIndex = index + direction;
-        const currentSub = newSubjects[index];
-        const targetSub = newSubjects[targetIndex];
-
-        // Swap their orders
-        const tempOrder = currentSub.order;
-        currentSub.order = targetSub.order;
-        targetSub.order = tempOrder;
+        if (!orderChanged) return;
 
         // Optimistic UI update
-        newSubjects[index] = targetSub;
-        newSubjects[targetIndex] = currentSub;
         setSubjects(newSubjects);
 
         try {
-            // If they didn't have orders initially, we should ideally save all of them, 
-            // but saving the two swapped ones is a start. If orderChanged is true, we could save all,
-            // but to be safe and fast, we just save the two affected ones.
-            if (orderChanged) {
-                // If it's the first time reordering, we might need to initialize all orders to prevent future bugs
-                await Promise.all(newSubjects.map((sub, i) => updateSubjectOrder(sub.id, sub.order, selectedProgram.id, selectedYear.id, selectedSemester.id)));
-            } else {
-                await Promise.all([
-                    updateSubjectOrder(currentSub.id, currentSub.order, selectedProgram.id, selectedYear.id, selectedSemester.id),
-                    updateSubjectOrder(targetSub.id, targetSub.order, selectedProgram.id, selectedYear.id, selectedSemester.id)
-                ]);
-            }
+            // Bulk update all subjects to be safe
+            await Promise.all(newSubjects.map(sub => 
+                updateSubjectOrder(sub.id, sub.order, selectedProgram.id, selectedYear.id, selectedSemester.id)
+            ));
             showToast('Subject order updated successfully', 'success');
         } catch (error) {
             console.error("Failed to reorder:", error);
@@ -778,11 +794,19 @@ const CourseContentManagement = () => {
                                 subjects.map((sub, index) => (
                                     <div
                                         key={sub.id}
-                                        className={`manager-item ${selectedSubject?.id === sub.id ? 'active' : ''}`}
+                                        className={`manager-item ${selectedSubject?.id === sub.id ? 'active' : ''} ${draggedSubjectIndex === index ? 'dragging' : ''} ${dragOverSubjectIndex === index ? 'drag-over' : ''}`}
                                         onClick={() => setSelectedSubject(sub)}
+                                        draggable={sub.isDynamic}
+                                        onDragStart={(e) => handleDragStart(e, index)}
+                                        onDragOver={(e) => handleDragOver(e, index)}
+                                        onDragEnd={handleDragEnd}
+                                        onDrop={(e) => handleDropSubject(e, index)}
                                     >
                                         {sub.isDynamic && (
-                                            <div onClick={e => e.stopPropagation()} className="mr-6 flex items-center">
+                                            <div onClick={e => e.stopPropagation()} className="mr-3 flex items-center gap-3">
+                                                <div className="drag-handle text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                                                    <GripVertical size={16} />
+                                                </div>
                                                 <input
                                                     type="checkbox"
                                                     className="custom-checkbox"
@@ -794,22 +818,6 @@ const CourseContentManagement = () => {
                                         <span className="flex-1 truncate">{sub.label}</span>
                                         {sub.isDynamic && (
                                             <div className="flex gap-2">
-                                                <div className="flex flex-col gap-0.5 mr-2 opacity-50 hover:opacity-100 transition-opacity">
-                                                    <button 
-                                                        onClick={(e) => { e.stopPropagation(); handleMoveSubject(index, -1); }} 
-                                                        className={`p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded ${index === 0 ? 'invisible' : ''}`}
-                                                        title="Move Up"
-                                                    >
-                                                        <ChevronUp size={14} />
-                                                    </button>
-                                                    <button 
-                                                        onClick={(e) => { e.stopPropagation(); handleMoveSubject(index, 1); }} 
-                                                        className={`p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded ${index === subjects.length - 1 ? 'invisible' : ''}`}
-                                                        title="Move Down"
-                                                    >
-                                                        <ChevronDown size={14} />
-                                                    </button>
-                                                </div>
                                                 <button onClick={(e) => { e.stopPropagation(); handleCopy('subject', sub.id); }} className="action-btn text-green-500" title="Copy Subject">
                                                     <Copy size={14} />
                                                 </button>
