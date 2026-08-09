@@ -3199,3 +3199,8 @@ textarea {
     width: clamp(80px, 25vw, 120px) !important;
     height: clamp(60px, 20vw, 90px) !important;
 }
+
+/* Safe Area Fixes */
+.app-layout {
+  padding-top: var(--safe-area-top, env(safe-area-inset-top, 0px));
+}
