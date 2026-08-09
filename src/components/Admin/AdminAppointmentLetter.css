@@ -3,7 +3,7 @@
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(8px);
     display: flex;
@@ -237,7 +237,7 @@
 
     /* Force the printed document to exactly 1 page height */
     html, body {
-        height: 100vh !important;
+        height: 100dvh !important;
         overflow: hidden !important;
         margin: 0 !important;
         padding: 0 !important;

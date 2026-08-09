@@ -33,13 +33,13 @@
 
 .app-layout {
     display: flex;
-    min-height: 100vh;
+    min-height: 100dvh;
     background-color: var(--color-background);
 }
 
 .sidebar {
     width: var(--sidebar-width);
-    height: calc(100vh - 2rem);
+    height: calc(100dvh - 2rem);
     position: fixed;
     top: 1rem;
     left: 1rem;
@@ -595,7 +595,7 @@
     transform: translateX(-100%);
     left: 0;
     top: 0;
-    height: 100vh;
+    height: 100dvh;
     border-radius: 0 1.5rem 1.5rem 0;
     box-shadow: 20px 0 50px rgba(0, 0, 0, 0.2);
     z-index: 10001;
@@ -617,7 +617,7 @@
         transform: translateX(0) !important;
         left: 1rem;
         top: 1rem;
-        height: calc(100vh - 2rem);
+        height: calc(100dvh - 2rem);
         border-radius: 1.5rem;
     }
 }

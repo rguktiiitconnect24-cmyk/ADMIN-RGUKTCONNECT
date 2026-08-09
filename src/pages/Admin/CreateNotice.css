@@ -1,7 +1,7 @@
 .create-notice-page {
     padding-top: max(2rem, var(--safe-area-top));
     padding-bottom: max(5rem, var(--safe-area-bottom));
-    min-height: 100vh;
+    min-height: 100dvh;
 }
 
 .cn-form-container {

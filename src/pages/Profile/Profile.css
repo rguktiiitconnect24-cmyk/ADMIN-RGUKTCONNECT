@@ -3108,7 +3108,7 @@ transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     right: 0;
     bottom: 0;
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
     background: rgba(15, 23, 42, 0.95);
     backdrop-filter: blur(20px);
     z-index: 9999999;
@@ -4225,7 +4225,7 @@ transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         border-radius: 24px;
         padding: 32px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-        min-height: calc(100vh - 48px);
+        min-height: calc(100dvh - 48px);
         position: relative;
     }
 
@@ -4269,7 +4269,7 @@ transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
     background-color: var(--color-background);
     z-index: 9999;
     display: flex;

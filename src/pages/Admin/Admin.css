@@ -3588,8 +3588,8 @@ input:checked+.slider:before {
 .modal-content.full-screen {
     max-width: 100vw !important;
     width: 100vw !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
     border-radius: 0 !important;
     border: none !important;
     margin: 0 !important;

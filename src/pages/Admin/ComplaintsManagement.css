@@ -2,7 +2,7 @@
     display: grid;
     grid-template-columns: 380px 1fr;
     gap: 1.5rem;
-    height: calc(100vh - 200px);
+    height: calc(100dvh - 200px);
     min-height: 0;
     padding: 0.5rem;
     overflow: hidden;
@@ -1799,7 +1799,7 @@
     border: none !important;
     margin: 0 !important;
     width: 100vw !important;
-    height: 100vh !important;
+    height: 100dvh !important;
 }
 
 [data-theme='dark'] .complaint-detail-container {
