@@ -118,7 +118,7 @@
 /* Course Manager Grid */
 .course-manager-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1.5fr;
+    grid-template-columns: 1.3fr 1fr 1fr;
     gap: 1.5rem;
     height: 600px;
 }
