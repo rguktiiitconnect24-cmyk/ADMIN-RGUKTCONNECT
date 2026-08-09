@@ -434,21 +434,21 @@ const TimetableManagement = () => {
                                                         onClick={(e) => handleCellClick(e, day, i)}
                                                     >
                                                         {showMergeBtn && (
-                                                            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-white dark:bg-slate-800 p-1.5 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 flex items-center gap-1.5 z-20 animate-slide-down">
-                                                                <button className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm whitespace-nowrap" onClick={(e) => { e.stopPropagation(); handleMerge(); }}>
+                                                            <div className="absolute top-[-52px] left-1/2 transform -translate-x-1/2 bg-[var(--color-surface)] p-1.5 rounded-xl shadow-xl border border-[var(--color-border)] flex items-center gap-1.5 z-50">
+                                                                <button className="btn-primary flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg shadow-sm whitespace-nowrap" onClick={(e) => { e.stopPropagation(); handleMerge(); }}>
                                                                     <Link size={14} /> Merge
                                                                 </button>
-                                                                <button className="flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-500 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400 p-1.5 rounded-lg transition-colors" onClick={(e) => { e.stopPropagation(); setSelectedCells([]); }}>
+                                                                <button className="btn-secondary flex items-center justify-center p-1.5 rounded-lg shadow-sm" style={{ color: '#ef4444', backgroundColor: '#fef2f2', borderColor: '#fecaca' }} onClick={(e) => { e.stopPropagation(); setSelectedCells([]); }}>
                                                                     <X size={14} />
                                                                 </button>
                                                             </div>
                                                         )}
                                                         {showUnmergeBtn && (
-                                                            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-white dark:bg-slate-800 p-1.5 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 flex items-center gap-1.5 z-20 animate-slide-down">
-                                                                <button className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm whitespace-nowrap" onClick={(e) => { e.stopPropagation(); handleUnmerge(day, i, colSpan); }}>
+                                                            <div className="absolute top-[-52px] left-1/2 transform -translate-x-1/2 bg-[var(--color-surface)] p-1.5 rounded-xl shadow-xl border border-[var(--color-border)] flex items-center gap-1.5 z-50">
+                                                                <button className="btn-primary flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg shadow-sm whitespace-nowrap" onClick={(e) => { e.stopPropagation(); handleUnmerge(day, i, colSpan); }}>
                                                                     <Unlink size={14} /> Unmerge
                                                                 </button>
-                                                                <button className="flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-500 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400 p-1.5 rounded-lg transition-colors" onClick={(e) => { e.stopPropagation(); setSelectedCells([]); }}>
+                                                                <button className="btn-secondary flex items-center justify-center p-1.5 rounded-lg shadow-sm" style={{ color: '#ef4444', backgroundColor: '#fef2f2', borderColor: '#fecaca' }} onClick={(e) => { e.stopPropagation(); setSelectedCells([]); }}>
                                                                     <X size={14} />
                                                                 </button>
                                                             </div>
