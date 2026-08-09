@@ -1,5 +1,6 @@
 import { Calendar, Plus, Check, Trash2, Edit2, Loader2, Save, Clock, Link, X, Unlink } from 'lucide-react';
 import LoadingTransition from '../../components/Common/LoadingTransition';
+import CustomSelect from '../../components/Common/CustomSelect';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../config/firebase';
@@ -273,35 +274,32 @@ const TimetableManagement = () => {
                 <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex-1">
                         <label className="block text-xs font-bold text-[var(--color-text-muted)] mb-2 uppercase tracking-wider">Branch</label>
-                        <select 
-                            className="form-select text-sm w-full"
+                        <CustomSelect 
                             value={selectedBranch}
-                            onChange={(e) => {
-                                setSelectedBranch(e.target.value);
+                            onChange={(val) => {
+                                setSelectedBranch(val);
                                 setSelectedSection(''); // Reset section when branch changes
                             }}
-                        >
-                            <option value="">Select Branch</option>
-                            {branches.map(b => (
-                                <option key={b} value={b}>{branchFullNames[b] || b}</option>
-                            ))}
-                        </select>
+                            options={[
+                                { value: '', label: 'Select Branch' },
+                                ...branches.map(b => ({ value: b, label: branchFullNames[b] || b }))
+                            ]}
+                        />
                     </div>
                     
                     <div className="flex-1">
                         <label className="block text-xs font-bold text-[var(--color-text-muted)] mb-2 uppercase tracking-wider">Section</label>
-                        <select 
-                            className="form-select text-sm w-full"
+                        <CustomSelect 
                             value={selectedSection}
-                            onChange={(e) => setSelectedSection(e.target.value)}
-                        >
-                            <option value="">Select Section</option>
-                            {availableSections.map(s => (
-                                <option key={s} value={s}>
-                                    {s === 'AIML' ? 'AIML' : `Section-${s}`}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={(val) => setSelectedSection(val)}
+                            options={[
+                                { value: '', label: 'Select Section' },
+                                ...availableSections.map(s => ({
+                                    value: s,
+                                    label: s === 'AIML' ? 'AIML' : `Section-${s}`
+                                }))
+                            ]}
+                        />
                     </div>
                 </div>
             </div>
