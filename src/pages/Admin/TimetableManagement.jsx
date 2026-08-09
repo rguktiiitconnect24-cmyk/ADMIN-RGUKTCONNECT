@@ -434,23 +434,15 @@ const TimetableManagement = () => {
                                                         onClick={(e) => handleCellClick(e, day, i)}
                                                     >
                                                         {showMergeBtn && (
-                                                            <div className="absolute top-[-52px] left-1/2 transform -translate-x-1/2 bg-[var(--color-surface)] p-1.5 rounded-xl shadow-xl border border-[var(--color-border)] flex items-center gap-1.5 z-50">
-                                                                <button className="btn-primary flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg shadow-sm whitespace-nowrap" onClick={(e) => { e.stopPropagation(); handleMerge(); }}>
-                                                                    <Link size={14} /> Merge
-                                                                </button>
-                                                                <button className="btn-secondary flex items-center justify-center p-1.5 rounded-lg shadow-sm" style={{ color: '#ef4444', backgroundColor: '#fef2f2', borderColor: '#fecaca' }} onClick={(e) => { e.stopPropagation(); setSelectedCells([]); }}>
-                                                                    <X size={14} />
-                                                                </button>
+                                                            <div className="merge-popup-container absolute top-[-40px] left-1/2 transform -translate-x-1/2 bg-slate-800 text-white p-1 rounded shadow-xl flex gap-1 z-10 flex-row">
+                                                                <button className="merge-popup-btn flex items-center gap-1 hover:bg-slate-700 px-2 py-1 rounded text-xs whitespace-nowrap" onClick={(e) => { e.stopPropagation(); handleMerge(); }}><Link size={12} /> Merge</button>
+                                                                <button className="merge-popup-btn cancel flex items-center gap-1 hover:bg-red-900 px-2 py-1 rounded text-xs whitespace-nowrap" onClick={(e) => { e.stopPropagation(); setSelectedCells([]); }}><X size={12} /></button>
                                                             </div>
                                                         )}
                                                         {showUnmergeBtn && (
-                                                            <div className="absolute top-[-52px] left-1/2 transform -translate-x-1/2 bg-[var(--color-surface)] p-1.5 rounded-xl shadow-xl border border-[var(--color-border)] flex items-center gap-1.5 z-50">
-                                                                <button className="btn-primary flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg shadow-sm whitespace-nowrap" onClick={(e) => { e.stopPropagation(); handleUnmerge(day, i, colSpan); }}>
-                                                                    <Unlink size={14} /> Unmerge
-                                                                </button>
-                                                                <button className="btn-secondary flex items-center justify-center p-1.5 rounded-lg shadow-sm" style={{ color: '#ef4444', backgroundColor: '#fef2f2', borderColor: '#fecaca' }} onClick={(e) => { e.stopPropagation(); setSelectedCells([]); }}>
-                                                                    <X size={14} />
-                                                                </button>
+                                                            <div className="merge-popup-container absolute top-[-40px] left-1/2 transform -translate-x-1/2 bg-slate-800 text-white p-1 rounded shadow-xl flex gap-1 z-10 flex-row">
+                                                                <button className="merge-popup-btn flex items-center gap-1 hover:bg-slate-700 px-2 py-1 rounded text-xs whitespace-nowrap" onClick={(e) => { e.stopPropagation(); handleUnmerge(day, i, colSpan); }}><Unlink size={12} /> Unmerge</button>
+                                                                <button className="merge-popup-btn cancel flex items-center gap-1 hover:bg-red-900 px-2 py-1 rounded text-xs whitespace-nowrap" onClick={(e) => { e.stopPropagation(); setSelectedCells([]); }}><X size={12} /></button>
                                                             </div>
                                                         )}
                                                         <div className={`period-cell h-full w-full flex items-center justify-center p-1 ${getCellClass(daySchedule[i])}`}>
