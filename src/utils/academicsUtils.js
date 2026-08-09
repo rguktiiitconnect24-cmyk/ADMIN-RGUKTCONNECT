@@ -119,7 +119,7 @@ export const fetchDynamicUnits = async (subjectId) => {
     }
 };
 
-export const createUnit = async (subjectId, label, videoUrl, pdfUrl, pdfName, additionalNotes = []) => {
+export const createUnit = async (subjectId, label, videoUrl, pdfUrl, pdfName, additionalNotes = [], isQuizEnabled = true) => {
     const res = await addDoc(collection(contentDb, 'academic_units'), {
         subjectId,
         label,
@@ -127,20 +127,22 @@ export const createUnit = async (subjectId, label, videoUrl, pdfUrl, pdfName, ad
         pdfUrl: pdfUrl || '',
         pdfName: pdfName || '',
         additionalNotes: additionalNotes || [],
+        isQuizEnabled,
         createdAt: new Date().toISOString()
     });
     delete contentCache.units[subjectId];
     return res;
 };
 
-export const updateUnit = async (unitId, subjectId, label, videoUrl, pdfUrl, pdfName, additionalNotes = []) => {
+export const updateUnit = async (unitId, subjectId, label, videoUrl, pdfUrl, pdfName, additionalNotes = [], isQuizEnabled = true) => {
     const docRef = doc(contentDb, 'academic_units', unitId);
     await updateDoc(docRef, {
         label,
         videoUrl: videoUrl || '',
         pdfUrl: pdfUrl || '',
         pdfName: pdfName || '',
-        additionalNotes: additionalNotes || []
+        additionalNotes: additionalNotes || [],
+        isQuizEnabled
     });
     delete contentCache.units[subjectId];
     delete contentCache.direct.units[unitId];
