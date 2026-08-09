@@ -31,7 +31,12 @@ export const fetchDynamicSubjects = async (programId, yearId, branchId, semester
         
         const snapshot = await getDocs(q);
         const subjects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isDynamic: true }));
-        const sorted = subjects.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+        const sorted = subjects.sort((a, b) => {
+            const orderA = a.order !== undefined ? a.order : 999999;
+            const orderB = b.order !== undefined ? b.order : 999999;
+            if (orderA !== orderB) return orderA - orderB;
+            return (a.createdAt || '').localeCompare(b.createdAt || '');
+        });
         
         // Ensure that if branchId wasn't provided, we only return subjects that explicitly lack a branchId 
         // (to prevent fetching BTech subjects for all branches accidentally if queried without one, though the UI prevents this).
@@ -71,6 +76,18 @@ export const updateSubject = async (subjectId, label, yearId, semesterId, progra
     await updateDoc(docRef, updateData);
     if (programId && yearId && semesterId) {
         delete contentCache.subjects[`${programId}_${yearId}_${branchId}_${semesterId}`];
+    }
+};
+
+export const updateSubjectOrder = async (subjectId, newOrder, programId, yearId, semesterId, branchId) => {
+    const docRef = doc(contentDb, 'academic_subjects', subjectId);
+    await updateDoc(docRef, { order: newOrder });
+    if (programId && yearId && semesterId) {
+        Object.keys(contentCache.subjects).forEach(key => {
+            if (key.startsWith(`${programId}_${yearId}_`)) {
+                delete contentCache.subjects[key];
+            }
+        });
     }
 };
 
