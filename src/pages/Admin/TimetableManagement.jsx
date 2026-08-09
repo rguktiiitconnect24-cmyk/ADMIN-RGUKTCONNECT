@@ -49,7 +49,7 @@ const TimetableManagement = () => {
         ? ['AIML'] 
         : selectedBranch === 'CE' 
             ? ['A', 'B'] 
-            : (selectedBranch === 'CHE' || selectedBranch === 'MME')
+            : (selectedBranch === 'CHE' || selectedBranch === 'MME' || selectedBranch === 'ME')
                 ? ['A']
                 : ['A', 'B', 'C', 'D'];
 
