@@ -875,9 +875,11 @@ const CourseContentManagement = () => {
                                                     <button onClick={(e) => { e.stopPropagation(); handleCopy('unit', unit.id); }} className="action-btn text-green-500" title="Copy Unit">
                                                         <Copy size={14} />
                                                     </button>
-                                                    <button onClick={(e) => { e.stopPropagation(); setQuizManagerTarget({ id: unit.id, label: unit.label, path: [selectedBranch?.label, selectedSemester?.label, selectedSubject?.label, unit.label].filter(Boolean).join(' / ') }); }} className="action-btn quiz" title="Manage Unit Quiz">
-                                                        <HelpCircle size={14} />
-                                                    </button>
+                                                    {unit.isQuizEnabled !== false && (
+                                                        <button onClick={(e) => { e.stopPropagation(); setQuizManagerTarget({ id: unit.id, label: unit.label, path: [selectedBranch?.label, selectedSemester?.label, selectedSubject?.label, unit.label].filter(Boolean).join(' / ') }); }} className="action-btn quiz" title="Manage Unit Quiz">
+                                                            <HelpCircle size={14} />
+                                                        </button>
+                                                    )}
                                                     <button onClick={(e) => { e.stopPropagation(); openEditModal(unit, 'unit'); }} className="action-btn edit">
                                                         <Edit2 size={14} />
                                                     </button>
