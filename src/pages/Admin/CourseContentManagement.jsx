@@ -973,8 +973,8 @@ const CourseContentManagement = () => {
 
             {/* Modals */}
             {activeModal && createPortal(
-                <div className={`modal-overlay`}>
-                    <div className={`modal-content ${(activeModal === 'unit' || activeModal === 'module') ? 'large-modal' : ''}`}>
+                <div className={`modal-overlay ${(activeModal === 'unit' || activeModal === 'module') ? 'full-screen-overlay' : ''}`}>
+                    <div className={`modal-content ${(activeModal === 'unit' || activeModal === 'module') ? 'full-screen' : ''}`}>
                         <div className="modal-header">
                             <h3>
                                 {activeModal === 'bulk_move_subjects'
