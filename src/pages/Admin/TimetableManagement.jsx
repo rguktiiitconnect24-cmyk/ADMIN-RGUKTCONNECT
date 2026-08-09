@@ -340,12 +340,12 @@ const TimetableManagement = () => {
                     // Timetable Grid Editor / Viewer
                     <div className="animate-fade-in p-2 md:p-4">
                         <div className="flex flex-row flex-wrap justify-between items-center gap-4 mb-6 bg-[var(--color-background)] p-4 rounded-xl border border-[var(--color-border)] shadow-sm">
-                            <div>
+                            <div className="flex flex-col gap-2">
                                 <h2 className="text-2xl font-black flex items-center gap-3 tracking-tight" style={{ color: 'var(--color-text-main)' }}>
                                     <Calendar size={28} style={{ color: 'var(--color-primary-500)' }} />
                                     {selectedBranch} <span className="mx-1" style={{ color: 'var(--color-text-muted)' }}>|</span> {selectedSection === 'AIML' ? 'AIML' : `Section-${selectedSection}`}
                                 </h2>
-                                <p className="timetable-badge-active text-xs font-bold mt-4 flex items-center gap-1.5 px-3 py-1.5 rounded-md w-fit shadow-sm">
+                                <p className="timetable-badge-active text-xs font-bold mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-md w-fit shadow-sm">
                                     <Check size={14}/> Active Student Timetable
                                 </p>
                             </div>
