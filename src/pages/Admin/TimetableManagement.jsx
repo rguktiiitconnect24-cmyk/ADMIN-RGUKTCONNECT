@@ -435,7 +435,7 @@ const TimetableManagement = () => {
                                                     >
                                                         {showMergeBtn && (
                                                             <div className="merge-popup-container absolute top-[-40px] left-1/2 transform -translate-x-1/2 bg-slate-800 text-white p-1 rounded shadow-xl flex gap-1 z-10 flex-row">
-                                                                <button className="merge-popup-btn flex items-center gap-1 hover:bg-slate-700 px-2 py-1 rounded text-xs whitespace-nowrap" onClick={(e) => { e.stopPropagation(); handleMerge(); }}><Link size={12} /> Merge</button>
+                                                                <button className="merge-popup-btn flex items-center gap-1 hover:bg-slate-700 px-2 py-1 rounded text-xs whitespace-nowrap" onClick={(e) => { e.stopPropagation(); handleMerge(); }}><Merge size={14} /> Merge</button>
                                                                 <button className="merge-popup-btn cancel flex items-center justify-center bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded" onClick={(e) => { e.stopPropagation(); setSelectedCells([]); }} title="Cancel">
                                                                     <X size={14} strokeWidth={2.5} color="white" />
                                                                 </button>
@@ -443,7 +443,7 @@ const TimetableManagement = () => {
                                                         )}
                                                         {showUnmergeBtn && (
                                                             <div className="merge-popup-container absolute top-[-40px] left-1/2 transform -translate-x-1/2 bg-slate-800 text-white p-1 rounded shadow-xl flex gap-1 z-10 flex-row">
-                                                                <button className="merge-popup-btn flex items-center gap-1 hover:bg-slate-700 px-2 py-1 rounded text-xs whitespace-nowrap" onClick={(e) => { e.stopPropagation(); handleUnmerge(day, i, colSpan); }}><Unlink size={12} /> Unmerge</button>
+                                                                <button className="merge-popup-btn flex items-center gap-1 hover:bg-slate-700 px-2 py-1 rounded text-xs whitespace-nowrap" onClick={(e) => { e.stopPropagation(); handleUnmerge(day, i, colSpan); }}><Split size={14} /> Unmerge</button>
                                                                 <button className="merge-popup-btn cancel flex items-center justify-center bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded" onClick={(e) => { e.stopPropagation(); setSelectedCells([]); }} title="Cancel">
                                                                     <X size={14} strokeWidth={2.5} color="white" />
                                                                 </button>
