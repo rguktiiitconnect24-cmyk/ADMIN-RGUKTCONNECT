@@ -47,7 +47,7 @@ const TimetableManagement = () => {
     // Dynamically set sections based on selected branch
     const availableSections = selectedBranch === 'CSE(AI&ML)' 
         ? ['AIML'] 
-        : selectedBranch === 'CE' 
+        : (selectedBranch === 'CE' || selectedBranch === 'EEE')
             ? ['A', 'B'] 
             : (selectedBranch === 'CHE' || selectedBranch === 'MME' || selectedBranch === 'ME')
                 ? ['A']
