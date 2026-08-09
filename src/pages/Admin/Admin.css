@@ -3619,6 +3619,12 @@ input:checked+.slider:before {
 .merge-popup-btn.cancel {
     background: var(--color-danger);
     padding: 0;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .merge-popup-btn.cancel:hover {
