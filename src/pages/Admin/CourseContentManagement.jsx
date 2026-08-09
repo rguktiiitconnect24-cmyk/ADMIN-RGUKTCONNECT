@@ -794,23 +794,20 @@ const CourseContentManagement = () => {
                                         <span className="flex-1 truncate">{sub.label}</span>
                                         {sub.isDynamic && (
                                             <div className="flex gap-2">
-                                                <div className="flex flex-col bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md overflow-hidden mr-2 shadow-sm transition-all hover:shadow-md">
+                                                <div className="flex flex-col gap-0.5 mr-2 opacity-50 hover:opacity-100 transition-opacity">
                                                     <button 
                                                         onClick={(e) => { e.stopPropagation(); handleMoveSubject(index, -1); }} 
-                                                        className={`flex items-center justify-center p-1 transition-colors ${index === 0 ? 'opacity-30 cursor-not-allowed' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-primary-50)] hover:text-[var(--color-primary-600)]'}`}
+                                                        className={`p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded ${index === 0 ? 'invisible' : ''}`}
                                                         title="Move Up"
-                                                        disabled={index === 0}
                                                     >
-                                                        <ChevronUp size={14} strokeWidth={3} />
+                                                        <ChevronUp size={14} />
                                                     </button>
-                                                    <div className="h-[1px] bg-[var(--color-border)] w-full opacity-50"></div>
                                                     <button 
                                                         onClick={(e) => { e.stopPropagation(); handleMoveSubject(index, 1); }} 
-                                                        className={`flex items-center justify-center p-1 transition-colors ${index === subjects.length - 1 ? 'opacity-30 cursor-not-allowed' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-primary-50)] hover:text-[var(--color-primary-600)]'}`}
+                                                        className={`p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded ${index === subjects.length - 1 ? 'invisible' : ''}`}
                                                         title="Move Down"
-                                                        disabled={index === subjects.length - 1}
                                                     >
-                                                        <ChevronDown size={14} strokeWidth={3} />
+                                                        <ChevronDown size={14} />
                                                     </button>
                                                 </div>
                                                 <button onClick={(e) => { e.stopPropagation(); handleCopy('subject', sub.id); }} className="action-btn text-green-500" title="Copy Subject">
