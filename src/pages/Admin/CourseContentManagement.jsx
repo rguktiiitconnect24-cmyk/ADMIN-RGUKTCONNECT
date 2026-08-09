@@ -1,4 +1,4 @@
-import { ClipboardPaste, Copy, Scissors, ChevronRight, Trash2, Plus, Edit2, HelpCircle, Video, FileText, X, BookOpen, AlertCircle, Loader2, ChevronDown, CheckCircle, XCircle } from 'lucide-react';
+import { ClipboardPaste, Copy, Scissors, ChevronRight, Trash2, Plus, Edit2, HelpCircle, Video, FileText, X, BookOpen, AlertCircle, Loader2, ChevronDown, ChevronUp, CheckCircle, XCircle } from 'lucide-react';
 import UnitQuizManager from '../../components/Admin/UnitQuizManager';
 import FileUploadWidget from '../../components/Admin/FileUploadWidget';
 import CustomSelect from '../../components/Common/CustomSelect';
@@ -9,7 +9,7 @@ import { db } from '../../config/firebase';
 import { collection, getDocs, doc, getDoc, deleteDoc } from 'firebase/firestore';
 import { PROGRAMS } from '../../config/academics';
 import {
-    fetchDynamicSubjects, createSubject, updateSubject, deleteSubject,
+    fetchDynamicSubjects, createSubject, updateSubject, deleteSubject, updateSubjectOrder,
     fetchDynamicUnits, createUnit, updateUnit, deleteUnit,
     fetchDynamicModules, createModule, updateModule, deleteModule,
     duplicateSubject, duplicateUnit, duplicateModule
@@ -527,6 +527,58 @@ const CourseContentManagement = () => {
         setSelectedSubjectIds(new Set());
     };
 
+    const handleMoveSubject = async (index, direction) => {
+        if (
+            (direction === -1 && index === 0) || 
+            (direction === 1 && index === subjects.length - 1)
+        ) return;
+
+        const newSubjects = [...subjects];
+        
+        // Ensure all subjects have an order assigned if they don't already
+        let orderChanged = false;
+        newSubjects.forEach((sub, i) => {
+            if (sub.order === undefined || sub.order === null) {
+                sub.order = i;
+                orderChanged = true;
+            }
+        });
+
+        const targetIndex = index + direction;
+        const currentSub = newSubjects[index];
+        const targetSub = newSubjects[targetIndex];
+
+        // Swap their orders
+        const tempOrder = currentSub.order;
+        currentSub.order = targetSub.order;
+        targetSub.order = tempOrder;
+
+        // Optimistic UI update
+        newSubjects[index] = targetSub;
+        newSubjects[targetIndex] = currentSub;
+        setSubjects(newSubjects);
+
+        try {
+            // If they didn't have orders initially, we should ideally save all of them, 
+            // but saving the two swapped ones is a start. If orderChanged is true, we could save all,
+            // but to be safe and fast, we just save the two affected ones.
+            if (orderChanged) {
+                // If it's the first time reordering, we might need to initialize all orders to prevent future bugs
+                await Promise.all(newSubjects.map((sub, i) => updateSubjectOrder(sub.id, sub.order, selectedProgram.id, selectedYear.id, selectedSemester.id)));
+            } else {
+                await Promise.all([
+                    updateSubjectOrder(currentSub.id, currentSub.order, selectedProgram.id, selectedYear.id, selectedSemester.id),
+                    updateSubjectOrder(targetSub.id, targetSub.order, selectedProgram.id, selectedYear.id, selectedSemester.id)
+                ]);
+            }
+            showToast('Subject order updated successfully', 'success');
+        } catch (error) {
+            console.error("Failed to reorder:", error);
+            showToast('Failed to update order', 'error');
+            loadSubjects(); // Revert on failure
+        }
+    };
+
     const handlePaste = async (targetType) => {
         if (!clipboard) return;
         setIsSaving(true);
@@ -723,7 +775,7 @@ const CourseContentManagement = () => {
                             </div>
                         ) :
                             subjects.length === 0 ? <div className="empty-state">No subjects</div> :
-                                subjects.map(sub => (
+                                subjects.map((sub, index) => (
                                     <div
                                         key={sub.id}
                                         className={`manager-item ${selectedSubject?.id === sub.id ? 'active' : ''}`}
@@ -742,6 +794,22 @@ const CourseContentManagement = () => {
                                         <span className="flex-1 truncate">{sub.label}</span>
                                         {sub.isDynamic && (
                                             <div className="flex gap-2">
+                                                <div className="flex flex-col gap-0.5 mr-2 opacity-50 hover:opacity-100 transition-opacity">
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); handleMoveSubject(index, -1); }} 
+                                                        className={`p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded ${index === 0 ? 'invisible' : ''}`}
+                                                        title="Move Up"
+                                                    >
+                                                        <ChevronUp size={14} />
+                                                    </button>
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); handleMoveSubject(index, 1); }} 
+                                                        className={`p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded ${index === subjects.length - 1 ? 'invisible' : ''}`}
+                                                        title="Move Down"
+                                                    >
+                                                        <ChevronDown size={14} />
+                                                    </button>
+                                                </div>
                                                 <button onClick={(e) => { e.stopPropagation(); handleCopy('subject', sub.id); }} className="action-btn text-green-500" title="Copy Subject">
                                                     <Copy size={14} />
                                                 </button>
