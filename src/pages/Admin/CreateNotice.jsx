@@ -15,8 +15,25 @@ const CreateNotice = () => {
     const { user } = useAuth();
     
     const isSuperAdmin = !user?.targetDepartments || user.targetDepartments.length === 0 || user.permissions?.includes('all');
-    const ALL_DEPTS = ['CSE(AI&ML)', 'CSE', 'ECE', 'EEE', 'CE', 'ME', 'MME', 'CHE'];
-    const allowedDepts = isSuperAdmin ? ALL_DEPTS : ALL_DEPTS.filter(dept => isDepartmentAllowed(dept, user));
+    const isPucAdmin = user?.targetDepartments?.includes('PUC');
+    
+    const ALL_BTECH_DEPTS = ['CSE(AI&ML)', 'CSE', 'ECE', 'EEE', 'CE', 'ME', 'MME', 'CHE'];
+    const ALL_PUC_CLASSES = [
+        'G-008', 'G-011', 'G-012', 'G-013', 'G-014', 'G-015', 
+        'K-1', 'K-2', 'K-3', 'K-4', 'K-5', 'K-6', 
+        'Phi-10', 'Phi-4', 'Phi-5', 'Phi-6', 'Phi-7', 'Phi-8', 'Phi-9'
+    ];
+    
+    let ALL_TARGETS = [];
+    if (isSuperAdmin) {
+        ALL_TARGETS = [...ALL_BTECH_DEPTS, ...ALL_PUC_CLASSES];
+    } else if (isPucAdmin) {
+        ALL_TARGETS = ALL_PUC_CLASSES;
+    } else {
+        ALL_TARGETS = ALL_BTECH_DEPTS;
+    }
+    
+    const allowedDepts = isSuperAdmin ? ALL_TARGETS : ALL_TARGETS.filter(dept => isDepartmentAllowed(dept, user));
 
     const fileInputRef = useRef(null);
 
@@ -226,8 +243,8 @@ const CreateNotice = () => {
                     {!formData.targetAll && (
                         <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                             <div className="cn-form-group" style={{ marginBottom: 0 }}>
-                                <label style={{ fontSize: '0.95rem', color: 'var(--color-text-main)' }}>Target Departments</label>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Select which departments should see this notice. Leave empty for all.</p>
+                                <label style={{ fontSize: '0.95rem', color: 'var(--color-text-main)' }}>Target {isPucAdmin && !isSuperAdmin ? 'Classes' : 'Departments & Classes'}</label>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Select which {isPucAdmin && !isSuperAdmin ? 'classes' : 'departments'} should see this notice. Leave empty for all.</p>
                                 <div className="cn-chip-container">
                                     {allowedDepts.map(dept => {
                                         const isSelected = formData.targetDepartments.includes(dept);

@@ -1,7 +1,7 @@
 import { UserPlus, Shield, Check } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../../config/firebase';
+import { db, pucDb } from '../../config/firebase';
 import { createUserWithEmailAndPassword, updateProfile, getAuth } from 'firebase/auth';
 import { initializeApp, deleteApp } from 'firebase/app';
 import { firebaseConfig } from '../../config/firebase';
@@ -34,6 +34,7 @@ const CreateAdminAccount = () => {
     const [selectedPermissions, setSelectedPermissions] = useState([]);
     const [selectedDepartments, setSelectedDepartments] = useState([]);
     const [isSuperAdmin, setIsSuperAdmin] = useState(true);
+    const [adminScope, setAdminScope] = useState('BTECH');
 
     const handlePermissionToggle = (id) => {
         setSelectedPermissions(prev => {
@@ -82,8 +83,20 @@ const CreateAdminAccount = () => {
         setError(null);
         setSuccess(false);
 
-        if (!formData.fullName || !formData.email || !formData.mobileNumber || !formData.password || !formData.adminId) {
+        const cleanedEmail = formData.email?.trim();
+        const cleanedName = formData.fullName?.trim();
+        const cleanedAdminId = formData.adminId?.trim();
+        const cleanedMobile = formData.mobileNumber?.trim();
+
+        if (!cleanedName || !cleanedEmail || !cleanedMobile || !formData.password || !cleanedAdminId) {
             setError("Please fill in all required fields (Name, Email, Mobile Number, Password, Admin ID).");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(cleanedEmail)) {
+            setError("Please enter a valid email address.");
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
@@ -101,12 +114,12 @@ const CreateAdminAccount = () => {
             const secondaryAuth = getAuth(secondaryApp);
 
             // 2. Create auth user on secondary app
-            const userCredential = await createUserWithEmailAndPassword(secondaryAuth, formData.email, formData.password);
+            const userCredential = await createUserWithEmailAndPassword(secondaryAuth, cleanedEmail, formData.password);
             const user = userCredential.user;
 
             // 3. Update profile
             await updateProfile(user, {
-                displayName: formData.fullName
+                displayName: cleanedName
             });
 
             // 4. Sign out and delete secondary app
@@ -115,14 +128,18 @@ const CreateAdminAccount = () => {
 
             // 3. Save to Firestore
             const permissionsToSave = isSuperAdmin ? ['all'] : selectedPermissions;
-            const departmentsToSave = isSuperAdmin ? [] : selectedDepartments;
+            let departmentsToSave = isSuperAdmin ? [] : [...selectedDepartments];
+            if (!isSuperAdmin && adminScope === 'PUC' && !departmentsToSave.includes('PUC')) {
+                departmentsToSave.push('PUC');
+            }
             
-            await setDoc(doc(db, 'users', user.uid), {
-                fullName: formData.fullName,
-                email: formData.email,
-                mobileNumber: formData.mobileNumber,
+            const targetDb = (!isSuperAdmin && adminScope === 'PUC') ? pucDb : db;
+            await setDoc(doc(targetDb, 'users', user.uid), {
+                fullName: cleanedName,
+                email: cleanedEmail,
+                mobileNumber: cleanedMobile,
                 role: 'admin',
-                adminId: formData.adminId || '',
+                adminId: cleanedAdminId || '',
                 permissions: permissionsToSave,
                 targetDepartments: departmentsToSave,
                 createdAt: serverTimestamp(),
@@ -132,10 +149,10 @@ const CreateAdminAccount = () => {
 
             setSuccess(true);
             setCreatedAdminData({
-                fullName: formData.fullName,
-                email: formData.email,
-                mobileNumber: formData.mobileNumber,
-                adminId: formData.adminId || '',
+                fullName: cleanedName,
+                email: cleanedEmail,
+                mobileNumber: cleanedMobile,
+                adminId: cleanedAdminId || '',
                 password: formData.password,
                 departments: departmentsToSave,
                 campus: 'RGUKT RK Valley'
@@ -318,12 +335,40 @@ const CreateAdminAccount = () => {
                         
                         {!isSuperAdmin && (
                             <div className="admin-form-group" style={{ marginTop: '2rem' }}>
-                                <label className="admin-form-label">Target Departments (Max 3)</label>
+                                <label className="admin-form-label">Admin Scope</label>
+                                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setAdminScope('BTECH'); setSelectedDepartments([]); }}
+                                        className={adminScope === 'BTECH' ? 'btn-primary' : 'btn-secondary'}
+                                        style={{ padding: '0.5rem 1.5rem', borderRadius: '8px', fontSize: '0.9rem' }}
+                                    >
+                                        BTECH Admin
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setAdminScope('PUC'); setSelectedDepartments([]); }}
+                                        className={adminScope === 'PUC' ? 'btn-primary' : 'btn-secondary'}
+                                        style={{ padding: '0.5rem 1.5rem', borderRadius: '8px', fontSize: '0.9rem' }}
+                                    >
+                                        PUC Admin
+                                    </button>
+                                </div>
+                                <label className="admin-form-label">
+                                    Target {adminScope === 'BTECH' ? 'Departments' : 'Classes'} (Max 3)
+                                </label>
                                 <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
-                                    Restrict this admin to specific departments. Leave empty for all departments.
+                                    Restrict this admin to specific {adminScope === 'BTECH' ? 'departments' : 'classes'}. Leave empty for all {adminScope === 'BTECH' ? 'departments' : 'classes'}.
                                 </p>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                    {['CSE(AI&ML)', 'CSE', 'ECE', 'EEE', 'CE', 'ME', 'MME', 'CHE'].map(dept => {
+                                    {(adminScope === 'BTECH' 
+                                        ? ['CSE(AI&ML)', 'CSE', 'ECE', 'EEE', 'CE', 'ME', 'MME', 'CHE']
+                                        : [
+                                            'G-008', 'G-011', 'G-012', 'G-013', 'G-014', 'G-015', 
+                                            'K-1', 'K-2', 'K-3', 'K-4', 'K-5', 'K-6', 
+                                            'Phi-10', 'Phi-4', 'Phi-5', 'Phi-6', 'Phi-7', 'Phi-8', 'Phi-9'
+                                          ]
+                                    ).map(dept => {
                                         const isSelected = selectedDepartments.includes(dept);
                                         const isDisabled = !isSelected && selectedDepartments.length >= 3;
                                         return (

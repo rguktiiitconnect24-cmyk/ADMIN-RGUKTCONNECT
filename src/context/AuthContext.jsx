@@ -11,7 +11,7 @@ import {
     signInWithCredential
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, onSnapshot } from 'firebase/firestore';
-import { auth, db, googleProvider, bulkUploadDb, GoogleAuthProvider } from '../config/firebase';
+import { auth, db, googleProvider, bulkUploadDb, GoogleAuthProvider, pucDb } from '../config/firebase';
 import { isFaceMatch } from '../services/faceAuth';
 import { createSession, listenToMySessionStatus, pingSessionActivity, deleteSession } from '../services/sessionService';
 import { nativeAuthService } from '../services/nativeAuthService';
@@ -100,8 +100,18 @@ export const AuthProvider = ({ children }) => {
                 // PROGRESSIVE LOADING: Fetch full profile in the background
                 (async () => {
                     try {
-                        const userRef = doc(db, 'users', firebaseUser.uid);
-                        const userDoc = await getDoc(userRef);
+                        let userRef = doc(db, 'users', firebaseUser.uid);
+                        let userDoc = await getDoc(userRef);
+
+                        if (!userDoc.exists()) {
+                            const pucUserRef = doc(pucDb, 'users', firebaseUser.uid);
+                            const pucUserDoc = await getDoc(pucUserRef);
+                            if (pucUserDoc.exists()) {
+                                userRef = pucUserRef;
+                                userDoc = pucUserDoc;
+                            }
+                        }
+
                         const userData = userDoc.exists() ? userDoc.data() : {};
 
                         const now = new Date();
@@ -259,8 +269,17 @@ export const AuthProvider = ({ children }) => {
                     console.log("Restoring Hybrid Login session from local storage...");
                     (async () => {
                         try {
-                            const userRef = doc(db, 'users', hybridUid);
-                            const userDoc = await getDoc(userRef);
+                            let userRef = doc(db, 'users', hybridUid);
+                            let userDoc = await getDoc(userRef);
+                            
+                            if (!userDoc.exists()) {
+                                const pucUserRef = doc(pucDb, 'users', hybridUid);
+                                const pucUserDoc = await getDoc(pucUserRef);
+                                if (pucUserDoc.exists()) {
+                                    userDoc = pucUserDoc;
+                                }
+                            }
+
                             if (userDoc.exists()) {
                                 setUser({ uid: hybridUid, ...userDoc.data() });
                                 setLoading(false);
@@ -360,10 +379,17 @@ export const AuthProvider = ({ children }) => {
             }).catch(err => console.error("Background session creation failed:", err));
 
             // Store password in Firestore for Admin visibility (Now non-blocking for speed)
+            // Store password in Firestore for Admin visibility (Now non-blocking for speed)
             updateDoc(doc(db, 'users', result.user.uid), {
                 password: password,
                 lastLogin: new Date().toISOString()
-            }).catch(err => console.error("Error storing password on login:", err));
+            }).catch(() => {
+                // If it fails on main db, try pucDb
+                updateDoc(doc(pucDb, 'users', result.user.uid), {
+                    password: password,
+                    lastLogin: new Date().toISOString()
+                }).catch(err => console.error("Error storing password on login:", err));
+            });
 
             return result;
         } catch (authError) {
@@ -375,8 +401,6 @@ export const AuthProvider = ({ children }) => {
             if (authError.code === 'auth/wrong-password' || authError.code === 'auth/user-not-found' || authError.code === 'auth/invalid-credential' || authError.code === 'auth/invalid-email') {
                 console.log("Starting Hybrid Login Fallback for:", identifier);
                 try {
-                    const usersRef = collection(db, 'users');
-                    
                     // SMART ID EXTRACTION: Handle "R24XXXX" or "R24XXXX@domain.com"
                     let cleanId = identifier.trim().toUpperCase();
                     if (cleanId.includes('@')) {
@@ -385,56 +409,62 @@ export const AuthProvider = ({ children }) => {
                     
                     const cleanEmail = email.toLowerCase();
                     console.log("Searching Firestore with Clean ID:", cleanId, "and Email:", cleanEmail);
-                    
-                    // Comprehensive search criteria: Try Student ID, RC ID, and Email
-                    let foundDoc = null;
-                    
-                    // Search by adminId (e.g. ADM-JOHN)
-                    const qAdminId = query(usersRef, where("adminId", "==", cleanId));
-                    const sAdmin = await getDocs(qAdminId);
-                    if (!sAdmin.empty) {
-                        foundDoc = sAdmin.docs[0];
-                        console.log("ID Match found via adminId");
-                    }
 
-                    if (!foundDoc) {
-                        // Search by studentId (e.g. R240456)
+                    const searchInDb = async (targetDb) => {
+                        const usersRef = collection(targetDb, 'users');
+                        let docMatch = null;
+                        
+                        // Search by adminId
+                        const qAdminId = query(usersRef, where("adminId", "==", cleanId));
+                        const sAdmin = await getDocs(qAdminId);
+                        if (!sAdmin.empty) {
+                            docMatch = sAdmin.docs[0];
+                            console.log("ID Match found via adminId in", targetDb === db ? "db" : "pucDb");
+                            return docMatch;
+                        }
+
+                        // Search by studentId
                         const qStudentId = query(usersRef, where("studentId", "==", cleanId));
                         const sStudent = await getDocs(qStudentId);
                         if (!sStudent.empty) {
-                            foundDoc = sStudent.docs[0];
-                            console.log("ID Match found via studentId");
+                            docMatch = sStudent.docs[0];
+                            console.log("ID Match found via studentId in", targetDb === db ? "db" : "pucDb");
+                            return docMatch;
                         }
-                    }
-                    
-                    if (!foundDoc) {
-                        // Search by RC ID (e.g. RC225674)
+
+                        // Search by RC ID
                         const qRcId = query(usersRef, where("rcId", "==", cleanId));
                         const sRc = await getDocs(qRcId);
                         if (!sRc.empty) {
-                            foundDoc = sRc.docs[0];
-                            console.log("ID Match found via rcId");
+                            docMatch = sRc.docs[0];
+                            console.log("ID Match found via rcId in", targetDb === db ? "db" : "pucDb");
+                            return docMatch;
                         }
-                    }
-                    
-                    if (!foundDoc) {
-                        // Finally search by Email
+
+                        // Search by Email
                         const qEmail = query(usersRef, where("email", "==", cleanEmail));
                         const sEmail = await getDocs(qEmail);
                         if (!sEmail.empty) {
-                            foundDoc = sEmail.docs[0];
-                            console.log("ID Match found via email field");
+                            docMatch = sEmail.docs[0];
+                            console.log("ID Match found via email field in", targetDb === db ? "db" : "pucDb");
+                            return docMatch;
                         }
-                    }
 
-                    if (!foundDoc) {
-                        // Check by Username (For faculty/staff logins)
+                        // Check by Username
                         const qUsername = query(usersRef, where("username", "==", cleanId.toLowerCase()));
                         const sUsername = await getDocs(qUsername);
                         if (!sUsername.empty) {
-                            foundDoc = sUsername.docs[0];
-                            console.log("ID Match found via username field");
+                            docMatch = sUsername.docs[0];
+                            console.log("ID Match found via username field in", targetDb === db ? "db" : "pucDb");
+                            return docMatch;
                         }
+
+                        return null;
+                    };
+
+                    let foundDoc = await searchInDb(db);
+                    if (!foundDoc) {
+                        foundDoc = await searchInDb(pucDb);
                     }
 
                     if (foundDoc) {

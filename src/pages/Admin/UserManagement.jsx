@@ -1,11 +1,12 @@
-import { MoreVertical, Search, Filter, Mail, Download, Eye, MailCheck, Edit2, Trash2, X, AlertCircle, Monitor, AlertTriangle, Check, LogIn } from 'lucide-react';
+import { MoreVertical, Search, Filter, Mail, Download, Eye, MailCheck, Edit2, Trash2, X, AlertCircle, Monitor, AlertTriangle, Check, LogIn, Database } from 'lucide-react';
 import CustomSelect from '../../components/Common/CustomSelect';
 import LoadingTransition from '../../components/Common/LoadingTransition';
 import BulkUpdater from '../../components/Admin/BulkUpdater';
+import PUCBulkUpdater from '../../components/Admin/PUCBulkUpdater';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { db, functions } from '../../config/firebase';
+import { db, functions, pucDb } from '../../config/firebase';
 import { httpsCallable } from 'firebase/functions';
 import { collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
@@ -24,8 +25,13 @@ const UserManagement = () => {
     const { theme } = useTheme();
     const [users, setUsers] = useState([]);
     const [masterStudents, setMasterStudents] = useState([]);
+    const [pucStudents, setPucStudents] = useState([]);
+    const [activeSection, setActiveSection] = useState('BTECH');
+    const [pucAuthUsers, setPucAuthUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isMasterLoading, setIsMasterLoading] = useState(true);
+    const [isPucLoading, setIsPucLoading] = useState(true);
+    const [isPucAuthLoading, setIsPucAuthLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedClass, setSelectedClass] = useState('');
     const [selectedBranch, setSelectedBranch] = useState('');
@@ -141,6 +147,56 @@ const UserManagement = () => {
         return () => unsubscribe();
     }, []);
 
+    useEffect(() => {
+        // Load from cache first
+        const cachedPuc = sessionStorage.getItem('admin_puc_students_cache');
+        if (cachedPuc) {
+            setPucStudents(JSON.parse(cachedPuc));
+            setIsPucLoading(false);
+        }
+
+        const unsubscribe = onSnapshot(collection(pucDb, 'puc_students'), (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setPucStudents(data);
+            sessionStorage.setItem('admin_puc_students_cache', JSON.stringify(data));
+            setIsPucLoading(false);
+        }, (error) => {
+            console.error("Error fetching puc students:", error);
+            setIsPucLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        const cachedPucUsers = sessionStorage.getItem('admin_puc_users_cache');
+        if (cachedPucUsers) {
+            setPucAuthUsers(JSON.parse(cachedPucUsers));
+            setIsPucAuthLoading(false);
+        }
+
+        let isInitialLoad = true;
+        const unsubscribe = onSnapshot(collection(pucDb, 'users'), (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setPucAuthUsers(data);
+            sessionStorage.setItem('admin_puc_users_cache', JSON.stringify(data));
+
+            if (isInitialLoad) {
+                setTimeout(() => {
+                    setIsPucAuthLoading(false);
+                    isInitialLoad = false;
+                }, 1000);
+            } else {
+                setIsPucAuthLoading(false);
+            }
+        }, (error) => {
+            console.error("Error fetching puc users:", error);
+            setIsPucAuthLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
     // fetchUsers function is no longer needed as onSnapshot handles it, 
     // but we might keep it if other functions call it. 
     // Actually, other functions call fetchUsers(). We should remove those calls 
@@ -204,10 +260,14 @@ const UserManagement = () => {
                 await deleteProfileImage(photoUrl);
             }
 
-            let collectionName = activeTab === 'master' ? 'students_master' : 'users';
+            let collectionName = 'users';
+            if (activeTab === 'master') collectionName = 'students_master';
+            if (activeTab === 'puc') collectionName = 'puc_students';
+            
+            const targetDb = activeSection === 'BTECH' ? db : pucDb;
             
             // If deleting an admin, completely wipe their Firebase Authentication account via our Cloud Function
-            if (activeTab === 'administrators' && collectionName === 'users') {
+            if (activeTab === 'admin' && collectionName === 'users') {
                 try {
                     const deleteAdminFn = httpsCallable(functions, 'deleteAdminUser');
                     await deleteAdminFn({ uid: userToDelete.id });
@@ -217,7 +277,7 @@ const UserManagement = () => {
                 }
             }
 
-            await deleteDoc(doc(db, collectionName, userToDelete.id));
+            await deleteDoc(doc(targetDb, collectionName, userToDelete.id));
             
             showToast("User record deleted successfully.");
             setIsDeleting(false);
@@ -244,9 +304,13 @@ const UserManagement = () => {
     const handleToggleMailStatus = async (userItem) => {
         try {
             const newStatus = !userItem.mailSent;
-            let collectionName = activeTab === 'master' ? 'students_master' : 'users';
+            let collectionName = 'users';
+            if (activeTab === 'master') collectionName = 'students_master';
+            if (activeTab === 'puc') collectionName = 'puc_students';
             
-            await updateDoc(doc(db, collectionName, userItem.id), {
+            const targetDb = activeSection === 'BTECH' ? db : pucDb;
+            
+            await updateDoc(doc(targetDb, collectionName, userItem.id), {
                 mailSent: newStatus
             });
 
@@ -273,7 +337,8 @@ const UserManagement = () => {
 
         setIsSaving(true);
         try {
-            const userRef = doc(db, 'users', editUser.id);
+            const targetDb = activeSection === 'BTECH' ? db : pucDb;
+            const userRef = doc(targetDb, 'users', editUser.id);
             const studentIdToSave = editUser.studentId ? editUser.studentId.replace(/^RGUKT-/i, '') : '';
 
             await updateDoc(userRef, {
@@ -384,7 +449,8 @@ const UserManagement = () => {
         
         if (user.studentId) {
             const id = formatStudentId(user.studentId);
-            const masterRecord = masterStudents.find(m => m.id === id);
+            const currentMaster = activeSection === 'BTECH' ? masterStudents : pucStudents;
+            const masterRecord = currentMaster.find(m => m.id === id);
             if (masterRecord) {
                 return masterRecord.department || masterRecord.branch || '';
             }
@@ -394,7 +460,20 @@ const UserManagement = () => {
 
     const getFilteredData = () => {
         let data = [];
-        if (activeTab === 'master') {
+        if (activeTab === 'puc' && activeSection === 'PUC') {
+            data = pucStudents.filter(s =>
+                s.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                s.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                s.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                s.classSection?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            if (selectedClass) data = data.filter(s => s.classSection === selectedClass);
+            if (selectedBranch) data = data.filter(s => normalizeDept(s.branch) === selectedBranch);
+            if (selectedMailStatus) data = data.filter(s => selectedMailStatus === 'sent' ? s.mailSent === true : s.mailSent !== true);
+            return data;
+        }
+
+        if (activeTab === 'master' && activeSection === 'BTECH') {
             data = masterStudents.filter(s =>
                 s.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 s.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -407,7 +486,8 @@ const UserManagement = () => {
             return data;
         }
 
-        data = users.filter(user =>
+        const currentUsers = activeSection === 'BTECH' ? users : pucAuthUsers;
+        data = currentUsers.filter(user =>
             user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.studentId?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -427,14 +507,17 @@ const UserManagement = () => {
 
     const filteredData = getFilteredData();
 
+    const currentUsers = activeSection === 'BTECH' ? users : pucAuthUsers;
+    const currentMaster = activeSection === 'BTECH' ? masterStudents : pucStudents;
+
     const availableClasses = Array.from(new Set([
-        ...users.map(u => u.currentClass),
-        ...masterStudents.map(m => m.classSection)
+        ...currentUsers.map(u => u.currentClass),
+        ...currentMaster.map(m => m.classSection)
     ])).filter(Boolean).sort();
     
     const availableBranches = Array.from(new Set([
-        ...users.map(u => normalizeDept(getUserBranch(u))),
-        ...masterStudents.map(m => normalizeDept(m.branch))
+        ...currentUsers.map(u => normalizeDept(getUserBranch(u))),
+        ...currentMaster.map(m => normalizeDept(m.branch))
     ])).filter(Boolean).sort();
     
     const branchFullNames = {
@@ -450,12 +533,48 @@ const UserManagement = () => {
 
     return (
         <div className="admin-container">
-            <BulkUpdater />
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', marginBottom: '1rem', justifyContent: 'center' }}>
+                <button
+                    className={activeSection === 'BTECH' ? 'btn-primary' : 'btn-secondary'}
+                    onClick={() => { setActiveSection('BTECH'); setActiveTab('student'); }}
+                    style={{ 
+                        padding: '0.75rem 2rem', 
+                        fontSize: '1.05rem', 
+                        fontWeight: '600', 
+                        borderRadius: '8px', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px'
+                    }}
+                >
+                    <Database size={18} />
+                    BTECH Database
+                </button>
+                <button
+                    className={activeSection === 'PUC' ? 'btn-primary' : 'btn-secondary'}
+                    onClick={() => { setActiveSection('PUC'); setActiveTab('student'); }}
+                    style={{ 
+                        padding: '0.75rem 2rem', 
+                        fontSize: '1.05rem', 
+                        fontWeight: '600', 
+                        borderRadius: '8px', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px'
+                    }}
+                >
+                    <Database size={18} />
+                    PUC Database
+                </button>
+            </div>
+            
+            {activeSection === 'BTECH' && <BulkUpdater />}
+            {activeSection === 'PUC' && <PUCBulkUpdater />}
             <div className="page-header-v2">
                 <div className="header-accent-bar"></div>
                 <div className="header-content-v2">
-                    <h1 className="page-title-v2">User Management</h1>
-                    <p className="page-subtitle-v2">Manage and monitor student and staff accounts.</p>
+                    <h1 className="page-title-v2">{activeSection === 'BTECH' ? 'BTECH User Management' : 'PUC User Management'}</h1>
+                    <p className="page-subtitle-v2">Manage and monitor {activeSection === 'BTECH' ? 'BTECH' : 'PUC'} student and staff accounts.</p>
                 </div>
                 <div className="header-action-btn" ref={menuRef}>
                     <button
@@ -515,29 +634,40 @@ const UserManagement = () => {
                     onClick={() => setActiveTab('student')}
                 >
                     Students
-                    <span className="count">{users.filter(u => u.role === 'student' || !u.role).length}</span>
+                    <span className="count">{(activeSection === 'BTECH' ? users : pucAuthUsers).filter(u => u.role === 'student' || !u.role).length}</span>
                 </button>
                 <button
                     className={`admin-tab ${activeTab === 'faculty' ? 'active' : ''}`}
                     onClick={() => setActiveTab('faculty')}
                 >
                     Faculty
-                    <span className="count">{users.filter(u => u.role === 'faculty').length}</span>
+                    <span className="count">{(activeSection === 'BTECH' ? users : pucAuthUsers).filter(u => u.role === 'faculty').length}</span>
                 </button>
                 <button
                     className={`admin-tab ${activeTab === 'admin' ? 'active' : ''}`}
                     onClick={() => setActiveTab('admin')}
                 >
                     Administrators
-                    <span className="count">{users.filter(u => u.role === 'admin').length}</span>
+                    <span className="count">{(activeSection === 'BTECH' ? users : pucAuthUsers).filter(u => u.role === 'admin').length}</span>
                 </button>
-                <button
-                    className={`admin-tab ${activeTab === 'master' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('master')}
-                >
-                    Master Database
-                    <span className="count">{masterStudents.length}</span>
-                </button>
+                {activeSection === 'BTECH' && (
+                    <button
+                        className={`admin-tab ${activeTab === 'master' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('master')}
+                    >
+                        Master Database
+                        <span className="count">{masterStudents.length}</span>
+                    </button>
+                )}
+                {activeSection === 'PUC' && (
+                    <button
+                        className={`admin-tab ${activeTab === 'puc' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('puc')}
+                    >
+                        PUC Database
+                        <span className="count">{pucStudents.length}</span>
+                    </button>
+                )}
             </div>
 
             <div className="admin-filters-container">
@@ -599,133 +729,144 @@ const UserManagement = () => {
             </div>
 
             <div className="admin-table-container">
-                {(activeTab === 'master' ? isMasterLoading : isLoading) ? (
+                {(activeTab === 'master' ? isMasterLoading : activeTab === 'puc' ? isPucLoading : (activeSection === 'BTECH' ? isLoading : isPucAuthLoading)) ? (
                     <LoadingTransition message="User Database Loading" persistent />
                 ) : (
                     <table className="admin-table">
                         <thead>
                             <tr>
-                                {activeTab === 'master' && <th>College ID</th>}
-                                <th>{activeTab === 'master' ? 'Name' : (activeTab === 'student' ? 'Student' : (activeTab === 'faculty' ? 'Faculty Member' : 'Administrator'))}</th>
-                                <th>{activeTab === 'master' ? 'Class' : (activeTab === 'student' ? 'ID & Dept' : 'Role')}</th>
+                                {(activeTab === 'master' || activeTab === 'puc') && <th>College ID</th>}
+                                <th>{(activeTab === 'master' || activeTab === 'puc') ? 'Name' : (activeTab === 'student' ? 'Student' : (activeTab === 'faculty' ? 'Faculty Member' : 'Administrator'))}</th>
+                                <th>{(activeTab === 'master' || activeTab === 'puc') ? 'Class' : (activeTab === 'student' ? 'ID & Dept' : 'Role')}</th>
                                 <th>RC ID</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredData.map((item, index) => (
-                                <tr key={item.id || index}>
-                                    {activeTab === 'master' && (
-                                        <td>
-                                            <div className="font-medium text-sm">{formatStudentId(item.studentId || item.id)}</div>
-                                        </td>
-                                    )}
-                                    <td>
-                                        <div className="flex items-center gap-3">
-                                            <img
-                                                src={item.avatar || `https://ui-avatars.com/api/?name=${item.fullName || item.name || 'User'}&background=random`}
-                                                className="user-avatar"
-                                                alt=""
-                                            />
-                                            <div>
-                                                <div className="font-semibold">{item.fullName || item.name || 'Unknown User'}</div>
-                                                <div className="text-xs text-[var(--color-text-muted)]">{item.email || item.id}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        {activeTab === 'student' ? (
-                                            <>
-                                                <div className="font-medium text-sm">{formatStudentId(item.studentId)}</div>
-                                                <div className="text-xs text-[var(--color-text-muted)]">{getUserBranch(item) || 'Not Assigned'}</div>
-                                            </>
-                                        ) : activeTab === 'master' ? (
-                                            <div className="font-medium text-sm">{getUserBranch(item) || 'Not Assigned'}</div>
-                                        ) : (
-                                            <>
-                                                <div className="font-medium text-sm capitalize">
-                                                    {item.role === 'faculty' 
-                                                        ? (item.designation ? `${item.role} - ${item.designation}` : item.role) 
-                                                        : (item.role === 'admin' 
-                                                            ? ((item.permissions?.includes('all') || item.email === 'admin@rguktconnect.ac.in') ? 'Super Admin' : 'Semi Admin') 
-                                                            : item.role)}
-                                                </div>
-                                                <div className="text-xs text-[var(--color-text-muted)]">{item.role === 'faculty' && item.studentId ? `${item.studentId} • ${item.email}` : (item.role === 'admin' ? item.email : item.email)}</div>
-                                            </>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <div className="flex flex-col gap-1">
-                                            {item.rcId ? (
-                                                <span className="text-xs font-mono font-bold text-primary-600 bg-primary-100/50 px-2 py-0.5 rounded border border-primary-200 w-fit">
-                                                    {item.rcId}
-                                                </span>
-                                            ) : (
-                                                <span className="text-[10px] text-[var(--color-text-muted)] italic">Not Set</span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span className={`badge ${item.status === 'inactive' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                                                    {(item.status || 'active').toUpperCase()}
-                                                </span>
-                                            </td>
+                            {filteredData.length > 0 ? (
+                                filteredData.map((item, index) => (
+                                    <tr key={item.id || index}>
+                                        {(activeTab === 'master' || activeTab === 'puc') && (
                                             <td>
-                                                <div className="action-buttons">
-                                                    {isSuperAdmin && item.role === 'admin' && item.id !== user.uid && (
+                                                <div className="font-medium text-sm">{formatStudentId(item.studentId || item.id)}</div>
+                                            </td>
+                                        )}
+                                        <td>
+                                            <div className="flex items-center gap-3">
+                                                <img
+                                                    src={item.avatar || `https://ui-avatars.com/api/?name=${item.fullName || item.name || 'User'}&background=random`}
+                                                    className="user-avatar"
+                                                    alt=""
+                                                />
+                                                <div>
+                                                    <div className="font-semibold">{item.fullName || item.name || 'Unknown User'}</div>
+                                                    <div className="text-xs text-[var(--color-text-muted)]">{item.email || item.id}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {activeTab === 'student' ? (
+                                                <>
+                                                    <div className="font-medium text-sm">{formatStudentId(item.studentId)}</div>
+                                                    <div className="text-xs text-[var(--color-text-muted)]">{getUserBranch(item) || 'Not Assigned'}</div>
+                                                </>
+                                            ) : (activeTab === 'master' || activeTab === 'puc') ? (
+                                                <>
+                                                    <div className="font-medium text-sm">{item.classSection || 'No Class'}</div>
+                                                    <div className="text-xs text-[var(--color-text-muted)]">{getUserBranch(item) || 'Not Assigned'}</div>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className="font-medium text-sm capitalize">
+                                                        {item.role === 'faculty' 
+                                                            ? (item.designation ? `${item.role} - ${item.designation}` : item.role) 
+                                                            : (item.role === 'admin' 
+                                                                ? ((item.permissions?.includes('all') || item.email === 'admin@rguktconnect.ac.in') ? 'Super Admin' : 'Semi Admin') 
+                                                                : item.role)}
+                                                    </div>
+                                                    <div className="text-xs text-[var(--color-text-muted)]">{item.role === 'faculty' && item.studentId ? `${item.studentId} • ${item.email}` : (item.role === 'admin' ? item.email : item.email)}</div>
+                                                </>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <div className="flex flex-col gap-1">
+                                                {item.rcId ? (
+                                                    <span className="text-xs font-mono font-bold text-primary-600 bg-primary-100/50 px-2 py-0.5 rounded border border-primary-200 w-fit">
+                                                        {item.rcId}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[10px] text-[var(--color-text-muted)] italic">Not Set</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span className={`badge ${item.status === 'inactive' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                                                        {(item.status || 'active').toUpperCase()}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div className="action-buttons">
+                                                        {isSuperAdmin && item.role === 'admin' && item.id !== user.uid && (
+                                                            <button
+                                                                className="action-btn"
+                                                                title="Direct Login as this Admin"
+                                                                onClick={async () => {
+                                                                    if (window.confirm(`Are you sure you want to log in as ${item.fullName}? Your current super admin session will be suspended.`)) {
+                                                                        try {
+                                                                            await forceLoginAsUser(item.id);
+                                                                            navigate('/admin/dashboard');
+                                                                        } catch(e) {
+                                                                            alert("Failed to spoof login: " + e.message);
+                                                                        }
+                                                                    }
+                                                                }}
+                                                                style={{ color: 'var(--color-primary)' }}
+                                                            >
+                                                                <LogIn size={18} />
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            className="action-btn view"
+                                                            title="View Details"
+                                                            onClick={() => setViewUser(item)}
+                                                        >
+                                                            <Eye size={18} />
+                                                        </button>
                                                         <button
                                                             className="action-btn"
-                                                            title="Direct Login as this Admin"
-                                                            onClick={async () => {
-                                                                if (window.confirm(`Are you sure you want to log in as ${item.fullName}? Your current super admin session will be suspended.`)) {
-                                                                    try {
-                                                                        await forceLoginAsUser(item.id);
-                                                                        navigate('/admin/dashboard');
-                                                                    } catch(e) {
-                                                                        alert("Failed to spoof login: " + e.message);
-                                                                    }
-                                                                }
-                                                            }}
-                                                            style={{ color: 'var(--color-primary)' }}
+                                                            title={item.mailSent ? "Mail Sent" : "Mail Not Sent"}
+                                                            onClick={() => handleToggleMailStatus(item)}
+                                                            style={{ color: item.mailSent ? 'var(--color-success)' : 'var(--color-text-muted)' }}
                                                         >
-                                                            <LogIn size={18} />
+                                                            {item.mailSent ? <MailCheck size={18} /> : <Mail size={18} />}
                                                         </button>
-                                                    )}
-                                                    <button
-                                                        className="action-btn view"
-                                                        title="View Details"
-                                                        onClick={() => setViewUser(item)}
-                                                    >
-                                                        <Eye size={18} />
-                                                    </button>
-                                                    <button
-                                                        className="action-btn"
-                                                        title={item.mailSent ? "Mail Sent" : "Mail Not Sent"}
-                                                        onClick={() => handleToggleMailStatus(item)}
-                                                        style={{ color: item.mailSent ? 'var(--color-success)' : 'var(--color-text-muted)' }}
-                                                    >
-                                                        {item.mailSent ? <MailCheck size={18} /> : <Mail size={18} />}
-                                                    </button>
-                                                    <button
-                                                        className="action-btn edit"
-                                                        title="Edit User"
-                                                        onClick={() => handleOpenEdit(item)}
-                                                    >
-                                                        <Edit2 size={18} />
-                                                    </button>
-                                                    <button
-                                                        className="action-btn delete"
-                                                        title="Delete User"
-                                                        onClick={() => setUserToDelete(item)}
-                                                        style={{ color: 'var(--color-danger)' }}
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
-                                                </div>
-                                            </td>
+                                                        <button
+                                                            className="action-btn edit"
+                                                            title="Edit User"
+                                                            onClick={() => handleOpenEdit(item)}
+                                                        >
+                                                            <Edit2 size={18} />
+                                                        </button>
+                                                        <button
+                                                            className="action-btn delete"
+                                                            title="Delete User"
+                                                            onClick={() => setUserToDelete(item)}
+                                                            style={{ color: 'var(--color-danger)' }}
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="6" style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--color-text-muted)' }}>
+                                        No logins yet
+                                    </td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
                 )}
