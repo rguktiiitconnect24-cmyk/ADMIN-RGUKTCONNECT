@@ -436,7 +436,7 @@ const TimetableManagement = () => {
                                                         {showMergeBtn && (
                                                             <div className="merge-popup-container absolute top-[-40px] left-1/2 transform -translate-x-1/2 bg-slate-800 text-white p-1 rounded shadow-xl flex gap-1 z-10 flex-row">
                                                                 <button className="merge-popup-btn flex items-center gap-1 hover:bg-slate-700 px-2 py-1 rounded text-xs whitespace-nowrap" onClick={(e) => { e.stopPropagation(); handleMerge(); }}><Link size={12} /> Merge</button>
-                                                                <button className="flex items-center justify-center bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded shadow-sm" onClick={(e) => { e.stopPropagation(); setSelectedCells([]); }}><X size={16} color="#ffffff" /></button>
+                                                                <button className="flex items-center justify-center text-white w-6 h-6 rounded shadow-sm hover:opacity-80 transition-opacity" style={{ backgroundColor: '#ef4444' }} onClick={(e) => { e.stopPropagation(); setSelectedCells([]); }}><X size={16} color="#ffffff" /></button>
                                                             </div>
                                                         )}
                                                         {showUnmergeBtn && (
