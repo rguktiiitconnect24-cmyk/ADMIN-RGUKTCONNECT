@@ -350,7 +350,7 @@ const TimetableManagement = () => {
                                 </p>
                             </div>
 
-                            <div className="flex flex-wrap gap-3 items-center mt-4 lg:mt-0">
+                            <div className="flex flex-wrap justify-end gap-3 items-center mt-4 lg:mt-0 w-full lg:w-auto">
                                 {!isEditMode && (
                                     <>
                                         <button className="btn-secondary rounded-full shadow-sm" style={{ color: '#ef4444' }} onClick={handleDelete}>
