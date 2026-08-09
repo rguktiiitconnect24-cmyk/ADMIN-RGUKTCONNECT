@@ -67,6 +67,7 @@ const CourseContentManagement = () => {
     const [newModuleHandwrittenNotes, setNewModuleHandwrittenNotes] = useState('');
     const [newModuleHandwrittenNotesName, setNewModuleHandwrittenNotesName] = useState('');
     const [additionalNotes, setAdditionalNotes] = useState([]); // [{ label, url }]
+    const [newUnitIsQuizEnabled, setNewUnitIsQuizEnabled] = useState(true);
 
     const [deleteConfirmation, setDeleteConfirmation] = useState({
         isOpen: false,
@@ -320,6 +321,7 @@ const CourseContentManagement = () => {
         setNewModuleHandwrittenNotes(item.handwrittenNotesUrl || '');
         setNewModuleHandwrittenNotesName(item.handwrittenNotesName || '');
         setAdditionalNotes(item.additionalNotes || []);
+        setNewUnitIsQuizEnabled(item.isQuizEnabled !== false);
 
         if (type === 'subject') {
             setTargetYear(item.yearId || selectedYear.id);
@@ -345,10 +347,10 @@ const CourseContentManagement = () => {
                 loadSubjects();
             } else if (activeModal === 'unit') {
                 if (editingItem) {
-                    await updateUnit(editingItem.id, selectedSubject.id, newItemLabel, newModuleVideo, newModulePdf, newModulePdfName, additionalNotes);
+                    await updateUnit(editingItem.id, selectedSubject.id, newItemLabel, newModuleVideo, newModulePdf, newModulePdfName, additionalNotes, newUnitIsQuizEnabled);
                     showToast('Unit updated successfully');
                 } else {
-                    await createUnit(selectedSubject.id, newItemLabel, newModuleVideo, newModulePdf, newModulePdfName, additionalNotes);
+                    await createUnit(selectedSubject.id, newItemLabel, newModuleVideo, newModulePdf, newModulePdfName, additionalNotes, newUnitIsQuizEnabled);
                     showToast('Unit created successfully');
                 }
                 loadUnits();
@@ -373,6 +375,7 @@ const CourseContentManagement = () => {
             setNewModuleHandwrittenNotes('');
             setNewModuleHandwrittenNotesName('');
             setAdditionalNotes([]);
+            setNewUnitIsQuizEnabled(true);
         } catch (error) {
             console.error("Save failed:", error);
             showToast('Failed to save item', 'error');
@@ -1079,6 +1082,20 @@ const CourseContentManagement = () => {
                                                     autoFocus
                                                 />
                                             </div>
+                                            {activeModal === 'unit' && (
+                                                <div className="admin-form-group">
+                                                    <label className="admin-form-label flex items-center gap-2 cursor-pointer w-fit p-3 bg-slate-800/50 rounded-xl border border-slate-700/50 hover:bg-slate-800 transition-colors">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            className="custom-checkbox !w-5 !h-5"
+                                                            checked={newUnitIsQuizEnabled}
+                                                            onChange={e => setNewUnitIsQuizEnabled(e.target.checked)}
+                                                        />
+                                                        <span className="text-sm font-semibold text-slate-200">Enable "Test Your Knowledge" Quiz</span>
+                                                    </label>
+                                                    <p className="text-xs text-slate-400 mt-2 ml-1">If unchecked, the quiz section will be completely hidden from students for this unit.</p>
+                                                </div>
+                                            )}
                                             <div className="admin-form-group">
                                                 <label className="admin-form-label flex items-center gap-2">
                                                     <Video size={14} /> Video URL (YouTube/MP4)
