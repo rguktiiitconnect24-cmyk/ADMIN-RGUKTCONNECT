@@ -105,9 +105,31 @@ export const getQuestionsForQuiz = async (quizId) => {
   try {
     const q = query(collection(db, QUESTIONS_COLLECTION), where('quizId', '==', quizId));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const questions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return questions.sort((a, b) => {
+      if (a.orderIndex !== undefined && b.orderIndex !== undefined) {
+        return a.orderIndex - b.orderIndex;
+      }
+      if (a.orderIndex !== undefined) return -1;
+      if (b.orderIndex !== undefined) return 1;
+      return (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0);
+    });
   } catch (error) {
     console.error('Error fetching questions:', error);
+    throw error;
+  }
+};
+
+export const reorderQuestions = async (questionsList) => {
+  try {
+    const promises = questionsList.map((q, idx) => {
+      const docRef = doc(db, QUESTIONS_COLLECTION, q.id);
+      return updateDoc(docRef, { orderIndex: idx });
+    });
+    await Promise.all(promises);
+    return true;
+  } catch (error) {
+    console.error('Error reordering questions:', error);
     throw error;
   }
 };

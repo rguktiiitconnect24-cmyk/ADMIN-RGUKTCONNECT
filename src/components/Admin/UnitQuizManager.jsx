@@ -1,30 +1,40 @@
-import { ChevronDown, X, List, Settings, Loader2, Save, Plus, Edit2, Trash2, Check, Lightbulb, Sigma } from 'lucide-react';
+import { ChevronDown, X, List, Settings, Loader2, Save, Plus, Edit2, Trash2, Check, CheckCircle2, Lightbulb, Sigma, GripVertical, ArrowUpDown, ImageIcon } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { getQuestionsForQuiz, addQuestion, deleteQuestion, updateQuestion } from '../../services/quizService';
+import { createPortal } from 'react-dom';
+import { generateCloudinarySignature } from '../../utils/cloudinaryUtils';
+import { getQuestionsForQuiz, addQuestion, deleteQuestion, updateQuestion, reorderQuestions } from '../../services/quizService';
+import { useToast } from '../../context/ToastContext';
 import { generateQuizForTopic } from '../../services/aiQuizService';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { contentDb as db } from '../../config/firebase';
-import 'mathlive';
+import { MathfieldElement } from 'mathlive';
 
-const CustomDropdown = ({ value, onChange, options, className }) => {
+// Configure MathLive font directory to prevent Vite font 400 decoding errors
+if (typeof window !== 'undefined' && MathfieldElement) {
+    MathfieldElement.fontsDirectory = 'https://cdn.jsdelivr.net/npm/mathlive@0.110.0/dist/fonts';
+}
+
+const CustomDropdown = ({ value, onChange, options, className, disabled }) => {
     const [isOpen, setIsOpen] = useState(false);
     
     return (
         <div 
-            className={`uqm-custom-dropdown ${className || ''}`}
-            tabIndex={0}
+            className={`uqm-custom-dropdown ${className || ''} ${disabled ? 'disabled-dropdown' : ''}`}
+            tabIndex={disabled ? -1 : 0}
             onBlur={(e) => {
                 if (!e.currentTarget.contains(e.relatedTarget)) {
                     setIsOpen(false);
                 }
             }}
+            style={disabled ? { opacity: 0.7, cursor: 'not-allowed', background: 'rgba(255, 255, 255, 0.02)' } : {}}
         >
             <div 
                 className="uqm-dropdown-header" 
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={() => !disabled && setIsOpen(!isOpen)}
+                style={{ cursor: disabled ? 'not-allowed' : 'pointer', paddingRight: disabled ? '1rem' : undefined }}
             >
-                <span>{value}</span>
-                <ChevronDown size={16} className={`uqm-dropdown-icon ${isOpen ? 'open' : ''}`} />
+                <span style={{ fontWeight: disabled ? '600' : 'normal', color: disabled ? '#94a3b8' : 'inherit' }}>{value}</span>
+                {!disabled && <ChevronDown size={16} className={`uqm-dropdown-icon ${isOpen ? 'open' : ''}`} />}
             </div>
             {isOpen && (
                 <div className="uqm-dropdown-list">
@@ -46,92 +56,62 @@ const CustomDropdown = ({ value, onChange, options, className }) => {
     );
 };
 
-const MathFieldRenderer = ({ math, inline }) => {
-    const ref = useRef(null);
-    useEffect(() => {
-        // Inject custom CSS into the MathLive shadow DOM to increase fraction spacing
-        const injectStyle = () => {
-            if (ref.current && ref.current.shadowRoot) {
-                let styleEl = ref.current.shadowRoot.querySelector('#custom-frac-style');
-                if (!styleEl) {
-                    styleEl = document.createElement('style');
-                    styleEl.id = 'custom-frac-style';
-                    styleEl.textContent = `
-                        .ML__num { transform: translateY(-0.15em) !important; display: inline-block; }
-                        .ML__den { transform: translateY(0.15em) !important; display: inline-block; }
-                        .ML__frac-line { height: 1.5px !important; background-color: currentColor !important; }
-                    `;
-                    ref.current.shadowRoot.appendChild(styleEl);
-                }
-            }
-        };
-
-        // It might take a moment for the shadow root to initialize
-        if (ref.current) {
-            injectStyle();
-            // Retry after a short delay in case it's not ready
-            setTimeout(injectStyle, 50);
-        }
-    }, [math]);
-
-    return (
-        <math-field 
-            ref={ref}
-            style={{ 
-                display: inline ? 'inline-block' : 'block', 
-                backgroundColor: 'transparent', 
-                border: 'none', 
-                padding: 0, 
-                outline: 'none', 
-                pointerEvents: 'none', 
-                color: 'var(--color-text-main, #000)', 
-                verticalAlign: 'middle', 
-                margin: inline ? '0 4px' : '0',
-                fontSize: inline ? '1.1em' : '1.2em'
-            }}
-        >
-            {inline ? `\\displaystyle ${math}` : math}
-        </math-field>
-    );
-};
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import remarkGfm from 'remark-gfm';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 
 const MixedMathText = ({ text }) => {
     if (!text) return null;
-    
-    // Normalize delimiters
-    let normalizedText = text
-        .replace(/\\\(/g, '$')
-        .replace(/\\\)/g, '$')
-        .replace(/\\\[/g, '$$')
-        .replace(/\\\]/g, '$$');
+    if (typeof text !== 'string') return text;
 
-    // Split by block math $$...$$
-    const blockParts = normalizedText.split(/(\$\$[\s\S]*?\$\$)/);
-    
+    let s = text;
+
+    if (s.includes('$')) {
+        s = s.replace(/\\\(/g, ' ').replace(/\\\)/g, ' ').replace(/\\\[/g, ' ').replace(/\\\]/g, ' ');
+        s = s.replace(/²/g, '^2').replace(/³/g, '^3').replace(/¹/g, '^1');
+    } else {
+        s = s.replace(/²/g, '$^2$')
+             .replace(/³/g, '$^3$')
+             .replace(/¹/g, '$^1$');
+
+        s = s.replace(/(\\frac\{[^{}]*\}\{[^{}]*\}|\\sqrt\{[^{}]*\}|\\pm|\\alpha|\\beta|\\gamma|\\pi|\\infty)/g, '$$1$');
+    }
+
+    const blocks = s.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/);
+    const processedText = blocks.map((block) => {
+        if ((block.startsWith('$$') && block.endsWith('$$')) || (block.startsWith('$') && block.endsWith('$'))) {
+            return block;
+        }
+        return block.replace(/([^\n])\n([^\n])/g, '$1  \n$2');
+    }).join('');
+
     return (
-        <div style={{ lineHeight: '1.6', fontSize: '1rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: 'var(--color-text-main, #000)' }}>
-            {blockParts.map((bPart, bIdx) => {
-                if (bPart.startsWith('$$') && bPart.endsWith('$$')) {
-                    const math = bPart.slice(2, -2).trim();
-                    return (
-                        <div key={bIdx} className="my-4 flex justify-center w-full" style={{ overflowX: 'auto', overflowY: 'hidden' }}>
-                            <MathFieldRenderer math={math} inline={false} />
-                        </div>
-                    );
-                }
-                
-                // Split inline math $...$
-                const inlineParts = bPart.split(/(\$[\s\S]*?\$)/);
-                return inlineParts.map((iPart, iIdx) => {
-                    if (iPart.startsWith('$') && iPart.endsWith('$') && iPart !== '$') {
-                        const math = iPart.slice(1, -1).trim();
-                        return (
-                            <MathFieldRenderer key={`${bIdx}-${iIdx}`} math={math} inline={true} />
-                        );
-                    }
-                    return <span key={`${bIdx}-${iIdx}`}>{iPart}</span>;
-                });
-            })}
+        <div className="math-rendered-preview markdown-math-container" style={{ textAlign: 'left', fontSize: '1.1rem', lineHeight: '1.6', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+            <ReactMarkdown
+                remarkPlugins={[remarkMath, remarkGfm]}
+                rehypePlugins={[rehypeKatex]}
+                components={{
+                    p: ({ node, children, ...props }) => (
+                        <p style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0 0 0.5rem 0', display: 'inline-block', width: '100%' }} {...props}>
+                            {children}
+                        </p>
+                    ),
+                    code: ({ node, inline, className, children, ...props }) => (
+                        <code style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'monospace, monospace', backgroundColor: 'rgba(255, 255, 255, 0.08)', padding: '0.1rem 0.3rem', borderRadius: '4px' }} {...props}>
+                            {children}
+                        </code>
+                    ),
+                    pre: ({ node, children, ...props }) => (
+                        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', backgroundColor: 'rgba(0, 0, 0, 0.2)', padding: '0.75rem', borderRadius: '8px', overflowX: 'auto' }} {...props}>
+                            {children}
+                        </pre>
+                    )
+                }}
+            >
+                {processedText}
+            </ReactMarkdown>
         </div>
     );
 };
@@ -177,23 +157,41 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
     };
 
     const handleInsertMath = () => {
-        const mathToInsert = `$$${tempMathValue}$$`;
-        
-        let currentValue = '';
-        if (mathTarget === 'questionText') {
-            currentValue = newQuestion.questionText;
-        } else if (mathTarget && mathTarget.startsWith('option-')) {
-            const idx = parseInt(mathTarget.split('-')[1]);
-            currentValue = newQuestion.options[idx];
+        let cleanTemp = tempMathValue.trim();
+        cleanTemp = cleanTemp.replace(/^(\$\$|\\\(|\\\[)+/, '').replace(/(\$\$|\\\)|\\\])+$/, '').trim();
+        cleanTemp = cleanTemp.replace(/\\\(/g, ' ').replace(/\\\)/g, ' ');
+        if (!cleanTemp) {
+            setShowMathModal(false);
+            return;
         }
 
-        const ref = inputRefs.current[mathTarget];
-        let newValue = currentValue;
-        if (ref) {
-            const cursorStart = ref.selectionStart;
-            newValue = currentValue.substring(0, cursorStart) + ' ' + mathToInsert + ' ' + currentValue.substring(cursorStart);
+        const mathToInsert = `$$${cleanTemp}$$`;
+
+        let currentValue = '';
+        if (mathTarget === 'questionText') {
+            currentValue = newQuestion.questionText || '';
+        } else if (mathTarget && mathTarget.startsWith('option-')) {
+            const idx = parseInt(mathTarget.split('-')[1]);
+            currentValue = newQuestion.options[idx] || '';
+        }
+
+        let newValue = '';
+        let trimmedCurrent = currentValue.trim();
+
+        if (trimmedCurrent.startsWith('$$') && trimmedCurrent.endsWith('$$') && trimmedCurrent.length >= 4) {
+            let inner = trimmedCurrent.slice(2, -2).trim();
+            inner = inner.replace(/\\\(/g, ' ').replace(/\\\)/g, ' ');
+            newValue = `$$${inner} ${cleanTemp}$$`;
+        } else if (!trimmedCurrent) {
+            newValue = mathToInsert;
         } else {
-            newValue = currentValue + ' ' + mathToInsert;
+            const ref = inputRefs.current[mathTarget];
+            if (ref) {
+                const cursorStart = ref.selectionStart || 0;
+                newValue = currentValue.substring(0, cursorStart) + ' ' + mathToInsert + ' ' + currentValue.substring(cursorStart);
+            } else {
+                newValue = currentValue + ' ' + mathToInsert;
+            }
         }
 
         if (mathTarget === 'questionText') {
@@ -230,6 +228,142 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
         }
     };
 
+    // Reorder State
+    const [draggedIndex, setDraggedIndex] = useState(null);
+    const [hasOrderChanged, setHasOrderChanged] = useState(false);
+    const [isSavingOrder, setIsSavingOrder] = useState(false);
+
+    // Difficulty Filter Tab State
+    const [activeDifficultyTab, setActiveDifficultyTab] = useState('Easy');
+
+    // Image Upload State
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const imageInputRef = useRef(null);
+
+    const handleImageUpload = async (e) => {
+        if (targetPath && !targetPath.includes('CSE') && !targetPath.includes('Computer Science')) {
+            showSuccessToast("Image upload is currently only supported for the CSE department.", "error");
+            return;
+        }
+
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            showSuccessToast("Please select a valid image file.", "error");
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            showSuccessToast("Image size must be less than 5MB.", "error");
+            return;
+        }
+
+        const cloudName = import.meta.env.VITE_CSE_QUIZ_CLOUDINARY_CLOUD_NAME;
+        const apiKey = import.meta.env.VITE_CSE_QUIZ_CLOUDINARY_API_KEY;
+        const apiSecret = import.meta.env.VITE_CSE_QUIZ_CLOUDINARY_API_SECRET;
+
+        if (!cloudName || !apiKey || !apiSecret) {
+            showSuccessToast("Cloudinary credentials not found in .env", "error");
+            return;
+        }
+
+        setIsUploadingImage(true);
+        try {
+            const timestamp = Math.round((new Date()).getTime() / 1000);
+            const publicId = `quiz_img_${Date.now()}`;
+            const signature = await generateCloudinarySignature(publicId, timestamp, apiSecret);
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('api_key', apiKey);
+            formData.append('timestamp', timestamp);
+            formData.append('signature', signature);
+            formData.append('public_id', publicId);
+
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.secure_url) {
+                setNewQuestion(prev => ({ ...prev, image: data.secure_url }));
+                showSuccessToast("Image uploaded successfully!");
+            } else {
+                showSuccessToast("Failed to upload image: " + (data.error?.message || "Unknown error"), "error");
+            }
+        } catch (error) {
+            console.error("Upload error:", error);
+            showSuccessToast("Error uploading image.", "error");
+        } finally {
+            setIsUploadingImage(false);
+            if (imageInputRef.current) {
+                imageInputRef.current.value = '';
+            }
+        }
+    };
+
+    const handleDragEnterCard = (targetIndex) => {
+        if (draggedIndex === null || draggedIndex === targetIndex) return;
+        
+        const isCurrentTab = (q) => {
+            if (activeDifficultyTab === 'Medium') return q.difficulty !== 'Easy' && q.difficulty !== 'High';
+            if (activeDifficultyTab === 'Hard') return q.difficulty === 'High';
+            return q.difficulty === 'Easy';
+        };
+
+        const currentTabItems = questions.filter(isCurrentTab);
+        const itemToMove = currentTabItems.splice(draggedIndex, 1)[0];
+        currentTabItems.splice(targetIndex, 0, itemToMove);
+        
+        let currentTabIndex = 0;
+        const updated = questions.map(q => {
+            if (isCurrentTab(q)) {
+                return currentTabItems[currentTabIndex++];
+            }
+            return q;
+        });
+
+        setDraggedIndex(targetIndex);
+        setQuestions(updated);
+        setHasOrderChanged(true);
+    };
+
+    // Success Animation Modal State
+    const [successModalMessage, setSuccessModalMessage] = useState(null);
+    let toastContext = null;
+    try {
+        toastContext = useToast();
+    } catch (e) {
+        // Safe fallback if unmounted from ToastProvider
+    }
+
+    const showSuccessToast = (msg, type = 'success') => {
+        setSuccessModalMessage(msg);
+        if (toastContext && toastContext.showToast) {
+            toastContext.showToast(msg, type);
+        }
+        setTimeout(() => {
+            setSuccessModalMessage(null);
+        }, 3500);
+    };
+
+    const handleSaveOrder = async () => {
+        setIsSavingOrder(true);
+        try {
+            await reorderQuestions(questions);
+            showSuccessToast("Question order updated & saved successfully!");
+            setHasOrderChanged(false);
+        } catch (error) {
+            console.error("Error saving question order:", error);
+            showSuccessToast("Failed to save question order.");
+        } finally {
+            setIsSavingOrder(false);
+        }
+    };
+
     useEffect(() => {
         fetchQuestions();
         fetchSettings();
@@ -251,10 +385,10 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
         setSavingSettings(true);
         try {
             await setDoc(doc(db, 'quiz_settings', targetId), settings);
-            alert("Settings saved successfully!");
+            showSuccessToast("Settings saved successfully!");
         } catch (error) {
             console.error("Error saving settings:", error);
-            alert("Failed to save settings.");
+            showSuccessToast("Failed to save settings.");
         } finally {
             setSavingSettings(false);
         }
@@ -300,7 +434,7 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
 
     const handleSaveQuestion = async (addAnother = false) => {
         if (!newQuestion.questionText || newQuestion.options.some(opt => !opt.trim())) {
-            alert("Please fill all fields and options.");
+            showSuccessToast("Please fill all fields and options.");
             return;
         }
 
@@ -308,8 +442,10 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
         try {
             if (editingQuestion) {
                 await updateQuestion(editingQuestion.id, newQuestion);
+                showSuccessToast("Question updated successfully!");
             } else {
                 await addQuestion(targetId, newQuestion);
+                showSuccessToast("Question added successfully!");
             }
             
             setEditingQuestion(null);
@@ -329,6 +465,7 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
             }
         } catch (error) {
             console.error("Error saving question:", error);
+            showSuccessToast("Failed to save question.");
         } finally {
             setIsSavingQuestion(false);
         }
@@ -343,6 +480,7 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this question?")) {
             await deleteQuestion(id);
+            showSuccessToast("Question deleted successfully!");
             fetchQuestions();
         }
     };
@@ -599,6 +737,31 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
 .uqm-action-btn.delete:hover {
     background: rgba(239, 68, 68, 0.2);
     color: #ef4444;
+}
+
+.uqm-option-math-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border, #cbd5e1);
+    background: var(--color-surface, #ffffff);
+    color: #8b5cf6;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.uqm-option-math-btn:hover {
+    background: #8b5cf6;
+    color: #ffffff;
+    border-color: #8b5cf6;
 }
 
 .uqm-options-grid {
@@ -966,18 +1129,55 @@ math-field::part(mode-toggle) {
                         </div>
                     ) : (
                         <>
+                            {/* Difficulty Sections/Tabs */}
+                            {!showForm && questions.length > 0 && (
+                                <div className="uqm-diff-tabs-container">
+                                    {['Easy', 'Medium', 'Hard'].map(tab => {
+                                        const count = questions.filter(q => tab === 'Medium' ? (q.difficulty !== 'Easy' && q.difficulty !== 'High') : (tab === 'Hard' ? q.difficulty === 'High' : q.difficulty === 'Easy')).length;
+                                        return (
+                                            <button
+                                                key={tab}
+                                                onClick={() => setActiveDifficultyTab(tab)}
+                                                className={`uqm-diff-tab ${activeDifficultyTab === tab ? 'active' : ''}`}
+                                            >
+                                                {tab} ({count})
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
                             {/* Action Bar */}
                             <div className="uqm-actions">
-                                <button 
-                                    onClick={() => {
-                                        setEditingQuestion(null);
-                                        setNewQuestion({ questionText: '', options: ['', '', '', ''], correctAnswerIndex: 0, hint: '', answerExplanation: '', marks: 1 });
-                                        setShowForm(true);
-                                    }}
-                                    className="uqm-btn-primary"
-                                >
-                                    <Plus size={20} /> Add New Question
-                                </button>
+                                <div className="flex gap-2">
+                                    <button 
+                                        onClick={() => {
+                                            setEditingQuestion(null);
+                                            const defaultDiff = activeDifficultyTab === 'Medium' ? 'Moderate' : (activeDifficultyTab === 'Hard' ? 'High' : 'Easy');
+                                            setNewQuestion({ questionText: '', options: ['', '', '', ''], correctAnswerIndex: 0, hint: '', answerExplanation: '', difficulty: defaultDiff, marks: 1 });
+                                            setShowForm(true);
+                                        }}
+                                        className="uqm-btn-primary"
+                                    >
+                                        <Plus size={20} /> Add New Question
+                                    </button>
+                                    <button 
+                                        onClick={handleSaveOrder}
+                                        disabled={isSavingOrder || !hasOrderChanged}
+                                        className="uqm-btn-secondary flex items-center justify-center gap-2"
+                                        style={{ 
+                                            background: hasOrderChanged ? '#8b5cf6' : undefined, 
+                                            color: hasOrderChanged ? '#ffffff' : undefined,
+                                            borderColor: hasOrderChanged ? '#8b5cf6' : undefined,
+                                            opacity: (isSavingOrder || !hasOrderChanged) ? 0.7 : 1,
+                                            cursor: hasOrderChanged ? 'pointer' : 'default'
+                                        }}
+                                        title="Rearrange question numbers and save new order"
+                                    >
+                                        {isSavingOrder ? <Loader2 className="animate-spin" size={16} /> : <ArrowUpDown size={16} />}
+                                        {isSavingOrder ? 'Saving Order...' : hasOrderChanged ? 'Save New Order' : 'Rearrange Questions'}
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Question Form */}
@@ -988,9 +1188,28 @@ math-field::part(mode-toggle) {
                                     <div className="uqm-input-group">
                                         <div className="flex justify-between items-center mb-2">
                                             <label className="uqm-label mb-0">Question Text</label>
-                                            <button type="button" onClick={() => openMathModal('questionText')} className="uqm-btn-primary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', gap: '0.25rem' }}>
-                                                <Sigma size={14} /> Insert Math
-                                            </button>
+                                            <div className="flex gap-2">
+                                                <input 
+                                                    type="file" 
+                                                    ref={imageInputRef} 
+                                                    onChange={handleImageUpload} 
+                                                    accept="image/*" 
+                                                    className="hidden" 
+                                                />
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => imageInputRef.current?.click()} 
+                                                    disabled={isUploadingImage}
+                                                    className="uqm-btn-secondary" 
+                                                    style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', gap: '0.25rem', opacity: isUploadingImage ? 0.7 : 1 }}
+                                                >
+                                                    {isUploadingImage ? <Loader2 size={14} className="animate-spin" /> : <ImageIcon size={14} />} 
+                                                    {isUploadingImage ? 'Uploading...' : 'Add Image'}
+                                                </button>
+                                                <button type="button" onClick={() => openMathModal('questionText')} className="uqm-btn-primary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', gap: '0.25rem' }}>
+                                                    <Sigma size={14} /> Insert Math
+                                                </button>
+                                            </div>
                                         </div>
                                         <textarea 
                                             ref={el => inputRefs.current['questionText'] = el}
@@ -1010,6 +1229,18 @@ math-field::part(mode-toggle) {
                                                 <MixedMathText text={newQuestion.questionText} />
                                             </div>
                                         )}
+                                        {newQuestion.image && (
+                                            <div className="mt-2 relative inline-block rounded-lg overflow-hidden border border-white/20">
+                                                <img src={newQuestion.image} alt="Question Attachment" className="max-h-48 object-contain bg-black/20" />
+                                                <button 
+                                                    onClick={() => setNewQuestion(prev => ({ ...prev, image: null }))}
+                                                    className="absolute top-2 right-2 p-1 bg-red-500/80 text-white rounded-full hover:bg-red-600 transition-colors"
+                                                    title="Remove Image"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="uqm-input-group">
                                         <label className="uqm-label">Difficulty Level</label>
@@ -1017,33 +1248,62 @@ math-field::part(mode-toggle) {
                                             value={newQuestion.difficulty || 'Moderate'}
                                             onChange={(val) => setNewQuestion({...newQuestion, difficulty: val})}
                                             options={['Easy', 'Moderate', 'High']}
+                                            disabled={true}
                                         />
                                     </div>
                                     
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                         {newQuestion.options.map((opt, idx) => (
-                                            <div key={idx} className="flex items-center gap-3">
-                                                <input 
-                                                    type="radio" 
-                                                    name="correctAnswer" 
-                                                    checked={newQuestion.correctAnswerIndex === idx}
-                                                    onChange={() => setNewQuestion({...newQuestion, correctAnswerIndex: idx})}
-                                                    className="w-5 h-5 text-purple-600 bg-slate-100 border-slate-300 dark:bg-slate-800 dark:border-slate-600 focus:ring-purple-500 focus:ring-2"
-                                                />
-                                                <div className="relative flex-1 flex">
+                                            <div key={idx} className="flex flex-col gap-2 p-3 bg-white/5 border border-white/10 rounded-xl">
+                                                <div className="flex justify-between items-center">
+                                                    <div className="flex items-center gap-2">
+                                                        <input 
+                                                            type="radio" 
+                                                            name="correctAnswer" 
+                                                            checked={newQuestion.correctAnswerIndex === idx}
+                                                            onChange={() => setNewQuestion({...newQuestion, correctAnswerIndex: idx})}
+                                                            className="w-4 h-4 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                                                            title="Mark as correct answer"
+                                                        />
+                                                        <span className="font-bold text-xs text-purple-400">Option {String.fromCharCode(65 + idx)}</span>
+                                                    </div>
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => openMathModal(`option-${idx}`)} 
+                                                        className="uqm-btn-primary"
+                                                        style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', gap: '0.25rem', height: 'auto' }}
+                                                        title={`Insert Math equation for Option ${String.fromCharCode(65 + idx)}`}
+                                                    >
+                                                        <Sigma size={13} /> Insert Math
+                                                    </button>
+                                                </div>
+                                                
+                                                <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center' }}>
                                                     <input 
                                                         ref={el => inputRefs.current[`option-${idx}`] = el}
                                                         type="text" 
-                                                        className="uqm-input flex-1"
+                                                        className="uqm-input w-full"
                                                         style={{ paddingRight: '2.5rem' }}
                                                         value={opt}
                                                         onChange={(e) => handleOptionChange(idx, e.target.value)}
-                                                        placeholder={`Option ${String.fromCharCode(65 + idx)}`}
+                                                        placeholder={`Type Option ${String.fromCharCode(65 + idx)} text or Math...`}
                                                     />
-                                                    <button type="button" onClick={() => openMathModal(`option-${idx}`)} className="uqm-action-btn" style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent' }} title="Insert Math">
-                                                        <Sigma size={16} />
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => openMathModal(`option-${idx}`)} 
+                                                        style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '26px', height: '26px', borderRadius: '6px', border: '1px solid var(--color-border, #cbd5e1)', background: 'var(--color-surface, #ffffff)', color: '#8b5cf6', cursor: 'pointer' }}
+                                                        title={`Insert Math for Option ${String.fromCharCode(65 + idx)}`}
+                                                    >
+                                                        <Sigma size={14} />
                                                     </button>
                                                 </div>
+
+                                                {opt && (opt.includes('$') || opt.includes('\\')) && (
+                                                    <div className="p-2 bg-white/5 border border-white/10 rounded-lg text-xs">
+                                                        <span className="text-purple-400 font-bold mr-1">Opt {String.fromCharCode(65 + idx)} Math Preview:</span>
+                                                        <MixedMathText text={opt} />
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
@@ -1098,13 +1358,50 @@ math-field::part(mode-toggle) {
                                 </div>
                             ) : (
                                 <div>
-                                    {questions.map((q, index) => (
-                                        <div key={q.id} className="uqm-question-card">
+                                    {questions.filter(q => {
+                                        if (activeDifficultyTab === 'Medium') return q.difficulty !== 'Easy' && q.difficulty !== 'High';
+                                        if (activeDifficultyTab === 'Hard') return q.difficulty === 'High';
+                                        return q.difficulty === 'Easy';
+                                    }).map((q, index) => (
+                                        <div 
+                                            key={q.id} 
+                                            className="uqm-question-card"
+                                            draggable={true}
+                                            onDragStart={(e) => {
+                                                setDraggedIndex(index);
+                                                e.dataTransfer.effectAllowed = "move";
+                                            }}
+                                            onDragOver={(e) => {
+                                                e.preventDefault();
+                                            }}
+                                            onDragEnter={() => {
+                                                handleDragEnterCard(index);
+                                            }}
+                                            onDragEnd={() => {
+                                                setDraggedIndex(null);
+                                            }}
+                                            style={{
+                                                opacity: draggedIndex === index ? 0.4 : 1,
+                                                border: draggedIndex === index ? '2px dashed #8b5cf6' : undefined,
+                                                transition: 'all 0.2s ease'
+                                            }}
+                                        >
                                             <div className="uqm-q-header">
-                                                <div className="flex items-start">
+                                                <div className="flex items-start gap-2 flex-1">
+                                                    <div 
+                                                        className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-purple-400 p-0.5 flex-shrink-0"
+                                                        title="Click and drag to reorder this question"
+                                                    >
+                                                        <GripVertical size={20} />
+                                                    </div>
                                                     <span className="uqm-q-badge">Q{index + 1}</span>
                                                     <div className="uqm-q-title flex-1">
                                                         <MixedMathText text={q.questionText} />
+                                                        {q.image && (
+                                                            <div className="mt-3 mb-1">
+                                                                <img src={q.image} alt="Question" className="max-h-48 object-contain rounded-lg bg-black/10 border border-white/10" />
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     {q.difficulty && (
                                                         <span className={`ml-3 px-2 py-0.5 text-xs font-semibold rounded-full ${q.difficulty === 'Easy' ? 'bg-green-500/20 text-green-400' : q.difficulty === 'Moderate' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'}`}>
@@ -1124,7 +1421,7 @@ math-field::part(mode-toggle) {
                                                     return (
                                                         <div key={oIdx} className={`uqm-option ${isCorrect ? 'correct' : ''}`}>
                                                             <span className="uqm-option-letter">{String.fromCharCode(65 + oIdx)}</span>
-                                                            <span className="flex-1">{opt}</span>
+                                                            <span className="flex-1"><MixedMathText text={opt} /></span>
                                                             {isCorrect && <Check size={16} className="ml-2" />}
                                                         </div>
                                                     )
@@ -1180,6 +1477,26 @@ math-field::part(mode-toggle) {
                     </div>
                 </div>
             </div>
+        )}
+
+        {/* Animated Website Success Toast Modal */}
+        {successModalMessage && createPortal(
+            <div className="uqm-success-toast-popup">
+                <div className="uqm-success-icon-wrapper">
+                    <CheckCircle2 size={22} strokeWidth={2.5} />
+                </div>
+                <div className="flex flex-col flex-1">
+                    <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255, 255, 255, 0.95)' }}>Success</span>
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#ffffff' }}>{successModalMessage}</span>
+                </div>
+                <button 
+                    onClick={() => setSuccessModalMessage(null)}
+                    style={{ background: 'transparent', border: 'none', color: 'rgba(255, 255, 255, 0.8)', cursor: 'pointer', padding: '4px' }}
+                >
+                    <X size={18} />
+                </button>
+            </div>,
+            document.body
         )}
         </>
     );
