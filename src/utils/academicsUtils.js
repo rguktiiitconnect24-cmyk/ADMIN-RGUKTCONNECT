@@ -110,12 +110,26 @@ export const fetchDynamicUnits = async (subjectId) => {
         );
         const snapshot = await getDocs(q);
         const units = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isDynamic: true }));
-        const sorted = units.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+        const sorted = units.sort((a, b) => {
+            const orderA = a.order !== undefined ? a.order : 999999;
+            const orderB = b.order !== undefined ? b.order : 999999;
+            if (orderA !== orderB) return orderA - orderB;
+            return (a.createdAt || '').localeCompare(b.createdAt || '');
+        });
         contentCache.units[subjectId] = sorted;
         return sorted;
     } catch (error) {
         console.error("Error fetching units:", error);
         return [];
+    }
+};
+
+export const updateUnitOrder = async (unitId, newOrder, subjectId) => {
+    const docRef = doc(contentDb, 'academic_units', unitId);
+    await updateDoc(docRef, { order: newOrder });
+    if (subjectId) {
+        delete contentCache.units[subjectId];
+        delete contentCache.direct.units[unitId];
     }
 };
 
@@ -184,12 +198,26 @@ export const fetchDynamicModules = async (unitId) => {
         );
         const snapshot = await getDocs(q);
         const modules = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isDynamic: true }));
-        const sorted = modules.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+        const sorted = modules.sort((a, b) => {
+            const orderA = a.order !== undefined ? a.order : 999999;
+            const orderB = b.order !== undefined ? b.order : 999999;
+            if (orderA !== orderB) return orderA - orderB;
+            return (a.createdAt || '').localeCompare(b.createdAt || '');
+        });
         contentCache.modules[unitId] = sorted;
         return sorted;
     } catch (error) {
         console.error("Error fetching modules:", error);
         return [];
+    }
+};
+
+export const updateModuleOrder = async (moduleId, newOrder, unitId) => {
+    const docRef = doc(contentDb, 'academic_modules', moduleId);
+    await updateDoc(docRef, { order: newOrder });
+    if (unitId) {
+        delete contentCache.modules[unitId];
+        delete contentCache.direct.modules[moduleId];
     }
 };
 

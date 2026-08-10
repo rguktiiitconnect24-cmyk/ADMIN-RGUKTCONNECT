@@ -1,4 +1,4 @@
-import { MoreVertical, Search, Filter, Mail, Download, Eye, MailCheck, Edit2, Trash2, X, AlertCircle, Monitor, AlertTriangle, Check, LogIn, Database } from 'lucide-react';
+import { MoreVertical, Search, Filter, Mail, Download, Eye, EyeOff, Key, ShieldCheck, MailCheck, Edit2, Trash2, X, AlertCircle, Monitor, AlertTriangle, Check, LogIn, Database } from 'lucide-react';
 import CustomSelect from '../../components/Common/CustomSelect';
 import LoadingTransition from '../../components/Common/LoadingTransition';
 import BulkUpdater from '../../components/Admin/BulkUpdater';
@@ -10,6 +10,7 @@ import { db, functions, pucDb } from '../../config/firebase';
 import { httpsCallable } from 'firebase/functions';
 import { collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { useTheme } from '../../context/ThemeContext';
 import { formatClassID } from '../../utils/formatUtils';
 import './Admin.css';
@@ -39,8 +40,9 @@ const UserManagement = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [viewUser, setViewUser] = useState(null);
     const [editUser, setEditUser] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
+    const { showToast } = useToast();
     const [userToDelete, setUserToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [animatingOutId, setAnimatingOutId] = useState(null);
@@ -77,17 +79,7 @@ const UserManagement = () => {
         setIsMenuOpen(false);
     };
 
-    const showToast = (message, type = 'success') => {
-        if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-        setToast({ visible: true, message, type });
-        toastTimerRef.current = setTimeout(() => {
-            setToast(prev => ({ ...prev, visible: false }));
-            // Clear message after animation finishes
-            setTimeout(() => {
-                setToast(prev => ({ ...prev, message: '' }));
-            }, 500);
-        }, 3000);
-    };
+
 
     // Clean up timer on unmount
     useEffect(() => {
@@ -344,6 +336,7 @@ const UserManagement = () => {
             await updateDoc(userRef, {
                 fullName: editUser.fullName,
                 email: editUser.email,
+                password: editUser.password || '',
                 role: editUser.role,
                 phone: editUser.phone || '',
                 bio: editUser.bio || '',
@@ -873,7 +866,7 @@ const UserManagement = () => {
             </div>
 
             {/* Add User Modal */}
-            {isModalOpen && (
+            {isModalOpen && createPortal(
                 <div className="modal-overlay">
                     <div className="modal-content">
                         <div className="flex justify-between items-center mb-6">
@@ -933,7 +926,8 @@ const UserManagement = () => {
                             </div>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* View User Modal */}
@@ -1094,12 +1088,15 @@ const UserManagement = () => {
             )}
 
             {/* Edit User Modal */}
-            {editUser && (
-                <div className="modal-overlay">
-                    <div className="modal-content wide">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold">Edit User Settings</h2>
-                            <button onClick={() => setEditUser(null)} className="btn-ghost hover:text-red-500">
+            {editUser && createPortal(
+                <div className="modal-overlay full-screen-overlay">
+                    <div className="modal-content full-screen p-6 sm:p-8 overflow-y-auto">
+                        <div className="flex justify-between items-center mb-6 pb-4 border-b border-[var(--color-border)]">
+                            <div>
+                                <h2 className="text-2xl font-bold text-[var(--color-text-main)]">Edit User Settings</h2>
+                                <p className="text-sm text-[var(--color-text-muted)]">Modify account permissions, profile details, and user settings</p>
+                            </div>
+                            <button onClick={() => setEditUser(null)} className="btn-ghost hover:text-red-500 p-2 rounded-lg">
                                 <X size={24} />
                             </button>
                         </div>
@@ -1125,6 +1122,19 @@ const UserManagement = () => {
                                         required
                                         value={editUser.email}
                                         onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
+                                    />
+                                </div>
+                                <div className="admin-form-group">
+                                    <label className="admin-form-label flex items-center gap-1.5">
+                                        <Key size={14} className="text-amber-500" />
+                                        Account Password
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="admin-form-input font-mono text-amber-500 font-semibold"
+                                        value={editUser.password || ''}
+                                        onChange={(e) => setEditUser({ ...editUser, password: e.target.value })}
+                                        placeholder="Enter account password"
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -1245,24 +1255,26 @@ const UserManagement = () => {
                                     </div>
                                 </div>
 
-                                <CustomSelect
-                                    label="Department / Current Level"
-                                    value={editUser.department || ''}
-                                    onChange={(val) => setEditUser({ ...editUser, department: val })}
-                                    options={[
-                                        { value: "", label: "Not Assigned" },
-                                        { value: "PUC-1 Semester 1", label: "PUC-1 Semester 1" },
-                                        { value: "PUC-1 Semester 2", label: "PUC-1 Semester 2" },
-                                        { value: "PUC-2 Semester 1", label: "PUC-2 Semester 1" },
-                                        { value: "PUC-2 Semester 2", label: "PUC-2 Semester 2" },
-                                        { value: "Computer Science & Engineering", label: "Computer Science & Engineering" },
-                                        { value: "Electronics & Communication", label: "Electronics & Communication" },
-                                        { value: "Mechanical Engineering", label: "Mechanical Engineering" },
-                                        { value: "Civil Engineering", label: "Civil Engineering" },
-                                        { value: "Electrical Engineering", label: "Electrical Engineering" },
-                                        { value: "Business Administration", label: "Business Administration" },
-                                    ]}
-                                />
+                                {editUser.role !== 'admin' && (
+                                    <CustomSelect
+                                        label="Department / Current Level"
+                                        value={editUser.department || ''}
+                                        onChange={(val) => setEditUser({ ...editUser, department: val })}
+                                        options={[
+                                            { value: "", label: "Not Assigned" },
+                                            { value: "PUC-1 Semester 1", label: "PUC-1 Semester 1" },
+                                            { value: "PUC-1 Semester 2", label: "PUC-1 Semester 2" },
+                                            { value: "PUC-2 Semester 1", label: "PUC-2 Semester 1" },
+                                            { value: "PUC-2 Semester 2", label: "PUC-2 Semester 2" },
+                                            { value: "Computer Science & Engineering", label: "Computer Science & Engineering" },
+                                            { value: "Electronics & Communication", label: "Electronics & Communication" },
+                                            { value: "Mechanical Engineering", label: "Mechanical Engineering" },
+                                            { value: "Civil Engineering", label: "Civil Engineering" },
+                                            { value: "Electrical Engineering", label: "Electrical Engineering" },
+                                            { value: "Business Administration", label: "Business Administration" },
+                                        ]}
+                                    />
+                                )}
 
                                 {editUser.role === 'faculty' && (
                                     <div className="admin-form-group">
@@ -1333,48 +1345,52 @@ const UserManagement = () => {
                                     </div>
                                 )}
 
-                                <div className="admin-form-group">
-                                    <label className="admin-form-label">Specific Class / Section</label>
-                                    <input
-                                        type="text"
-                                        className="admin-form-input"
-                                        value={editUser.currentClass || ''}
-                                        onChange={(e) => setEditUser({ ...editUser, currentClass: e.target.value })}
-                                        placeholder="e.g. F-04, CSE-3"
-                                    />
-                                </div>
+                                {editUser.role !== 'admin' && (
+                                    <>
+                                        <div className="admin-form-group">
+                                            <label className="admin-form-label">Specific Class / Section</label>
+                                            <input
+                                                type="text"
+                                                className="admin-form-input"
+                                                value={editUser.currentClass || ''}
+                                                onChange={(e) => setEditUser({ ...editUser, currentClass: e.target.value })}
+                                                placeholder="e.g. F-04, CSE-3"
+                                            />
+                                        </div>
 
-                                <h4 className="text-sm font-bold text-[var(--color-text-muted)] uppercase tracking-wider mt-6 mb-2">Detailed Settings</h4>
+                                        <h4 className="text-sm font-bold text-[var(--color-text-muted)] uppercase tracking-wider mt-6 mb-2">Detailed Settings</h4>
 
-                                <div className="setting-row">
-                                    <div className="setting-info">
-                                        <h4>Email Notifications</h4>
-                                        <p>Send summary and alert emails</p>
-                                    </div>
-                                    <label className="switch">
-                                        <input
-                                            type="checkbox"
-                                            checked={editUser.emailNotifs}
-                                            onChange={(e) => setEditUser({ ...editUser, emailNotifs: e.target.checked })}
-                                        />
-                                        <span className="slider"></span>
-                                    </label>
-                                </div>
+                                        <div className="setting-row">
+                                            <div className="setting-info">
+                                                <h4>Email Notifications</h4>
+                                                <p>Send summary and alert emails</p>
+                                            </div>
+                                            <label className="switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={editUser.emailNotifs}
+                                                    onChange={(e) => setEditUser({ ...editUser, emailNotifs: e.target.checked })}
+                                                />
+                                                <span className="slider"></span>
+                                            </label>
+                                        </div>
 
-                                <div className="setting-row">
-                                    <div className="setting-info">
-                                        <h4>Security Alerts</h4>
-                                        <p>Notify on suspicious logins</p>
-                                    </div>
-                                    <label className="switch">
-                                        <input
-                                            type="checkbox"
-                                            checked={editUser.securityAlerts}
-                                            onChange={(e) => setEditUser({ ...editUser, securityAlerts: e.target.checked })}
-                                        />
-                                        <span className="slider"></span>
-                                    </label>
-                                </div>
+                                        <div className="setting-row">
+                                            <div className="setting-info">
+                                                <h4>Security Alerts</h4>
+                                                <p>Notify on suspicious logins</p>
+                                            </div>
+                                            <label className="switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={editUser.securityAlerts}
+                                                    onChange={(e) => setEditUser({ ...editUser, securityAlerts: e.target.checked })}
+                                                />
+                                                <span className="slider"></span>
+                                            </label>
+                                        </div>
+                                    </>
+                                )}
 
                                 <div className="mt-6 flex gap-3 pt-4 border-t border-[var(--color-border)]">
                                     <button
@@ -1395,7 +1411,8 @@ const UserManagement = () => {
                             </div>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
             {/* User Deletion Custom Alert */}
             {userToDelete && createPortal(
@@ -1442,18 +1459,7 @@ const UserManagement = () => {
                 </div>
             , document.body)}
 
-            {/* Toast Notification */}
-            <div className={`toast-container`}>
-                <div className={`toast ${toast.type} ${toast.visible ? 'visible' : ''}`}>
-                    <div className="toast-icon">
-                        {toast.type === 'success' ? <Check size={18} /> : <AlertCircle size={18} />}
-                    </div>
-                    <div className="toast-content">
-                        <h4>{toast.type === 'success' ? 'Success' : 'Error'}</h4>
-                        <p>{toast.message}</p>
-                    </div>
-                </div>
-            </div>
+
         </div>
     );
 };

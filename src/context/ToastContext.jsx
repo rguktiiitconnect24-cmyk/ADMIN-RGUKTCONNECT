@@ -48,6 +48,28 @@ const TOAST_CONFIG = {
     },
 };
 
+const triggerSuccessAudio = () => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([80, 40, 80]);
+    }
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const context = new AudioContext();
+        const osc = context.createOscillator();
+        const gain = context.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, context.currentTime); 
+        osc.frequency.exponentialRampToValueAtTime(1046.50, context.currentTime + 0.1); 
+        gain.gain.setValueAtTime(0.15, context.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.25);
+        osc.connect(gain);
+        gain.connect(context.destination);
+        osc.start();
+        osc.stop(context.currentTime + 0.25);
+    } catch (e) {}
+};
+
 export const ToastProvider = ({ children }) => {
     const [toast, setToast] = useState({ visible: false, message: '', type: 'success', id: null });
     const [pendingDeletion, setPendingDeletion] = useState(null);
@@ -58,6 +80,10 @@ export const ToastProvider = ({ children }) => {
         if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
         const id = Date.now();
         setToast({ visible: true, message, type, id });
+
+        if (type === 'success') {
+            triggerSuccessAudio();
+        }
 
         if (type !== 'undo') {
             toastTimerRef.current = setTimeout(() => {
@@ -110,46 +136,63 @@ export const ToastProvider = ({ children }) => {
         <ToastContext.Provider value={{ showToast, showUndoToast, handleUndo, hideToast, toast }}>
             {children}
 
-            {/* Premium Global Toast */}
+            {/* Global Toast Container */}
             <div className="toast-container" aria-live="polite">
-                <div className={`premium-toast ${toast.visible ? 'visible' : ''}`}
-                    style={{ '--toast-accent': config.accent, '--toast-glow': config.glow, '--toast-light-bg': config.lightBg }}
-                >
-                    {/* Left accent bar */}
-                    <div className="toast-accent-bar" style={{ background: config.gradient }} />
-
-                    {/* Icon */}
-                    <div className="toast-icon-wrap" style={{ background: config.lightBg }}>
-                        <Icon size={20} style={{ color: config.accent }} strokeWidth={2.5} />
+                {toast.type === 'success' ? (
+                    <div className={`success-toast-card ${toast.visible ? 'visible' : ''}`}>
+                        <svg className="success-wave" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0,192L60,192C120,192,240,192,360,176C480,160,600,128,720,128C840,128,960,160,1080,176C1200,192,1320,192,1380,192L1440,192L1440,320L1380,320C1320,320,1200,320,1080,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
+                        </svg>
+                        <div className="success-icon-container">
+                            <svg className="success-icon-svg" viewBox="0 0 512 512" fill="currentColor">
+                                <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"></path>
+                            </svg>
+                        </div>
+                        <div className="success-message-text-container">
+                            <p className="success-message-text">{toast.message}</p>
+                        </div>
+                        <X className="success-cross-icon" onClick={hideToast} size={18} />
                     </div>
+                ) : (
+                    <div className={`premium-toast ${toast.visible ? 'visible' : ''}`}
+                        style={{ '--toast-accent': config.accent, '--toast-glow': config.glow, '--toast-light-bg': config.lightBg }}
+                    >
+                        {/* Left accent bar */}
+                        <div className="toast-accent-bar" style={{ background: config.gradient }} />
 
-                    {/* Content */}
-                    <div className="toast-body">
-                        <span className="toast-label" style={{ color: config.accent }}>{config.label}</span>
-                        <p className="toast-msg">{toast.message}</p>
-                    </div>
+                        {/* Icon */}
+                        <div className="toast-icon-wrap" style={{ background: config.lightBg }}>
+                            <Icon size={20} style={{ color: config.accent }} strokeWidth={2.5} />
+                        </div>
 
-                    {/* Undo button */}
-                    {toast.type === 'undo' && (
-                        <button className="toast-undo-btn" onClick={handleUndo}>
-                            <RotateCcw size={13} />
-                            Undo
+                        {/* Content */}
+                        <div className="toast-body">
+                            <span className="toast-label" style={{ color: config.accent }}>{config.label}</span>
+                            <p className="toast-msg">{toast.message}</p>
+                        </div>
+
+                        {/* Undo button */}
+                        {toast.type === 'undo' && (
+                            <button className="toast-undo-btn" onClick={handleUndo}>
+                                <RotateCcw size={13} />
+                                Undo
+                            </button>
+                        )}
+
+                        {/* Close */}
+                        <button className="toast-close-btn" onClick={hideToast} aria-label="Close notification">
+                            <X size={15} />
                         </button>
-                    )}
 
-                    {/* Close */}
-                    <button className="toast-close-btn" onClick={hideToast} aria-label="Close notification">
-                        <X size={15} />
-                    </button>
-
-                    {/* Progress bar */}
-                    {toast.visible && (
-                        <div
-                            className={`toast-progress ${toast.type === 'undo' ? 'undo-progress' : ''}`}
-                            style={{ background: config.gradient }}
-                        />
-                    )}
-                </div>
+                        {/* Progress bar */}
+                        {toast.visible && (
+                            <div
+                                className={`toast-progress ${toast.type === 'undo' ? 'undo-progress' : ''}`}
+                                style={{ background: config.gradient }}
+                            />
+                        )}
+                    </div>
+                )}
             </div>
         </ToastContext.Provider>
     );

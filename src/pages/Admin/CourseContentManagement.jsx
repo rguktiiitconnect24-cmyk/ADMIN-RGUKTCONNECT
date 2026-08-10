@@ -5,13 +5,14 @@ import CustomSelect from '../../components/Common/CustomSelect';
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { db } from '../../config/firebase';
 import { collection, getDocs, doc, getDoc, deleteDoc } from 'firebase/firestore';
 import { PROGRAMS } from '../../config/academics';
 import {
     fetchDynamicSubjects, createSubject, updateSubject, deleteSubject, updateSubjectOrder,
-    fetchDynamicUnits, createUnit, updateUnit, deleteUnit,
-    fetchDynamicModules, createModule, updateModule, deleteModule,
+    fetchDynamicUnits, createUnit, updateUnit, deleteUnit, updateUnitOrder,
+    fetchDynamicModules, createModule, updateModule, deleteModule, updateModuleOrder,
     duplicateSubject, duplicateUnit, duplicateModule
 } from '../../utils/academicsUtils';
 import { pdfService } from '../../services/pdfService';
@@ -47,6 +48,10 @@ const CourseContentManagement = () => {
     // Drag state
     const [draggedSubjectIndex, setDraggedSubjectIndex] = useState(null);
     const [dragOverSubjectIndex, setDragOverSubjectIndex] = useState(null);
+    const [draggedUnitIndex, setDraggedUnitIndex] = useState(null);
+    const [dragOverUnitIndex, setDragOverUnitIndex] = useState(null);
+    const [draggedModuleIndex, setDraggedModuleIndex] = useState(null);
+    const [dragOverModuleIndex, setDragOverModuleIndex] = useState(null);
 
     // Multi-select State
     const [selectedSubjectIds, setSelectedSubjectIds] = useState(new Set()); // Set of IDs
@@ -116,17 +121,8 @@ const CourseContentManagement = () => {
     // Clipboard State
     const [clipboard, setClipboard] = useState(null); // { type: 'subject' | 'unit' | 'module', id: '...' }
 
-    // Toast State
-    const [toast, setToast] = useState({
-        visible: false,
-        message: '',
-        type: 'success' // 'success' or 'error'
-    });
-
-    const showToast = (message, type = 'success') => {
-        setToast({ visible: true, message, type });
-        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
-    };
+    // Global Toast Hook
+    const { showToast } = useToast();
 
     // --- Effects ---
 
@@ -598,6 +594,130 @@ const CourseContentManagement = () => {
         }
     };
 
+    // --- Unit Drag and Drop ---
+    const handleDragStartUnit = (e, index) => {
+        setDraggedUnitIndex(index);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', index);
+        setTimeout(() => {
+            if (e.target) e.target.classList.add('dragging');
+        }, 0);
+    };
+
+    const handleDragOverUnit = (e, index) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (draggedUnitIndex === null) return;
+        if (dragOverUnitIndex !== index) {
+            setDragOverUnitIndex(index);
+        }
+    };
+
+    const handleDragEndUnit = (e) => {
+        setDraggedUnitIndex(null);
+        setDragOverUnitIndex(null);
+        if (e.target) e.target.classList.remove('dragging');
+    };
+
+    const handleDropUnit = async (e, dropIndex) => {
+        e.preventDefault();
+        const dragIndex = draggedUnitIndex;
+        setDraggedUnitIndex(null);
+        setDragOverUnitIndex(null);
+        if (e.target) e.target.classList.remove('dragging');
+
+        if (dragIndex === null || dragIndex === dropIndex) return;
+
+        const newUnits = [...units];
+        const [movedItem] = newUnits.splice(dragIndex, 1);
+        newUnits.splice(dropIndex, 0, movedItem);
+
+        let orderChanged = false;
+        newUnits.forEach((unit, i) => {
+            if (unit.order !== i) {
+                unit.order = i;
+                orderChanged = true;
+            }
+        });
+
+        if (!orderChanged) return;
+
+        setUnits(newUnits);
+
+        try {
+            await Promise.all(newUnits.map(unit => 
+                updateUnitOrder(unit.id, unit.order, selectedSubject.id)
+            ));
+            showToast('Unit order updated successfully', 'success');
+        } catch (error) {
+            console.error("Failed to reorder units:", error);
+            showToast('Failed to update unit order', 'error');
+            loadUnits(selectedSubject.id);
+        }
+    };
+
+    // --- Module Drag and Drop ---
+    const handleDragStartModule = (e, index) => {
+        setDraggedModuleIndex(index);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', index);
+        setTimeout(() => {
+            if (e.target) e.target.classList.add('dragging');
+        }, 0);
+    };
+
+    const handleDragOverModule = (e, index) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (draggedModuleIndex === null) return;
+        if (dragOverModuleIndex !== index) {
+            setDragOverModuleIndex(index);
+        }
+    };
+
+    const handleDragEndModule = (e) => {
+        setDraggedModuleIndex(null);
+        setDragOverModuleIndex(null);
+        if (e.target) e.target.classList.remove('dragging');
+    };
+
+    const handleDropModule = async (e, dropIndex) => {
+        e.preventDefault();
+        const dragIndex = draggedModuleIndex;
+        setDraggedModuleIndex(null);
+        setDragOverModuleIndex(null);
+        if (e.target) e.target.classList.remove('dragging');
+
+        if (dragIndex === null || dragIndex === dropIndex) return;
+
+        const newModules = [...modules];
+        const [movedItem] = newModules.splice(dragIndex, 1);
+        newModules.splice(dropIndex, 0, movedItem);
+
+        let orderChanged = false;
+        newModules.forEach((mod, i) => {
+            if (mod.order !== i) {
+                mod.order = i;
+                orderChanged = true;
+            }
+        });
+
+        if (!orderChanged) return;
+
+        setModules(newModules);
+
+        try {
+            await Promise.all(newModules.map(mod => 
+                updateModuleOrder(mod.id, mod.order, selectedUnit.id)
+            ));
+            showToast('Module order updated successfully', 'success');
+        } catch (error) {
+            console.error("Failed to reorder modules:", error);
+            showToast('Failed to update module order', 'error');
+            loadModules(selectedUnit.id);
+        }
+    };
+
     const handlePaste = async (targetType) => {
         if (!clipboard) return;
         setIsSaving(true);
@@ -863,12 +983,24 @@ const CourseContentManagement = () => {
                                 </div>
                             ) :
                                 units.length === 0 ? <div className="empty-state">No units found</div> :
-                                    units.map(unit => (
+                                    units.map((unit, index) => (
                                         <div
                                             key={unit.id}
-                                            className={`manager-item ${selectedUnit?.id === unit.id ? 'active' : ''}`}
+                                            className={`manager-item ${selectedUnit?.id === unit.id ? 'active' : ''} ${draggedUnitIndex === index ? 'dragging' : ''} ${dragOverUnitIndex === index ? 'drag-over' : ''}`}
                                             onClick={() => setSelectedUnit(unit)}
+                                            draggable={unit.isDynamic}
+                                            onDragStart={(e) => handleDragStartUnit(e, index)}
+                                            onDragOver={(e) => handleDragOverUnit(e, index)}
+                                            onDragEnd={handleDragEndUnit}
+                                            onDrop={(e) => handleDropUnit(e, index)}
                                         >
+                                            {unit.isDynamic && (
+                                                <div onClick={e => e.stopPropagation()} className="mr-3 flex items-center">
+                                                    <div className="drag-handle text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                                                        <GripVertical size={16} />
+                                                    </div>
+                                                </div>
+                                            )}
                                             <span className="flex-1 truncate">{unit.label}</span>
                                             {unit.isDynamic && (
                                                 <div className="flex gap-2">
@@ -925,10 +1057,23 @@ const CourseContentManagement = () => {
                                 </div>
                             ) :
                                 modules.length === 0 ? <div className="empty-state">No modules found</div> :
-                                    modules.map(mod => (
-                                        <div key={mod.id} className="module-item">
-                                            <div className="module-header">
-                                                <span className="font-medium">{mod.label}</span>
+                                    modules.map((mod, index) => (
+                                        <div 
+                                            key={mod.id} 
+                                            className={`module-item ${draggedModuleIndex === index ? 'dragging' : ''} ${dragOverModuleIndex === index ? 'drag-over' : ''}`}
+                                            draggable={mod.isDynamic}
+                                            onDragStart={(e) => handleDragStartModule(e, index)}
+                                            onDragOver={(e) => handleDragOverModule(e, index)}
+                                            onDragEnd={handleDragEndModule}
+                                            onDrop={(e) => handleDropModule(e, index)}
+                                        >
+                                            <div className="module-header flex items-center">
+                                                {mod.isDynamic && (
+                                                    <div onClick={e => e.stopPropagation()} className="drag-handle text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 mr-2">
+                                                        <GripVertical size={16} />
+                                                    </div>
+                                                )}
+                                                <span className="font-medium flex-1 truncate">{mod.label}</span>
                                                 {mod.isDynamic && (
                                                     <div className="flex gap-2">
                                                         <button onClick={(e) => { e.stopPropagation(); handleCopy('module', mod.id); }} className="action-btn text-green-500" title="Copy Module">
@@ -1084,20 +1229,29 @@ const CourseContentManagement = () => {
                                                     autoFocus
                                                 />
                                             </div>
-                                            {activeModal === 'unit' && (
-                                                <div className="admin-form-group">
-                                                    <label className="admin-form-label flex items-center gap-2 cursor-pointer w-fit p-3 bg-slate-800/50 rounded-xl border border-slate-700/50 hover:bg-slate-800 transition-colors">
-                                                        <input 
-                                                            type="checkbox" 
-                                                            className="custom-checkbox !w-5 !h-5"
-                                                            checked={newUnitIsQuizEnabled}
-                                                            onChange={e => setNewUnitIsQuizEnabled(e.target.checked)}
-                                                        />
-                                                        <span className="text-sm font-semibold text-slate-200">Enable "Test Your Knowledge" Quiz</span>
-                                                    </label>
-                                                    <p className="text-xs text-slate-400 mt-2 ml-1">If unchecked, the quiz section will be completely hidden from students for this unit.</p>
-                                                </div>
-                                            )}
+                                             {activeModal === 'unit' && (
+                                                 <div className="admin-form-group">
+                                                     <label className="admin-form-label flex items-center justify-between cursor-pointer w-full p-3 bg-slate-800/50 rounded-xl border border-slate-700/50 hover:bg-slate-800 transition-colors">
+                                                         <div className="flex items-center gap-3">
+                                                             <span className="text-sm font-semibold text-slate-200">Enable "Test Your Knowledge" Quiz</span>
+                                                             <span className={newUnitIsQuizEnabled ? "status-badge-active" : "status-badge-inactive"}>
+                                                                 {newUnitIsQuizEnabled ? 'Active' : 'Inactive'}
+                                                             </span>
+                                                         </div>
+                                                         <input 
+                                                             type="checkbox" 
+                                                             className="custom-toggle"
+                                                             checked={newUnitIsQuizEnabled}
+                                                             onChange={e => setNewUnitIsQuizEnabled(e.target.checked)}
+                                                         />
+                                                     </label>
+                                                     <p className="text-xs text-slate-400 mt-2 ml-1">
+                                                         {newUnitIsQuizEnabled 
+                                                             ? 'The quiz section is currently active and visible to students for this unit.' 
+                                                             : 'If inactive, the quiz section will be completely hidden from students for this unit.'}
+                                                     </p>
+                                                 </div>
+                                             )}
                                             <div className="admin-form-group">
                                                 <label className="admin-form-label flex items-center gap-2">
                                                     <Video size={14} /> Video URL (YouTube/MP4)
@@ -1515,23 +1669,7 @@ const CourseContentManagement = () => {
                 document.body
             )}
 
-            {/* Toast Notification */}
-            {createPortal(
-                <div className={`toast-container ${toast.visible ? 'visible' : ''}`}>
-                <div className={`toast ${toast.visible ? 'visible' : ''} ${toast.type}`}>
-                    <div className="toast-icon-wrapper">
-                        <div className="toast-icon">
-                            {toast.type === 'success' ? <CheckCircle size={40} strokeWidth={3} /> : <XCircle size={40} strokeWidth={3} />}
-                        </div>
-                    </div>
-                    <div className="toast-content">
-                        <h4>{toast.type === 'success' ? 'Success!' : 'Error'}</h4>
-                        <p>{toast.message}</p>
-                    </div>
-                </div>
-                </div>,
-                document.body
-            )}
+
 
 
             {/* File Delete Confirmation */}
