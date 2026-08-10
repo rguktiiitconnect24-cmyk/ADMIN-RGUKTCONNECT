@@ -1882,11 +1882,14 @@ textarea {
 
 /* --- Success Toast Card (Uiverse) --- */
 .success-toast-card {
-  width: 340px;
-  min-height: 64px;
+  min-width: 320px !important;
+  max-width: 480px !important;
+  width: auto !important;
+  min-height: 56px !important;
+  height: auto !important;
   border-radius: 14px !important;
   box-sizing: border-box;
-  padding: 0 16px !important;
+  padding: 12px 16px !important;
   background-color: #ffffff !important;
   box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px !important;
   position: relative;
@@ -2133,21 +2136,23 @@ textarea {
 
 /* --- New Success Toast Card (Uiverse) --- */
 .success-toast-card {
-  width: 330px;
-  height: 60px;
-  border-radius: 12px !important;
+  min-width: 320px !important;
+  max-width: 460px !important;
+  width: auto !important;
+  min-height: 56px !important;
+  height: auto !important;
+  border-radius: 14px !important;
   box-sizing: border-box;
-  padding: 0 15px !important;
+  padding: 10px 16px !important;
   background-color: #ffffff !important;
-  box-shadow: rgba(149, 157, 165, 0.15) 0px 8px 24px !important;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px !important;
   position: relative;
   overflow: hidden;
   display: flex !important;
   align-items: center;
   justify-content: flex-start;
   gap: 12px;
-  border: none !important;
-  min-width: 330px !important;
+  border: 1px solid rgba(4, 228, 0, 0.15) !important;
 }
 
 [data-theme='dark'] .success-toast-card {
@@ -2173,7 +2178,7 @@ textarea {
   align-items: center;
   background-color: #04e40048;
   border-radius: 50%;
-  margin-left: 8px;
+  margin-left: 4px;
   flex-shrink: 0;
 }
 
