@@ -23,6 +23,7 @@
     "html5-qrcode": "^2.3.8",
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.8",
+    "katex": "^0.18.4",
     "lucide-react": "^0.563.0",
     "mathlive": "^0.110.0",
     "react": "^19.2.0",
@@ -34,6 +35,9 @@
     "reactflow": "^11.11.4",
     "read-excel-file": "^6.0.3",
     "recharts": "^3.8.1",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
     "ua-parser-js": "^2.0.9",
     "xlsx": "^0.18.5"
   },
