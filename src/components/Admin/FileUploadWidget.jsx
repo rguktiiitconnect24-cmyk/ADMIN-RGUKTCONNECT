@@ -53,13 +53,13 @@ const FileUploadWidget = ({
             setUploadPercent(95);
             
             const firestoreResult = await pdfService.uploadPdfMetadata({
-                gdFileId: uploadResult.fileId,
-                fileName: uploadResult.fileName,
-                publicViewUrl: uploadResult.fileUrl,
-                embedUrl: uploadResult.embedUrl,
-                downloadUrl: uploadResult.downloadUrl,
-                size: uploadResult.size,
-                mimeType: uploadResult.mimeType,
+                gdFileId: uploadResult.fileId || '',
+                fileName: uploadResult.fileName || selectedFile.name,
+                publicViewUrl: uploadResult.fileUrl || uploadResult.url || uploadResult.link || '',
+                embedUrl: uploadResult.embedUrl || '',
+                downloadUrl: uploadResult.downloadUrl || '',
+                size: uploadResult.size || selectedFile.size || 0,
+                mimeType: uploadResult.mimeType || selectedFile.type || 'application/pdf',
                 backendUrl: backendUrl,
                 ...metadata
             });
