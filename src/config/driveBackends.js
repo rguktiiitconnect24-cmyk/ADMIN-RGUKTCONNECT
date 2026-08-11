@@ -63,7 +63,18 @@ export const DRIVE_BACKENDS = {
  * @returns {string|null} The backend URL, or null if no backend is configured.
  */
 export const resolveBackendUrl = (programId, yearId, branchId) => {
-    if (!programId || !yearId || !branchId) return null;
-    const key = `${programId}_${yearId}_${branchId}`;
-    return DRIVE_BACKENDS[key] || null;
+    const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbz4opRsCOpB_Y29fL-Vx85wtoWKAUuYTpIyQVgIJwYI1kEmVYYcMohqu7vuK-0b8H33LQ/exec';
+    
+    if (!programId || !yearId) return DEFAULT_URL;
+    
+    // For PUC, branchId might be undefined, handle it:
+    let key;
+    if (programId === 'puc') {
+        key = `${programId}_${yearId}`;
+    } else {
+        if (!branchId) return DEFAULT_URL;
+        key = `${programId}_${yearId}_${branchId}`;
+    }
+    
+    return DRIVE_BACKENDS[key] || DEFAULT_URL;
 };
