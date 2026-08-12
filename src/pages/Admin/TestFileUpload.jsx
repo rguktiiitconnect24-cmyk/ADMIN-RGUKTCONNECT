@@ -20,7 +20,7 @@ const TestFileUpload = () => {
         subject: 'Test Subject'
     });
 
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4opRsCOpB_Y29fL-Vx85wtoWKAUuYTpIyQVgIJwYI1kEmVYYcMohqu7vuK-0b8H33LQ/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3zrX5t7EDSfe_KU2VaGQVisqUmZ1Tmv9hRCI9lWPC3QtuNfb0oMG1ITV2TbMc96e4/exec";
 
     useEffect(() => {
         return () => {

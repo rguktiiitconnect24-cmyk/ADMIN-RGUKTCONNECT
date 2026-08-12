@@ -238,31 +238,14 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
 
     // Image Upload State
     const [isUploadingImage, setIsUploadingImage] = useState(false);
-    const [isDeletingImage, setIsDeletingImage] = useState(false);
     const imageInputRef = useRef(null);
 
-    const handleRemoveImage = async () => {
-        if (!newQuestion.image) return;
-        
-        const imageUrl = newQuestion.image;
-        setIsDeletingImage(true);
-        try {
-            const { deleteImageFromCloudinaryUrl } = await import('../../services/imageStorageService');
-            const success = await deleteImageFromCloudinaryUrl(imageUrl);
-            if (success) {
-                showSuccessToast("Image deleted from Cloudinary");
-            } else {
-                console.warn("Could not delete image from Cloudinary (might not be found or not a cloudinary URL)");
-            }
-        } catch (error) {
-            console.error("Failed to delete image", error);
-        } finally {
-            setNewQuestion(prev => ({ ...prev, image: null }));
-            setIsDeletingImage(false);
-        }
-    };
-
     const handleImageUpload = async (e) => {
+        if (targetPath && !targetPath.includes('CSE') && !targetPath.includes('Computer Science')) {
+            showSuccessToast("Image upload is currently only supported for the CSE department.", "error");
+            return;
+        }
+
         const file = e.target.files[0];
         if (!file) return;
 
@@ -276,20 +259,44 @@ const UnitQuizManager = ({ targetId, targetLabel, targetPath, onClose }) => {
             return;
         }
 
+        const cloudName = import.meta.env.VITE_CSE_QUIZ_CLOUDINARY_CLOUD_NAME;
+        const apiKey = import.meta.env.VITE_CSE_QUIZ_CLOUDINARY_API_KEY;
+        const apiSecret = import.meta.env.VITE_CSE_QUIZ_CLOUDINARY_API_SECRET;
+
+        if (!cloudName || !apiKey || !apiSecret) {
+            showSuccessToast("Cloudinary credentials not found in .env", "error");
+            return;
+        }
+
         setIsUploadingImage(true);
         try {
-            const { uploadImageFile } = await import('../../services/imageStorageService');
-            const result = await uploadImageFile(file, 'Quizzes');
+            const timestamp = Math.round((new Date()).getTime() / 1000);
+            const publicId = `quiz_img_${Date.now()}`;
+            const signature = await generateCloudinarySignature(publicId, timestamp, apiSecret);
 
-            if (result && result.cloudinaryUrl) {
-                setNewQuestion(prev => ({ ...prev, image: result.cloudinaryUrl }));
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('api_key', apiKey);
+            formData.append('timestamp', timestamp);
+            formData.append('signature', signature);
+            formData.append('public_id', publicId);
+
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.secure_url) {
+                setNewQuestion(prev => ({ ...prev, image: data.secure_url }));
                 showSuccessToast("Image uploaded successfully!");
             } else {
-                throw new Error("Upload failed, no URL returned.");
+                showSuccessToast("Failed to upload image: " + (data.error?.message || "Unknown error"), "error");
             }
         } catch (error) {
             console.error("Upload error:", error);
-            showSuccessToast("Error uploading image: " + (error.message || "Unknown error"), "error");
+            showSuccessToast("Error uploading image.", "error");
         } finally {
             setIsUploadingImage(false);
             if (imageInputRef.current) {
@@ -1224,14 +1231,13 @@ math-field::part(mode-toggle) {
                                         )}
                                         {newQuestion.image && (
                                             <div className="mt-2 relative inline-block rounded-lg overflow-hidden border border-white/20">
-                                                <img src={newQuestion.image} alt="Question Attachment" className="w-[100px] h-[20px] object-contain bg-black/20" />
+                                                <img src={newQuestion.image} alt="Question Attachment" className="max-h-48 object-contain bg-black/20" />
                                                 <button 
-                                                    onClick={handleRemoveImage}
-                                                    disabled={isDeletingImage}
-                                                    className="absolute top-2 right-2 p-1 bg-red-500/80 text-white rounded-full hover:bg-red-600 transition-colors disabled:opacity-50"
+                                                    onClick={() => setNewQuestion(prev => ({ ...prev, image: null }))}
+                                                    className="absolute top-2 right-2 p-1 bg-red-500/80 text-white rounded-full hover:bg-red-600 transition-colors"
                                                     title="Remove Image"
                                                 >
-                                                    {isDeletingImage ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />}
+                                                    <X size={14} />
                                                 </button>
                                             </div>
                                         )}
@@ -1393,7 +1399,7 @@ math-field::part(mode-toggle) {
                                                         <MixedMathText text={q.questionText} />
                                                         {q.image && (
                                                             <div className="mt-3 mb-1">
-                                                                <img src={q.image} alt="Question" className="w-[100px] h-[20px] object-contain rounded-lg bg-black/10 border border-white/10" />
+                                                                <img src={q.image} alt="Question" className="max-h-48 object-contain rounded-lg bg-black/10 border border-white/10" />
                                                             </div>
                                                         )}
                                                     </div>

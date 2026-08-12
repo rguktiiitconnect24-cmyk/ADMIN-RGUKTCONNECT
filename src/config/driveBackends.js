@@ -42,11 +42,11 @@ export const DRIVE_BACKENDS = {
     'btech_btech3_eee': 'https://script.google.com/macros/s/AKfycbxoWYeXJ9s-XyN_QZDrHC46bs82rL0ehM7fmxJeIXdct5zLuzbqOUs0uo8QLkcUzN0/exec',
     'btech_btech4_eee': 'https://script.google.com/macros/s/AKfycbxoWYeXJ9s-XyN_QZDrHC46bs82rL0ehM7fmxJeIXdct5zLuzbqOUs0uo8QLkcUzN0/exec',
 
-    // CSE Endpoints (Placeholders: update these URLs after deploying)
-    'btech_btech1_cse': 'https://script.google.com/macros/s/AKfycbz4opRsCOpB_Y29fL-Vx85wtoWKAUuYTpIyQVgIJwYI1kEmVYYcMohqu7vuK-0b8H33LQ/exec',
-    'btech_btech2_cse': 'https://script.google.com/macros/s/AKfycbz4opRsCOpB_Y29fL-Vx85wtoWKAUuYTpIyQVgIJwYI1kEmVYYcMohqu7vuK-0b8H33LQ/exec',
-    'btech_btech3_cse': 'https://script.google.com/macros/s/AKfycbz4opRsCOpB_Y29fL-Vx85wtoWKAUuYTpIyQVgIJwYI1kEmVYYcMohqu7vuK-0b8H33LQ/exec',
-    'btech_btech4_cse': 'https://script.google.com/macros/s/AKfycbz4opRsCOpB_Y29fL-Vx85wtoWKAUuYTpIyQVgIJwYI1kEmVYYcMohqu7vuK-0b8H33LQ/exec',
+    // CSE Endpoints
+    'btech_btech1_cse': 'https://script.google.com/macros/s/AKfycbw3zrX5t7EDSfe_KU2VaGQVisqUmZ1Tmv9hRCI9lWPC3QtuNfb0oMG1ITV2TbMc96e4/exec',
+    'btech_btech2_cse': 'https://script.google.com/macros/s/AKfycbw3zrX5t7EDSfe_KU2VaGQVisqUmZ1Tmv9hRCI9lWPC3QtuNfb0oMG1ITV2TbMc96e4/exec',
+    'btech_btech3_cse': 'https://script.google.com/macros/s/AKfycbw3zrX5t7EDSfe_KU2VaGQVisqUmZ1Tmv9hRCI9lWPC3QtuNfb0oMG1ITV2TbMc96e4/exec',
+    'btech_btech4_cse': 'https://script.google.com/macros/s/AKfycbw3zrX5t7EDSfe_KU2VaGQVisqUmZ1Tmv9hRCI9lWPC3QtuNfb0oMG1ITV2TbMc96e4/exec',
 
     // ME Endpoints (Placeholders: update these URLs after deploying)
     'btech_btech1_me': 'https://script.google.com/macros/s/AKfycbz4opRsCOpB_Y29fL-Vx85wtoWKAUuYTpIyQVgIJwYI1kEmVYYcMohqu7vuK-0b8H33LQ/exec',
