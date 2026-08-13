@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, User, Users, MessageSquare, Calendar, ClipboardList, Database, QrCode, BookOpen, Bell, Library, Activity } from 'lucide-react';
+import { LayoutDashboard, FileText, User, Users, MessageSquare, Calendar, ClipboardList, Database, QrCode, BookOpen, Bell, Library, Activity, Send } from 'lucide-react';
 
 export const NAV_ITEMS = [
     {
@@ -74,6 +74,14 @@ export const NAV_ITEMS = [
         label: 'Notice Board',
         path: '/admin/notices',
         icon: Bell,
+        adminOnly: true,
+        hideOnMobile: true
+    },
+    {
+        id: 'admin-notifications',
+        label: 'Push Notifications',
+        path: '/admin/notifications',
+        icon: Send,
         adminOnly: true,
         hideOnMobile: true
     },

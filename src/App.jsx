@@ -49,6 +49,7 @@ const CreateFacultyAccount = lazy(() => import('./pages/Admin/CreateFacultyAccou
 const TestFileUpload = lazy(() => import('./pages/Admin/TestFileUpload'));
 const BookOrdersManagement = lazy(() => import('./pages/Admin/BookOrdersManagement'));
 const AppHealthMonitor = lazy(() => import('./pages/Admin/AppHealthMonitor'));
+const NotificationsManager = lazy(() => import('./pages/NotificationsManager'));
 
 
 const AdminRoute = ({ children, permission }) => {
@@ -308,6 +309,7 @@ const App = () => {
                 <Route path="/admin/quizzes/:quizId/analytics" element={<AdminRoute permission="admin-quizzes"><AdminQuizAnalytics /></AdminRoute>} />
                 <Route path="/admin/quizzes/:quizId/question/:questionIndex" element={<AdminRoute permission="admin-quizzes"><AdminQuestionAnalytics /></AdminRoute>} />
                 <Route path="/admin/test-upload" element={<AdminRoute><TestFileUpload /></AdminRoute>} />
+                <Route path="/admin/notifications" element={<AdminRoute permission="admin-notices"><NotificationsManager /></AdminRoute>} />
 
                 <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
               </Route>
