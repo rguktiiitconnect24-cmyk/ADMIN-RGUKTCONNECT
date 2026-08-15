@@ -121,7 +121,7 @@
     font-size: 1.05rem;
     font-weight: 500;
     background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
+/* backdrop-filter: blur(10px); */
     padding: 0.75rem 1.25rem;
     border-radius: 0.75rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -329,8 +329,8 @@
 
 .login-card {
     background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+/* backdrop-filter: blur(12px); */
+/* -webkit-backdrop-filter: blur(12px); */
     border: 1px solid var(--color-border);
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-xl);
@@ -639,8 +639,8 @@
     align-items: center;
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+/* backdrop-filter: blur(4px); */
+/* -webkit-backdrop-filter: blur(4px); */
     animation: fadeIn 0.2s ease-out;
 }
 
@@ -984,7 +984,7 @@
 /* Autofill Prompt Premium Styles */
 .autofill-prompt {
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(8px);
+/* backdrop-filter: blur(8px); */
     border: 1px solid var(--color-primary-100);
     border-radius: 1rem;
     padding: 1rem;
@@ -1085,8 +1085,8 @@
     right: 0;
     bottom: 0;
     background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+/* backdrop-filter: blur(8px); */
+/* -webkit-backdrop-filter: blur(8px); */
     z-index: 2000;
     display: flex;
     align-items: flex-end;
@@ -1675,7 +1675,7 @@
     position: fixed;
     inset: 0;
     background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(12px);
+/* backdrop-filter: blur(12px); */
     z-index: 10000;
     display: flex;
     align-items: center;

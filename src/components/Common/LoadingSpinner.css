@@ -108,8 +108,8 @@
 }
 
 .backdrop-blur-sm {
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+/* backdrop-filter: blur(4px); */
+/* -webkit-backdrop-filter: blur(4px); */
 }
 
 /* Dots Animation */

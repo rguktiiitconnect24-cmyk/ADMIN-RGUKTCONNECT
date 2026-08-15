@@ -5,8 +5,8 @@
     width: 100vw;
     height: 100dvh;
     background: rgba(15, 23, 42, 0.95); /* Darker backdrop for full screen */
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+/* backdrop-filter: blur(12px); */
+/* -webkit-backdrop-filter: blur(12px); */
     z-index: 9999;
     display: flex;
     align-items: center;
@@ -24,8 +24,8 @@
 
 .cgpa-modal-content {
     background: rgba(255, 255, 255, 0.95); /* More solid background for full screen */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+/* backdrop-filter: blur(20px); */
+/* -webkit-backdrop-filter: blur(20px); */
     border: none;
     border-radius: 0;
     width: 100vw;

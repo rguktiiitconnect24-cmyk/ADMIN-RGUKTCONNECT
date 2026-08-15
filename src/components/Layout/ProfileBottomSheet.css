@@ -4,8 +4,8 @@
     inset: 0;
     z-index: 100000;
     background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+/* backdrop-filter: blur(8px); */
+/* -webkit-backdrop-filter: blur(8px); */
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -30,7 +30,7 @@
 
 [data-theme='dark'] .profile-sheet-content {
     background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(40px);
+/* backdrop-filter: blur(40px); */
 }
 
 .profile-sheet-handle {
@@ -240,7 +240,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(10px);
+/* backdrop-filter: blur(10px); */
     padding: 2rem;
 }
 
@@ -276,7 +276,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    backdrop-filter: blur(4px);
+/* backdrop-filter: blur(4px); */
     transition: all 0.2s;
 }
 

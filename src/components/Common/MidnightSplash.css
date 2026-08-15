@@ -9,8 +9,8 @@
     z-index: 100000;
     overflow: hidden;
     background-color: var(--color-loader-bg-end);
-    backdrop-filter: blur(15px) saturate(160%);
-    -webkit-backdrop-filter: blur(15px) saturate(160%);
+/* backdrop-filter: blur(15px) saturate(160%); */
+/* -webkit-backdrop-filter: blur(15px) saturate(160%); */
 }
 
 /* Mesh Gradient Background */

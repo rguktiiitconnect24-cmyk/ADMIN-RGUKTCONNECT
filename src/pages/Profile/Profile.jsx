@@ -289,11 +289,11 @@ const Profile = () => {
         });
     };
 
-    useEffect(() => {
-        if (previewUrl) {
-            urlToBase64(previewUrl).then(setPdfAvatar);
-        }
-    }, [previewUrl]);
+    // useEffect(() => {
+    //     if (previewUrl) {
+    //         urlToBase64(previewUrl).then(setPdfAvatar);
+    //     }
+    // }, [previewUrl]);
     const [showMobileDetail, setShowMobileDetail] = useState(false);
 
     // Permissions State

@@ -324,8 +324,8 @@ input:checked + .slider:before {
 
 .preview-bottom-sheet {
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+/* backdrop-filter: blur(16px); */
+/* -webkit-backdrop-filter: blur(16px); */
     border-top: 1px solid rgba(255, 255, 255, 0.8);
     border-radius: 32px 32px 0 0;
     padding: 36px 24px 28px;

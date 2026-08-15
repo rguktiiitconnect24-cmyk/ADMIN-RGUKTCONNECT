@@ -149,13 +149,13 @@
 .qr-scan-status-overlay.error {
     background: rgba(15, 23, 42, 0.92);
     color: #f87171;
-    backdrop-filter: blur(4px);
+/* backdrop-filter: blur(4px); */
 }
 
 .qr-scan-status-overlay.idle {
     background: rgba(15, 23, 42, 0.85);
     color: rgba(255,255,255,0.8);
-    backdrop-filter: blur(4px);
+/* backdrop-filter: blur(4px); */
 }
 
 .qr-status-sub {

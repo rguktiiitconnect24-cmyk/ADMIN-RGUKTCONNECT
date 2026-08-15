@@ -71,7 +71,7 @@
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
+/* backdrop-filter: blur(4px); */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -207,4 +207,4 @@
 
 /* Dark Mode Support (optional, based on your system) */
 html[data-theme="dark"] /* Add dark mode specific overrides if parent theme supports it */
-    /* .upload-dropzone { background-color: #1e293b; border-color: #475569; } */
+    /* .upload-dropzone { background-color: #1e293b; border-color: #475569; } */

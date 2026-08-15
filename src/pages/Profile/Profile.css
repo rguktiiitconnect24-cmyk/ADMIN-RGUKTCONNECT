@@ -109,8 +109,8 @@
 
 .profile-glass-card {
     background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+/* backdrop-filter: blur(16px); */
+/* -webkit-backdrop-filter: blur(16px); */
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: var(--radius-2xl);
     width: 92%;
@@ -201,7 +201,7 @@
 
 .image-upload-overlay {
     background: rgba(15, 23, 42, 0.8) !important;
-    backdrop-filter: blur(8px) !important;
+/* backdrop-filter: blur(8px) !important; */
 }
 
 .profile-info {
@@ -783,7 +783,7 @@ select.profile-form-input {
     padding: 0.5rem;
     z-index: 1000;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(12px);
+/* backdrop-filter: blur(12px); */
     overflow: hidden;
 }
 
@@ -1661,7 +1661,7 @@ input:checked+.slider:before {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
+/* backdrop-filter: blur(4px); */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1722,7 +1722,7 @@ input:checked+.slider:before {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
+/* backdrop-filter: blur(8px); */
     display: flex !important;
     align-items: flex-start !important;
     justify-content: center !important;
@@ -1888,7 +1888,7 @@ input:checked+.slider:before {
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
+/* backdrop-filter: blur(8px); */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2083,7 +2083,7 @@ transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
+/* backdrop-filter: blur(8px); */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3110,7 +3110,7 @@ transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     width: 100vw;
     height: 100dvh;
     background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(20px);
+/* backdrop-filter: blur(20px); */
     z-index: 9999999;
     display: flex;
     flex-direction: column;
@@ -3662,7 +3662,7 @@ transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
 [data-theme='dark'] .profile-card-action-btn {
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
+/* backdrop-filter: blur(10px); */
 }
 
 [data-theme='dark'] .profile-card-action-btn:hover {
@@ -4158,8 +4158,8 @@ transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     inset: 3px;
     z-index: -1;
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+/* backdrop-filter: blur(24px); */
+/* -webkit-backdrop-filter: blur(24px); */
     border-radius: 21px;
     border: 1px solid rgba(0, 0, 0, 0.05);
 }
@@ -4673,7 +4673,7 @@ transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(12px);
+/* backdrop-filter: blur(12px); */
     display: flex;
     align-items: center;
     justify-content: center;

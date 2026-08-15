@@ -34,8 +34,8 @@
 
 .mobile-day-accordion {
     background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+/* backdrop-filter: blur(12px); */
+/* -webkit-backdrop-filter: blur(12px); */
     border-radius: 16px;
     padding: 1.1rem 1.4rem;
     display: flex;
@@ -130,7 +130,7 @@
     font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.05em;
-    backdrop-filter: blur(4px);
+/* backdrop-filter: blur(4px); */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
@@ -212,8 +212,8 @@
 
 .mobile-free-period {
     background: rgba(30, 41, 59, 0.6);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+/* backdrop-filter: blur(8px); */
+/* -webkit-backdrop-filter: blur(8px); */
     border: 1px dashed rgba(148, 163, 184, 0.3);
     color: #94a3b8;
     align-items: center;
