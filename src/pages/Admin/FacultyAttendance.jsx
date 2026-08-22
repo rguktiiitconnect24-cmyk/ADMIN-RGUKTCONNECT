@@ -1247,19 +1247,19 @@ const FacultyAttendance = () => {
                     }}></div>
                     
                     <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1.5rem' }}>
-                        <div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <button onClick={() => {
                                 setIsReadOnly(false);
                                 navigate('/admin/users');
                             }} style={{
                                 background: 'none', border: 'none', color: '#4f46e5', cursor: 'pointer',
                                 fontSize: '0.875rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.25rem',
-                                marginBottom: '0.75rem', padding: 0
+                                padding: 0, alignSelf: 'flex-start'
                             }}>
                                 <ArrowLeft size={14} /> Back to Class Selection
                             </button>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#1f2937', margin: '0 0 0.5rem 0', letterSpacing: '-0.025em' }}>
-                                {selection.year} {selection.branch !== 'PUC' ? `• ${selection.branch}` : ''} • Sec {selection.section}
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#1f2937', margin: 0, letterSpacing: '-0.025em', lineHeight: '1.2' }}>
+                                {selection.year} {selection.branch !== 'PUC' ? `• ${selection.branch}` : ''} • Sec {selection.section?.replace(/^(?:SECTION|SEC)\s*-?\s*/i, '').trim() || ''}
                             </h2>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#6b7280', fontWeight: '500', flexWrap: 'wrap' }}>
                                 <BookOpen size={16} color="#6366f1"/> 
@@ -1274,51 +1274,51 @@ const FacultyAttendance = () => {
                         </div>
                         
                         <div style={{
-                            display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem',
-                            backgroundColor: '#f9fafb', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #f3f4f6'
+                            display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem',
+                            backgroundColor: '#f9fafb', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #f3f4f6',
+                            width: '100%', boxSizing: 'border-box'
                         }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderRight: '1px solid #e5e7eb', paddingRight: '1rem' }}>
-                                <div style={{ backgroundColor: '#fff', padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', flex: '1 1 auto', minWidth: '200px' }}>
+                                <div style={{ width: '100%', backgroundColor: '#fff', padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <Calendar size={16} color="#6366f1"/>
                                     <input 
                                         type="date" 
-                                        style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: '0.875rem', fontWeight: '600', color: '#374151', cursor: 'pointer' }}
+                                        style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: '0.875rem', fontWeight: '600', color: '#374151', cursor: 'pointer', width: '100%' }}
                                         value={selection.date}
                                         onChange={(e) => updateSelection('date', e.target.value)}
                                     />
                                 </div>
                             </div>
                             
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', flex: '1 1 auto' }}>
                                 <button 
                                     style={{
-                                        backgroundColor: '#fff', color: '#4b5563', padding: '0.5rem 1rem', borderRadius: '0.5rem', border: '1px solid #d1d5db',
-                                        display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                                        flex: '1 1 auto', backgroundColor: '#fff', color: '#4b5563', padding: '0.5rem 1rem', borderRadius: '0.5rem', border: '1px solid #d1d5db',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
                                     }}
                                     onClick={fetchHistory}
                                     disabled={loading || students.length === 0}
                                 >
                                     <Clock size={16}/> History
                                 </button>
-                                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                                 {!isReadOnly && (
                                     <>
                                         <button onClick={() => markAll('present')} style={{
-                                            backgroundColor: '#10b981', color: '#fff', padding: '0.5rem 1rem', borderRadius: '0.5rem', border: 'none',
-                                            display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer', boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)'
+                                            flex: '1 1 auto', backgroundColor: '#10b981', color: '#fff', padding: '0.5rem 1rem', borderRadius: '0.5rem', border: 'none',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer', boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)'
                                         }}>
                                             <CheckCircle2 size={16}/> All Present
                                         </button>
                                         <button onClick={() => markAll('absent')} style={{
-                                            backgroundColor: '#f43f5e', color: '#fff', padding: '0.5rem 1rem', borderRadius: '0.5rem', border: 'none',
-                                            display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer', boxShadow: '0 2px 4px rgba(244, 63, 94, 0.2)'
+                                            flex: '1 1 auto', backgroundColor: '#f43f5e', color: '#fff', padding: '0.5rem 1rem', borderRadius: '0.5rem', border: 'none',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer', boxShadow: '0 2px 4px rgba(244, 63, 94, 0.2)'
                                         }}>
                                             <XCircle size={16}/> All Absent
                                         </button>
                                     </>
                                 )}
                             </div>
-                        </div>    </div>
+                        </div>
                     </div>
                 </div>
 
