@@ -941,7 +941,7 @@ const UserManagement = () => {
                                                                                                                 key={sub.id}
                                                                                                                 onClick={(e) => {
                                                                                                                     e.stopPropagation();
-                                                                                                                    navigate('/admin/attendance', { replace: true,
+                                                                                                                    navigate('/admin/attendance', {
                                                                                                                         state: {
                                                                                                                             year: year.id,
                                                                                                                             branch: {
