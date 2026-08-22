@@ -1190,13 +1190,15 @@ const FacultyAttendance = () => {
                     ) : (
                         <div>
                             {displayedHistory.map(record => {
-                                const isToday = record.date === new Date().toISOString().split('T')[0];
+                                const d = new Date();
+                                const localToday = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                                const isToday = record.date === localToday;
                                 return (
                                 <div key={record.date} className="history-card" style={{ position: 'relative' }}>
                                     {isToday && (
                                         <span style={{
                                             position: 'absolute', top: 0, left: 0, borderTopLeftRadius: '0.75rem', borderBottomRightRadius: '0.5rem',
-                                            padding: '0.15rem 0.75rem', fontSize: '0.65rem', fontWeight: 'bold', backgroundColor: '#ef4444',
+                                            padding: '0.15rem 0.75rem', fontSize: '0.65rem', fontWeight: 'bold', backgroundColor: '#10b981',
                                             color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em', boxShadow: '1px 1px 3px rgba(0,0,0,0.1)'
                                         }}>New</span>
                                     )}
