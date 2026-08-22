@@ -1322,20 +1322,27 @@ const FacultyAttendance = () => {
                     </div>
                 </div>
 
-                <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
-                    <div style={{ position: 'absolute', top: '50%', left: '1rem', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>
-                        <Search color="#9ca3af" size={18} />
+                <div style={{ position: 'relative', marginBottom: '1.5rem', width: '100%', maxWidth: '100%' }}>
+                    <div style={{ position: 'absolute', top: '50%', left: '1rem', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex', alignItems: 'center', transition: 'color 0.2s ease' }}>
+                        <Search color="#6b7280" size={18} />
                     </div>
                     <input 
                         type="text" 
-                        placeholder="Search students by Name or ID..." 
+                        placeholder="Search by Name or last 4 digits of ID (e.g. 1234)"
                         style={{
-                            width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem', backgroundColor: '#fff',
-                            border: '1px solid #e5e7eb', borderRadius: '0.75rem', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                            outline: 'none', transition: 'border-color 0.2s', fontSize: '0.95rem'
+                            width: '100%', padding: '0.875rem 1rem 0.875rem 2.75rem', borderRadius: '0.75rem',
+                            border: '1px solid #d1d5db', fontSize: '0.9375rem', color: '#1f2937', outline: 'none',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff',
+                            transition: 'all 0.2s ease', boxSizing: 'border-box'
                         }}
-                        onFocus={(e) => e.target.style.borderColor = '#6366f1'}
-                        onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                        onFocus={(e) => {
+                            e.target.style.borderColor = '#6366f1';
+                            e.target.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.2)';
+                        }}
+                        onBlur={(e) => {
+                            e.target.style.borderColor = '#d1d5db';
+                            e.target.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+                        }}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
 
