@@ -430,6 +430,7 @@ const FacultyAttendance = () => {
 
             await batch.commit();
             showToast("Attendance submitted successfully!", "success");
+            await fetchHistory();
             
         } catch (error) {
             console.error("Error submitting attendance:", error);
