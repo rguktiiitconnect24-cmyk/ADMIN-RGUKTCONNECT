@@ -1258,17 +1258,17 @@ const FacultyAttendance = () => {
                             }}>
                                 <ArrowLeft size={14} /> Back to Class Selection
                             </button>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#1f2937', margin: 0, letterSpacing: '-0.025em', lineHeight: '1.2' }}>
-                                {selection.year} {selection.branch !== 'PUC' ? `• ${selection.branch}` : ''} • Sec {selection.section?.replace(/^(?:SECTION|SEC)\s*-?\s*/i, '').trim() || ''}
+                            <h2 style={{ fontSize: '1.125rem', fontWeight: '700', color: '#374151', margin: 0, letterSpacing: '-0.01em', lineHeight: '1.2' }}>
+                                {(selection.year || '').toUpperCase()} {selection.branch !== 'PUC' ? `• ${selection.branch}` : ''} • Section {selection.section?.replace(/^(?:SECTION|SEC)\s*-?\s*/i, '').trim() || ''}
                             </h2>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#6b7280', fontWeight: '500', flexWrap: 'wrap' }}>
-                                <BookOpen size={16} color="#6366f1"/> 
-                                <span style={{ backgroundColor: '#e0e7ff', color: '#4338ca', padding: '0.25rem 0.75rem', borderRadius: '0.375rem', fontSize: '0.875rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '-0.25rem' }}>
+                                <span style={{ backgroundColor: '#e0e7ff', color: '#4338ca', padding: '0.125rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.75rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                    <BookOpen size={12} /> 
                                     {selection.subject}
                                 </span>
-                                <span style={{ backgroundColor: '#f3f4f6', color: '#4b5563', padding: '0.25rem 0.75rem', borderRadius: '0.375rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                                    <Users size={14} color="#6b7280"/>
-                                    {filteredStudents.length} {filteredStudents.length === 1 ? 'Student' : 'Students'}
+                                <span style={{ backgroundColor: '#f3f4f6', color: '#4b5563', padding: '0.125rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.75rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                    <Users size={12} />
+                                    {filteredStudents.length} Students
                                 </span>
                             </div>
                         </div>
