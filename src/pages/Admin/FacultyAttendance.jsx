@@ -1230,7 +1230,7 @@ const FacultyAttendance = () => {
                                         </button>
                                     </div>
                                 </div>
-                            ))}
+                            )})}
                         </div>
                     )}
                 </div>
