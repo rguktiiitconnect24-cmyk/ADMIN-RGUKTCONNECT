@@ -1189,12 +1189,21 @@ const FacultyAttendance = () => {
                         </div>
                     ) : (
                         <div>
-                            {displayedHistory.map(record => (
+                            {displayedHistory.map(record => {
+                                const isToday = record.date === new Date().toISOString().split('T')[0];
+                                return (
                                 <div key={record.date} className="history-card">
                                     <div>
                                         <div className="history-date">
                                             <Calendar size={18} color="#6366f1" />
                                             {record.date}
+                                            {isToday && (
+                                                <span style={{
+                                                    marginLeft: '8px', padding: '2px 8px', borderRadius: '12px',
+                                                    fontSize: '0.7rem', fontWeight: 'bold', backgroundColor: '#fee2e2',
+                                                    color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.05em'
+                                                }}>New</span>
+                                            )}
                                         </div>
                                         <div className="history-stats">
                                             <strong>{record.present} / {record.total} Present</strong> ({(record.present/record.total*100).toFixed(0)}%)
