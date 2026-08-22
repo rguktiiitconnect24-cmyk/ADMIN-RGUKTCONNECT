@@ -129,7 +129,7 @@ export default defineConfig({
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
           'vendor-utils': ['crypto-js', 'date-fns', 'ua-parser-js'],
-          'vendor-ui-libs': ['lucide-react', 'driver.js'],
+          'vendor-ui-libs': ['lucide-react'],
           'vendor-heavy-ml': ['face-api.js'],
           'vendor-heavy-export': ['html2canvas', 'jspdf', 'html2pdf.js']
         }
