@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { bulkUploadDb } from '../../config/firebase';
 import { collection, doc, writeBatch, serverTimestamp } from 'firebase/firestore';
 import readXlsxFile from 'read-excel-file';
-import './AttendanceManagement.css'; // Reusing AttendanceManagement CSS
+import './FacultyAttendance.css'; // Reusing FacultyAttendance CSS
 
 const CgpaManagement = () => {
     const [file, setFile] = useState(null);
