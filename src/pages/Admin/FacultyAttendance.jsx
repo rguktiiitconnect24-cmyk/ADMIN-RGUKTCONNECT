@@ -1508,13 +1508,13 @@ const FacultyAttendance = () => {
                             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
                                 <div style={{ flex: 1, backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1rem', borderRadius: '0.75rem', textAlign: 'center' }}>
                                     <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#059669' }}>
-                                        {Object.values(attendanceData).filter(s => s === 'present').length}
+                                        {allStudents.filter(s => attendanceData[s.id] === 'present').length}
                                     </div>
                                     <div style={{ fontSize: '0.875rem', color: '#10b981', fontWeight: '500' }}>Present</div>
                                 </div>
                                 <div style={{ flex: 1, backgroundColor: '#fff1f2', border: '1px solid #fecdd3', padding: '1rem', borderRadius: '0.75rem', textAlign: 'center' }}>
                                     <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#e11d48' }}>
-                                        {Object.values(attendanceData).filter(s => s === 'absent').length}
+                                        {allStudents.filter(s => attendanceData[s.id] === 'absent').length}
                                     </div>
                                     <div style={{ fontSize: '0.875rem', color: '#f43f5e', fontWeight: '500' }}>Absent</div>
                                 </div>
