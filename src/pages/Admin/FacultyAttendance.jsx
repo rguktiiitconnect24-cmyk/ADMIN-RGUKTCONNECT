@@ -592,9 +592,9 @@ const FacultyAttendance = () => {
         showToast(`Viewing attendance for ${dateToView}`, "info");
     };
 
-    const filteredStudents = allStudents.filter(s => 
-        (s.fullName || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
-        (s.studentId || s.id).toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredStudents = students.filter(s => 
+        (s.fullName || s.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+        (s.studentId || s.id || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const renderWizard = () => {
