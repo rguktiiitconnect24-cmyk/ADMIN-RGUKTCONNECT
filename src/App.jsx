@@ -34,7 +34,6 @@ const TimetableManagement = lazy(() => import('./pages/Admin/TimetableManagement
 const AdminExams = lazy(() => import('./pages/Admin/AdminExams'));
 const AdminExamSettings = lazy(() => import('./pages/Admin/AdminExamSettings'));
 const AppUpdateManagement = lazy(() => import('./pages/Admin/AppUpdateManagement'));
-const AttendanceManagement = lazy(() => import('./pages/Admin/AttendanceManagement'));
 const CgpaManagement = lazy(() => import('./pages/Admin/CgpaManagement'));
 const AdminQRScanner = lazy(() => import('./pages/Admin/AdminQRScanner'));
 const AdminStudentDetail = lazy(() => import('./pages/Admin/AdminStudentDetail'));
@@ -50,14 +49,19 @@ const TestFileUpload = lazy(() => import('./pages/Admin/TestFileUpload'));
 const BookOrdersManagement = lazy(() => import('./pages/Admin/BookOrdersManagement'));
 const AppHealthMonitor = lazy(() => import('./pages/Admin/AppHealthMonitor'));
 const NotificationsManager = lazy(() => import('./pages/NotificationsManager'));
+const FacultyAttendance = lazy(() => import('./pages/Admin/FacultyAttendance'));
 
-
-const AdminRoute = ({ children, permission }) => {
+const AdminRoute = ({ children, permission, allowFaculty = false }) => {
   const { user, loading } = useAuth();
   if (loading) return <LoadingTransition persistent />;
-  if (!user || user.role?.toLowerCase() !== 'admin') return <Navigate to="/login" replace />;
   
-  if (permission && user.permissions && user.permissions.length > 0) {
+  const userRole = user?.role?.toLowerCase();
+  
+  if (!user || (userRole !== 'admin' && !(userRole === 'faculty' && allowFaculty))) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (userRole === 'admin' && permission && user.permissions && user.permissions.length > 0) {
     if (!user.permissions.includes('all') && !user.permissions.includes(permission)) {
       return <Navigate to="/admin/dashboard" replace />;
     }
@@ -280,28 +284,28 @@ const App = () => {
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgetPassword />} />
               <Route element={<Layout />}>
-                <Route path="/admin" element={<AdminRoute><Navigate to="/admin/dashboard" replace /></AdminRoute>} />
-                <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-                <Route path="/admin/users" element={<AdminRoute permission="admin-users"><UserManagement /></AdminRoute>} />
+                <Route path="/admin" element={<AdminRoute allowFaculty={true}><Navigate to="/admin/dashboard" replace /></AdminRoute>} />
+                <Route path="/admin/dashboard" element={<AdminRoute allowFaculty={true}><AdminDashboard /></AdminRoute>} />
+                <Route path="/admin/users" element={<AdminRoute permission="admin-users" allowFaculty={true}><UserManagement /></AdminRoute>} />
                 <Route path="/admin/new" element={<AdminRoute permission="admin-users"><CreateAdminAccount /></AdminRoute>} />
                 <Route path="/admin/faculty/new" element={<AdminRoute permission="admin-users"><CreateFacultyAccount /></AdminRoute>} />
-                <Route path="/admin/content" element={<AdminRoute permission="admin-content"><ContentManagement /></AdminRoute>} />
-                <Route path="/admin/courses" element={<AdminRoute permission="admin-courses"><CourseContentManagement /></AdminRoute>} />
+                <Route path="/admin/content" element={<AdminRoute permission="admin-content" allowFaculty={true}><ContentManagement /></AdminRoute>} />
+                <Route path="/admin/courses" element={<AdminRoute permission="admin-courses" allowFaculty={true}><CourseContentManagement /></AdminRoute>} />
                 <Route path="/admin/feedback" element={<AdminRoute><AdminFeedback /></AdminRoute>} />
                 <Route path="/admin/complaints" element={<AdminRoute permission="admin-complaints"><ComplaintsManagement /></AdminRoute>} />
-                <Route path="/admin/notices" element={<AdminRoute permission="admin-notices"><NoticeManagement /></AdminRoute>} />
-                <Route path="/admin/notices/create" element={<AdminRoute permission="admin-notices"><CreateNotice /></AdminRoute>} />
-                <Route path="/admin/notices/edit/:id" element={<AdminRoute permission="admin-notices"><CreateNotice /></AdminRoute>} />
+                <Route path="/admin/notices" element={<AdminRoute permission="admin-notices" allowFaculty={true}><NoticeManagement /></AdminRoute>} />
+                <Route path="/admin/notices/create" element={<AdminRoute permission="admin-notices" allowFaculty={true}><CreateNotice /></AdminRoute>} />
+                <Route path="/admin/notices/edit/:id" element={<AdminRoute permission="admin-notices" allowFaculty={true}><CreateNotice /></AdminRoute>} />
                 <Route path="/admin/book-orders" element={<AdminRoute permission="admin-books"><BookOrdersManagement /></AdminRoute>} />
                 <Route path="/admin/timetable" element={<AdminRoute permission="admin-timetable"><TimetableManagement /></AdminRoute>} />
                 <Route path="/admin/exams" element={<AdminRoute permission="admin-exams"><AdminExams /></AdminRoute>} />
                 <Route path="/admin/exams/settings" element={<AdminRoute permission="admin-exams"><AdminExamSettings /></AdminRoute>} />
                 <Route path="/admin/updates" element={<AdminRoute permission="admin-updates"><AppUpdateManagement /></AdminRoute>} />
-                <Route path="/admin/attendance" element={<AdminRoute permission="admin-attendance"><AttendanceManagement /></AdminRoute>} />
-                <Route path="/admin/cgpa" element={<AdminRoute permission="admin-cgpa"><CgpaManagement /></AdminRoute>} />
+                <Route path="/admin/attendance" element={<AdminRoute allowFaculty={true}><FacultyAttendance /></AdminRoute>} />
+                <Route path="/admin/cgpa" element={<AdminRoute permission="admin-cgpa" allowFaculty={true}><CgpaManagement /></AdminRoute>} />
                 <Route path="/admin/scanner" element={<AdminRoute permission="admin-scanner"><AdminQRScanner /></AdminRoute>} />
                 <Route path="/admin/health" element={<AdminRoute><AppHealthMonitor /></AdminRoute>} />
-                <Route path="/admin/student/:uid" element={<AdminRoute permission="admin-users"><AdminStudentDetail /></AdminRoute>} />
+                <Route path="/admin/student/:uid" element={<AdminRoute permission="admin-users" allowFaculty={true}><AdminStudentDetail /></AdminRoute>} />
                 <Route path="/admin/quizzes" element={<AdminRoute permission="admin-quizzes"><AdminQuizList /></AdminRoute>} />
                 <Route path="/admin/quizzes/new" element={<AdminRoute permission="admin-quizzes"><AdminQuizForm /></AdminRoute>} />
                 <Route path="/admin/quizzes/edit/:quizId" element={<AdminRoute permission="admin-quizzes"><AdminQuizForm /></AdminRoute>} />

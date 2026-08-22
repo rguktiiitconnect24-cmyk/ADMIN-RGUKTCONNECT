@@ -101,11 +101,11 @@ const Login = () => {
             // Wait for the full profile to load from Firestore before rejecting
             if (user.loadingProfile) return;
 
-            if (user.role === 'admin') {
+            if (user.role === 'admin' || user.role === 'faculty') {
                 navigate('/admin/dashboard', { replace: true });
             } else {
                 logout();
-                setError('Access Denied: This portal is exclusively for Administrators.');
+                setError('Access Denied: This portal is exclusively for Administrators and Faculty.');
             }
         } else if (!user) {
             setShowPinModal(false);

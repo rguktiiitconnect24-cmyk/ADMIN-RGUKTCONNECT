@@ -20,7 +20,8 @@ const CustomSelect = ({
   onChange, 
   placeholder = "Select an option...",
   className = "",
-  upward = false
+  upward = false,
+  icon: Icon
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -68,6 +69,7 @@ const CustomSelect = ({
           aria-expanded={isOpen}
           aria-haspopup="listbox"
         >
+          {Icon && <Icon className="custom-select-start-icon" size={18} style={{ marginRight: '8px', color: 'var(--color-text-muted, #94a3b8)' }} />}
           <span className={`custom-select-value ${!selectedOption ? 'placeholder' : ''}`}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>

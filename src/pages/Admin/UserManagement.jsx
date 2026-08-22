@@ -1,4 +1,4 @@
-import { MoreVertical, Search, Filter, Mail, Download, Eye, EyeOff, Key, ShieldCheck, MailCheck, Edit2, Trash2, X, AlertCircle, Monitor, AlertTriangle, Check, LogIn, Database } from 'lucide-react';
+import { MoreVertical, Search, Filter, Mail, Download, Eye, EyeOff, Key, ShieldCheck, MailCheck, Edit2, Trash2, X, AlertCircle, Monitor, AlertTriangle, Check, LogIn, Database, ChevronDown, ArrowLeft, Users } from 'lucide-react';
 import CustomSelect from '../../components/Common/CustomSelect';
 import LoadingTransition from '../../components/Common/LoadingTransition';
 import BulkUpdater from '../../components/Admin/BulkUpdater';
@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { db, functions, pucDb } from '../../config/firebase';
 import { httpsCallable } from 'firebase/functions';
-import { collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, where } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -17,7 +17,9 @@ import './Admin.css';
 import './CreateAdminAccount.css';
 import { deleteProfileImage } from '../../services/imageService';
 import { NAV_ITEMS } from '../../config/navigation';
+import { PROGRAMS } from '../../config/academics';
 import AdminAppointmentLetter from '../../components/Admin/AdminAppointmentLetter';
+import { fetchDynamicSubjects } from '../../utils/academicsUtils';
 
 const UserManagement = () => {
     const navigate = useNavigate();
@@ -46,6 +48,12 @@ const UserManagement = () => {
     const [userToDelete, setUserToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [animatingOutId, setAnimatingOutId] = useState(null);
+    const [selectedFacultyClass, setSelectedFacultyClass] = useState(null);
+    const [expandedYearId, setExpandedYearId] = useState(null);
+    const [expandedBranchId, setExpandedBranchId] = useState(null);
+    const [expandedSectionId, setExpandedSectionId] = useState(null);
+    const [sectionSubjects, setSectionSubjects] = useState([]);
+    const [isLoadingSubjects, setIsLoadingSubjects] = useState(false);
     const toastTimerRef = useRef(null);
 
     const formatStudentId = (id) => {
@@ -97,9 +105,23 @@ const UserManagement = () => {
         }
 
         let isInitialLoad = true;
-        const unsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
+        let q;
+        if (user?.role === 'faculty') {
+            if (!selectedFacultyClass || selectedFacultyClass.startsWith('puc')) return;
+            let targetClasses = [];
+            if (selectedFacultyClass === 'btech1') targetClasses = ['E-01', 'E1', 'E-1', 'Engineering 1'];
+            else if (selectedFacultyClass === 'btech2') targetClasses = ['E-02', 'E2', 'E-2', 'Engineering 2'];
+            else if (selectedFacultyClass === 'btech3') targetClasses = ['E-03', 'E3', 'E-3', 'Engineering 3'];
+            else if (selectedFacultyClass === 'btech4') targetClasses = ['E-04', 'E4', 'E-4', 'Engineering 4'];
+            
+            q = query(collection(db, 'users'), where('currentClass', 'in', targetClasses));
+        } else {
+            q = collection(db, 'users');
+        }
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setUsers(data);
+            setUsers(data); console.log('USERS CURRENT CLASSES:', data.map(u => u.currentClass));
             sessionStorage.setItem('admin_users_cache', JSON.stringify(data));
 
             if (isInitialLoad) {
@@ -115,8 +137,10 @@ const UserManagement = () => {
             setIsLoading(false);
         });
 
-        return () => unsubscribe();
-    }, []);
+        return () => {
+            if (unsubscribe) unsubscribe();
+        };
+    }, [user, selectedFacultyClass]);
 
     useEffect(() => {
         // Load from cache first
@@ -168,7 +192,19 @@ const UserManagement = () => {
         }
 
         let isInitialLoad = true;
-        const unsubscribe = onSnapshot(collection(pucDb, 'users'), (snapshot) => {
+        let q;
+        if (user?.role === 'faculty') {
+            if (!selectedFacultyClass || !selectedFacultyClass.startsWith('puc')) return;
+            let targetClasses = [];
+            if (selectedFacultyClass === 'puc1') targetClasses = ['PUC-01', 'PUC1', 'PUC-1'];
+            else if (selectedFacultyClass === 'puc2') targetClasses = ['PUC-02', 'PUC2', 'PUC-2'];
+            
+            q = query(collection(pucDb, 'users'), where('currentClass', 'in', targetClasses));
+        } else {
+            q = collection(pucDb, 'users');
+        }
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setPucAuthUsers(data);
             sessionStorage.setItem('admin_puc_users_cache', JSON.stringify(data));
@@ -186,8 +222,10 @@ const UserManagement = () => {
             setIsPucAuthLoading(false);
         });
 
-        return () => unsubscribe();
-    }, []);
+        return () => {
+            if (unsubscribe) unsubscribe();
+        };
+    }, [user, selectedFacultyClass]);
 
     // fetchUsers function is no longer needed as onSnapshot handles it, 
     // but we might keep it if other functions call it. 
@@ -424,8 +462,8 @@ const UserManagement = () => {
 
     const normalizeDept = (rawBranch) => {
         if (!rawBranch) return '';
-        const raw = rawBranch.toUpperCase();
-        if (/CSE\(AI&ML\)|CSC \(AI&ML\)|AIML/i.test(raw)) return 'AIML';
+        const raw = String(rawBranch).toUpperCase();
+        if (/ARTIFICIAL|AI\s*&\s*ML|AIML/i.test(raw)) return 'AIML';
         if (/ECE|E\.C\.E|ELECTRONICS/i.test(raw)) return 'ECE';
         if (/CSE|C\.S\.E|COMPUTER/i.test(raw)) return 'CSE';
         if (/CIVIL/i.test(raw)) return 'CIVIL';
@@ -434,6 +472,14 @@ const UserManagement = () => {
         if (/CHEM/i.test(raw)) return 'CHEM';
         if (/EEE|E\.E\.E|ELECTRICAL/i.test(raw)) return 'EEE';
         return rawBranch;
+    };
+
+    const normalizeClass = (rawClass) => {
+        if (!rawClass) return '';
+        const raw = String(rawClass).toUpperCase().trim();
+        const secMatch = raw.match(/^SECTION[\s\-]*([A-Z])$/i);
+        if (secMatch) return `Section ${secMatch[1]}`;
+        return rawClass;
     };
 
     const getUserBranch = (user) => {
@@ -460,9 +506,19 @@ const UserManagement = () => {
                 s.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 s.classSection?.toLowerCase().includes(searchTerm.toLowerCase())
             );
-            if (selectedClass) data = data.filter(s => s.classSection === selectedClass);
+            if (selectedClass) data = data.filter(s => normalizeClass(s.classSection) === selectedClass);
             if (selectedBranch) data = data.filter(s => normalizeDept(s.branch) === selectedBranch);
             if (selectedMailStatus) data = data.filter(s => selectedMailStatus === 'sent' ? s.mailSent === true : s.mailSent !== true);
+            
+            if (selectedFacultyClass) {
+                data = data.filter(s => {
+                    const uc = s.classSection ? String(s.classSection).toUpperCase() : '';
+                    const ucNoSpace = uc.replace(/\s+/g, '');
+                    if (selectedFacultyClass === 'puc1') return ucNoSpace === 'PUC-01' || ucNoSpace === 'PUC1' || ucNoSpace === 'PUC-1' || ucNoSpace === 'PUC 1' || ucNoSpace === 'P1';
+                    if (selectedFacultyClass === 'puc2') return ucNoSpace === 'PUC-02' || ucNoSpace === 'PUC2' || ucNoSpace === 'PUC-2' || ucNoSpace === 'PUC 2' || ucNoSpace === 'P2';
+                    return false;
+                });
+            }
             return data;
         }
 
@@ -473,9 +529,21 @@ const UserManagement = () => {
                 s.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 s.classSection?.toLowerCase().includes(searchTerm.toLowerCase())
             );
-            if (selectedClass) data = data.filter(s => s.classSection === selectedClass);
+            if (selectedClass) data = data.filter(s => normalizeClass(s.classSection) === selectedClass);
             if (selectedBranch) data = data.filter(s => normalizeDept(s.branch) === selectedBranch);
             if (selectedMailStatus) data = data.filter(s => selectedMailStatus === 'sent' ? s.mailSent === true : s.mailSent !== true);
+            
+            if (selectedFacultyClass) {
+                data = data.filter(s => {
+                    const uc = s.classSection ? String(s.classSection).toUpperCase() : '';
+                    const ucNoSpace = uc.replace(/\s+/g, '');
+                    if (selectedFacultyClass === 'btech1') return ucNoSpace === 'E-01' || ucNoSpace === 'E1' || ucNoSpace === 'E-1' || uc === 'ENGINEERING 1';
+                    if (selectedFacultyClass === 'btech2') return ucNoSpace === 'E-02' || ucNoSpace === 'E2' || ucNoSpace === 'E-2' || uc === 'ENGINEERING 2';
+                    if (selectedFacultyClass === 'btech3') return ucNoSpace === 'E-03' || ucNoSpace === 'E3' || ucNoSpace === 'E-3' || uc === 'ENGINEERING 3';
+                    if (selectedFacultyClass === 'btech4') return ucNoSpace === 'E-04' || ucNoSpace === 'E4' || ucNoSpace === 'E-4' || uc === 'ENGINEERING 4';
+                    return false;
+                });
+            }
             return data;
         }
 
@@ -491,9 +559,38 @@ const UserManagement = () => {
             return false;
         });
 
-        if (selectedClass) data = data.filter(user => user.currentClass === selectedClass);
+        if (selectedClass) {
+            data = data.filter(user => {
+                if (normalizeClass(user.currentClass) === selectedClass) return true;
+                if (user.studentId) {
+                    const id = formatStudentId(user.studentId);
+                    const currentMaster = activeSection === 'BTECH' ? masterStudents : pucStudents;
+                    const masterRecord = currentMaster.find(m => m.id === id);
+                    if (masterRecord && normalizeClass(masterRecord.classSection) === selectedClass) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+        }
         if (selectedBranch) data = data.filter(user => normalizeDept(getUserBranch(user)) === selectedBranch);
         if (selectedMailStatus) data = data.filter(user => selectedMailStatus === 'sent' ? user.mailSent === true : user.mailSent !== true);
+        
+        if (selectedFacultyClass) {
+            data = data.filter(user => {
+                const uc = user.currentClass ? String(user.currentClass).toUpperCase() : '';
+                const ucNoSpace = uc.replace(/\s+/g, '');
+                
+                if (selectedFacultyClass === 'puc1') return ucNoSpace === 'PUC-01' || ucNoSpace === 'PUC1' || ucNoSpace === 'PUC-1';
+                if (selectedFacultyClass === 'puc2') return ucNoSpace === 'PUC-02' || ucNoSpace === 'PUC2' || ucNoSpace === 'PUC-2';
+                
+                if (selectedFacultyClass === 'btech1') return ucNoSpace === 'E-01' || ucNoSpace === 'E1' || ucNoSpace === 'E-1' || uc === 'ENGINEERING 1';
+                if (selectedFacultyClass === 'btech2') return ucNoSpace === 'E-02' || ucNoSpace === 'E2' || ucNoSpace === 'E-2' || uc === 'ENGINEERING 2';
+                if (selectedFacultyClass === 'btech3') return ucNoSpace === 'E-03' || ucNoSpace === 'E3' || ucNoSpace === 'E-3' || uc === 'ENGINEERING 3';
+                if (selectedFacultyClass === 'btech4') return ucNoSpace === 'E-04' || ucNoSpace === 'E4' || ucNoSpace === 'E-4' || uc === 'ENGINEERING 4';
+                return false;
+            });
+        }
         
         return data;
     };
@@ -503,125 +600,478 @@ const UserManagement = () => {
     const currentUsers = activeSection === 'BTECH' ? users : pucAuthUsers;
     const currentMaster = activeSection === 'BTECH' ? masterStudents : pucStudents;
 
-    const availableClasses = Array.from(new Set([
-        ...currentUsers.map(u => u.currentClass),
-        ...currentMaster.map(m => m.classSection)
-    ])).filter(Boolean).sort();
+    const usersForClasses = selectedBranch 
+        ? currentUsers.filter(u => normalizeDept(getUserBranch(u)) === selectedBranch)
+        : currentUsers;
+        
+    const masterForClasses = selectedBranch
+        ? currentMaster.filter(m => normalizeDept(m.branch) === selectedBranch)
+        : currentMaster;
+
+    let availableClasses = Array.from(new Set([
+        ...usersForClasses.map(u => normalizeClass(u.currentClass)),
+        ...masterForClasses.map(m => normalizeClass(m.classSection))
+    ])).filter(Boolean);
+
+    availableClasses = availableClasses.filter(c => {
+        const up = c.toUpperCase();
+        return up !== 'N/A' && up !== 'S-05,ECE-C';
+    });
+
+    availableClasses.sort();
     
-    const availableBranches = Array.from(new Set([
+    let availableBranches = Array.from(new Set([
         ...currentUsers.map(u => normalizeDept(getUserBranch(u))),
         ...currentMaster.map(m => normalizeDept(m.branch))
-    ])).filter(Boolean).sort();
+    ])).filter(Boolean);
+
+    if (activeSection === 'BTECH') {
+        availableBranches = availableBranches.filter(b => b.toUpperCase() !== 'PUC');
+    }
+
+    availableBranches.sort();
     
     const branchFullNames = {
         'AIML': 'Computer Science & Engineering (AI & ML)',
         'CSE': 'Computer Science & Engineering',
         'ECE': 'Electronics & Communication Engineering',
         'EEE': 'Electrical & Electronics Engineering',
-        'CIVIL': 'Civil Engineering',
+        'CE': 'Civil Engineering',
         'MECH': 'Mechanical Engineering',
         'MME': 'Metallurgical & Materials Engineering',
         'CHEM': 'Chemical Engineering'
     };
 
+    const getNormalizedBranchId = (branchId) => {
+        const upper = branchId.toUpperCase();
+        if (upper === 'CE') return 'CIVIL';
+        if (upper === 'ME') return 'MECH';
+        if (upper === 'CHE') return 'CHEM';
+        return upper;
+    };
+
+    const getAvailableSectionsFor = (yearId, branchId) => {
+        const branchUpper = getNormalizedBranchId(branchId);
+        
+        let yearFilter = [];
+        if (yearId === 'btech1') yearFilter = ['E-01', 'E1', 'E-1', 'ENGINEERING 1'];
+        if (yearId === 'btech2') yearFilter = ['E-02', 'E2', 'E-2', 'ENGINEERING 2'];
+        if (yearId === 'btech3') yearFilter = ['E-03', 'E3', 'E-3', 'ENGINEERING 3'];
+        if (yearId === 'btech4') yearFilter = ['E-04', 'E4', 'E-4', 'ENGINEERING 4'];
+
+        const userSections = users
+            .filter(u => normalizeDept(getUserBranch(u)) === branchUpper)
+            .filter(u => {
+                const uc = u.currentClass ? String(u.currentClass).toUpperCase() : '';
+                return yearFilter.includes(uc.replace(/\s+/g, ''));
+            })
+            .map(u => normalizeClass(u.currentClass));
+            
+        const currentMaster = activeSection === 'BTECH' ? masterStudents : pucStudents;
+        const masterSections = currentMaster
+            .filter(m => normalizeDept(m.branch) === branchUpper)
+            .map(m => normalizeClass(m.classSection));
+            
+        let sections = Array.from(new Set([...userSections, ...masterSections])).filter(c => c && c.toUpperCase() !== 'N/A' && c !== 'S-05,ECE-C');
+        
+        if (branchUpper === 'AIML') {
+            if (sections.includes('AIML')) return ['AIML'];
+            else return [];
+        }
+        sections = sections.filter(c => c !== 'AIML');
+        sections.sort();
+        return sections;
+    };
+
     return (
         <div className="admin-container">
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', marginBottom: '1rem', justifyContent: 'center' }}>
-                <button
-                    className={activeSection === 'BTECH' ? 'btn-primary' : 'btn-secondary'}
-                    onClick={() => { setActiveSection('BTECH'); setActiveTab('student'); }}
-                    style={{ 
-                        padding: '0.75rem 2rem', 
-                        fontSize: '1.05rem', 
-                        fontWeight: '600', 
-                        borderRadius: '8px', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '8px'
-                    }}
-                >
-                    <Database size={18} />
-                    BTECH Database
-                </button>
-                <button
-                    className={activeSection === 'PUC' ? 'btn-primary' : 'btn-secondary'}
-                    onClick={() => { setActiveSection('PUC'); setActiveTab('student'); }}
-                    style={{ 
-                        padding: '0.75rem 2rem', 
-                        fontSize: '1.05rem', 
-                        fontWeight: '600', 
-                        borderRadius: '8px', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '8px'
-                    }}
-                >
-                    <Database size={18} />
-                    PUC Database
-                </button>
-            </div>
-            
-            {activeSection === 'BTECH' && <BulkUpdater />}
-            {activeSection === 'PUC' && <PUCBulkUpdater />}
-            <div className="page-header-v2">
-                <div className="header-accent-bar"></div>
-                <div className="header-content-v2">
-                    <h1 className="page-title-v2">{activeSection === 'BTECH' ? 'BTECH User Management' : 'PUC User Management'}</h1>
-                    <p className="page-subtitle-v2">Manage and monitor {activeSection === 'BTECH' ? 'BTECH' : 'PUC'} student and staff accounts.</p>
-                </div>
-                <div className="header-action-btn" ref={menuRef}>
-                    <button
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="btn-labeled primary"
-                        title="Add New..."
-                    >
-                        <MoreVertical size={18} />
-                        <span>Add New Account</span>
-                    </button>
-                    {isMenuOpen && (
-                        <div
-                            className="admin-action-dropdown"
-                            style={{
-                                background: theme === 'dark' ? '#1e293b' : 'var(--color-surface)',
-                                borderColor: theme === 'dark' ? '#334155' : 'var(--color-border)'
+            {(!user?.role || user?.role !== 'faculty') && (
+                <>
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', marginBottom: '1rem', justifyContent: 'center' }}>
+                        <button
+                            className={activeSection === 'BTECH' ? 'btn-primary' : 'btn-secondary'}
+                            onClick={() => { setActiveSection('BTECH'); setActiveTab('student'); }}
+                            style={{ 
+                                padding: '0.75rem 2rem', 
+                                fontSize: '1.05rem', 
+                                fontWeight: '600', 
+                                borderRadius: '8px', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '8px'
                             }}
                         >
+                            <Database size={18} />
+                            BTECH Database
+                        </button>
+                        <button
+                            className={activeSection === 'PUC' ? 'btn-primary' : 'btn-secondary'}
+                            onClick={() => { setActiveSection('PUC'); setActiveTab('student'); }}
+                            style={{ 
+                                padding: '0.75rem 2rem', 
+                                fontSize: '1.05rem', 
+                                fontWeight: '600', 
+                                borderRadius: '8px', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '8px'
+                            }}
+                        >
+                            <Database size={18} />
+                            PUC Database
+                        </button>
+                    </div>
+                    
+                    {activeSection === 'BTECH' && <BulkUpdater />}
+                    {activeSection === 'PUC' && <PUCBulkUpdater />}
+                    
+                    <div className="page-header-v2">
+                        <div className="header-accent-bar"></div>
+                        <div className="header-content-v2">
+                            <h1 className="page-title-v2">{activeSection === 'BTECH' ? 'BTECH User Management' : 'PUC User Management'}</h1>
+                            <p className="page-subtitle-v2">Manage and monitor {activeSection === 'BTECH' ? 'BTECH' : 'PUC'} student and staff accounts.</p>
+                        </div>
+                        <div className="header-action-btn" ref={menuRef}>
                             <button
-                                onClick={() => handleOpenAddModal('student')}
-                                className="admin-action-item"
-                                style={{
-                                    color: theme === 'dark' ? '#f8fafc' : 'inherit',
-                                    background: theme === 'dark' ? 'transparent' : 'inherit'
-                                }}
+                                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                className="btn-labeled primary"
+                                title="Add New..."
                             >
-                                <span className="action-dot student"></span> Add Student
+                                <MoreVertical size={18} />
+                                <span>Add New Account</span>
                             </button>
-                            <button
-                                onClick={() => navigate('/admin/faculty/new')}
-                                className="admin-action-item"
-                                style={{
-                                    color: theme === 'dark' ? '#f8fafc' : 'inherit',
-                                    background: theme === 'dark' ? 'transparent' : 'inherit'
-                                }}
+
+                            {isMenuOpen && (
+                                <div
+                                    className="admin-action-dropdown"
+                                    style={{
+                                        background: theme === 'dark' ? '#1e293b' : 'var(--color-surface)',
+                                        borderColor: theme === 'dark' ? '#334155' : 'var(--color-border)'
+                                    }}
+                                >
+                                    <button
+                                        onClick={() => handleOpenAddModal('student')}
+                                        className="admin-action-item"
+                                        style={{
+                                            color: theme === 'dark' ? '#f8fafc' : 'inherit',
+                                            background: theme === 'dark' ? 'transparent' : 'inherit'
+                                        }}
+                                    >
+                                        <span className="action-dot student"></span> Add Student
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/admin/faculty/new')}
+                                        className="admin-action-item"
+                                        style={{
+                                            color: theme === 'dark' ? '#f8fafc' : 'inherit',
+                                            background: theme === 'dark' ? 'transparent' : 'inherit'
+                                        }}
+                                    >
+                                        <span className="action-dot faculty"></span> Add Faculty
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/admin/new')}
+                                        className="admin-action-item"
+                                        style={{
+                                            color: theme === 'dark' ? '#f8fafc' : 'inherit',
+                                            background: theme === 'dark' ? 'transparent' : 'inherit'
+                                        }}
+                                    >
+                                        <span className="action-dot admin"></span> Add Admin
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {user?.role === 'faculty' && selectedFacultyClass && (
+                <div className="page-header-v2" style={{ marginTop: '1.5rem' }}>
+                    <div className="header-accent-bar" style={{ background: 'var(--color-primary-main)' }}></div>
+                    <div className="header-content-v2">
+                        <h1 className="page-title-v2">My Students</h1>
+                        <p className="page-subtitle-v2">View and monitor students in {selectedFacultyClass.toUpperCase()}</p>
+                    </div>
+                </div>
+            )}
+
+            {user?.role === 'faculty' && !selectedFacultyClass ? (
+                <div className="faculty-classes-container" style={{ marginTop: '2rem', padding: '0 1rem' }}>
+                    {PROGRAMS.map((program) => {
+                        const Icon = program.icon;
+                        return (
+                            <div key={program.id} className="course-program-group" style={{ marginBottom: '2rem' }}>
+                                <div className="program-header" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                                    <div className={`program-icon bg-${program.color}-100 text-${program.color}-600`} style={{ padding: '0.75rem', borderRadius: '12px' }}>
+                                        <Icon size={24} />
+                                    </div>
+                                    <div>
+                                        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-text-main)' }}>{program.label}</h3>
+                                        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>{program.description}</p>
+                                    </div>
+                                </div>
+                                <div className="years-grid" style={{ display: 'grid', gap: '1rem' }}>
+                                    {program.years.map((year) => {
+                                        const isExpanded = expandedYearId === year.id;
+                                        return (
+                                        <div 
+                                            key={year.id} 
+                                            className="year-card"
+                                            style={{
+                                                background: 'var(--color-surface)',
+                                                border: isExpanded ? '1px solid var(--color-primary-main)' : '1px solid var(--color-border)',
+                                                borderRadius: '12px',
+                                                padding: '1.25rem',
+                                                transition: 'all 0.2s ease',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: isExpanded ? '1.5rem' : '0',
+                                                boxShadow: isExpanded ? '0 4px 12px rgba(0,0,0,0.05)' : 'none'
+                                            }}
+                                        >
+                                            <div 
+                                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    if (year.branches && year.branches.length > 0) {
+                                                        setExpandedYearId(isExpanded ? null : year.id);
+                                                    } else {
+                                                        setSelectedFacultyClass(year.id);
+                                                        const isPuc = year.id.startsWith('puc');
+                                                        setActiveSection(isPuc ? 'PUC' : 'BTECH');
+                                                        setActiveTab(isPuc ? 'puc' : 'master');
+                                                    }
+                                                }}
+                                            >
+                                                <div>
+                                                    <h4 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--color-text-main)' }}>{year.label}</h4>
+                                                    <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '0.25rem' }}>{year.subLabel}</p>
+                                                </div>
+                                                <ChevronDown size={20} style={{ color: 'var(--color-text-muted)', transform: isExpanded ? 'rotate(180deg)' : (year.branches && year.branches.length > 0 ? 'rotate(0deg)' : 'rotate(-90deg)'), transition: 'transform 0.2s ease' }} />
+                                            </div>
+                                            
+                                            {isExpanded && year.branches && (
+                                                <div style={{ animation: 'fadeIn 0.2s ease-out' }}>
+                                                    {expandedBranchId ? (
+                                                        <>
+                                                            <div 
+                                                                onClick={(e) => { e.stopPropagation(); setExpandedBranchId(null); }}
+                                                                style={{ color: 'var(--color-primary-main)', cursor: 'pointer', marginBottom: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '500' }}
+                                                            >
+                                                                <ArrowLeft size={16} /> Back to Branches
+                                                            </div>
+                                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                                                                {getAvailableSectionsFor(year.id, expandedBranchId).map(section => (
+                                                                    <div key={section} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                                        <button
+                                                                            onClick={async (e) => {
+                                                                                e.stopPropagation();
+                                                                                if (expandedSectionId === section) {
+                                                                                    setExpandedSectionId(null);
+                                                                                    return;
+                                                                                }
+                                                                                setExpandedSectionId(section);
+                                                                                setIsLoadingSubjects(true);
+                                                                                try {
+                                                                                    const programId = year.id.startsWith('btech') ? 'btech' : 'puc';
+                                                                                    const branchId = expandedBranchId;
+                                                                                    const sem1Subs = await fetchDynamicSubjects(programId, year.id, branchId, 'sem1');
+                                                                                    const sem2Subs = await fetchDynamicSubjects(programId, year.id, branchId, 'sem2');
+                                                                                    setSectionSubjects([
+                                                                                        { id: 'sem1', label: 'Semester - I', subjects: sem1Subs },
+                                                                                        { id: 'sem2', label: 'Semester - II', subjects: sem2Subs }
+                                                                                    ]);
+                                                                                } catch (error) {
+                                                                                    console.error("Failed to load subjects", error);
+                                                                                } finally {
+                                                                                    setIsLoadingSubjects(false);
+                                                                                }
+                                                                            }}
+                                                                            style={{
+                                                                                padding: '1rem',
+                                                                                background: expandedSectionId === section ? 'var(--color-primary-50, #e0e7ff)' : 'var(--color-surface, #ffffff)',
+                                                                                border: expandedSectionId === section ? '1px solid var(--color-primary-main, #6366f1)' : '1px solid var(--color-border, #e5e7eb)',
+                                                                                borderRadius: '8px',
+                                                                                color: expandedSectionId === section ? 'var(--color-primary-main, #4338ca)' : 'var(--color-text-main, #374151)',
+                                                                                fontWeight: '600',
+                                                                                cursor: 'pointer',
+                                                                                transition: 'all 0.2s ease',
+                                                                                display: 'flex',
+                                                                                justifyContent: 'space-between',
+                                                                                alignItems: 'center'
+                                                                            }}
+                                                                            onMouseEnter={(e) => {
+                                                                                if (expandedSectionId !== section) {
+                                                                                    e.currentTarget.style.background = 'var(--color-primary-50)';
+                                                                                    e.currentTarget.style.borderColor = 'var(--color-primary-200)';
+                                                                                }
+                                                                            }}
+                                                                            onMouseLeave={(e) => {
+                                                                                if (expandedSectionId !== section) {
+                                                                                    e.currentTarget.style.background = 'var(--color-surface)';
+                                                                                    e.currentTarget.style.borderColor = 'var(--color-border)';
+                                                                                }
+                                                                            }}
+                                                                        >
+                                                                            <span>{section}</span>
+                                                                            <ChevronDown 
+                                                                                size={16} 
+                                                                                style={{ 
+                                                                                    transform: expandedSectionId === section ? 'rotate(180deg)' : 'none',
+                                                                                    transition: 'transform 0.2s'
+                                                                                }} 
+                                                                            />
+                                                                        </button>
+                                                                        
+                                                                        {expandedSectionId === section && (
+                                                                            <div style={{ padding: '0.5rem', background: 'var(--color-bg-subtle)', borderRadius: '8px', border: '1px solid var(--color-border)', marginBottom: '0.5rem' }}>
+                                                                                {isLoadingSubjects ? (
+                                                                                    <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--color-text-muted)' }}>Loading subjects...</div>
+                                                                                ) : (
+                                                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                                                        {sectionSubjects.map(semester => (
+                                                                                            semester.subjects.length > 0 && (
+                                                                                                <div key={semester.id}>
+                                                                                                    <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                                                                                        {semester.label}
+                                                                                                    </div>
+                                                                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                                                                        {semester.subjects.map(sub => (
+                                                                                                            <button
+                                                                                                                key={sub.id}
+                                                                                                                onClick={(e) => {
+                                                                                                                    e.stopPropagation();
+                                                                                                                    navigate('/admin/attendance', { replace: true,
+                                                                                                                        state: {
+                                                                                                                            year: year.id,
+                                                                                                                            branch: {
+                                                                                                                                'cse': 'CSE',
+                                                                                                                                'ece': 'ECE',
+                                                                                                                                'eee': 'EEE',
+                                                                                                                                'me': 'Mechanical',
+                                                                                                                                'ce': 'Civil',
+                                                                                                                                'che': 'Chemical',
+                                                                                                                                'mme': 'MME',
+                                                                                                                                'aiml': 'AIML'
+                                                                                                                            }[expandedBranchId] || expandedBranchId.toUpperCase(),
+                                                                                                                            section: section,
+                                                                                                                            subject: sub.label,
+                                                                                                                            step: 5
+                                                                                                                        },
+                                                                                                                        replace: true
+                                                                                                                    });
+                                                                                                                }}
+                                                                                                                style={{
+                                                                                                                    padding: '0.75rem',
+                                                                                                                    background: 'white',
+                                                                                                                    border: '1px solid var(--color-border)',
+                                                                                                                    borderRadius: '6px',
+                                                                                                                    textAlign: 'left',
+                                                                                                                    cursor: 'pointer',
+                                                                                                                    display: 'flex',
+                                                                                                                    flexDirection: 'column',
+                                                                                                                    gap: '0.25rem'
+                                                                                                                }}
+                                                                                                                onMouseEnter={(e) => {
+                                                                                                                    e.currentTarget.style.borderColor = 'var(--color-primary-main)';
+                                                                                                                    e.currentTarget.style.background = 'var(--color-primary-50)';
+                                                                                                                }}
+                                                                                                                onMouseLeave={(e) => {
+                                                                                                                    e.currentTarget.style.borderColor = 'var(--color-border)';
+                                                                                                                    e.currentTarget.style.background = 'white';
+                                                                                                                }}
+                                                                                                            >
+                                                                                                                <span style={{ fontWeight: '600', color: 'var(--color-text-main)', fontSize: '0.875rem' }}>{sub.label}</span>
+                                                                                                                {(sub.credits || sub.type) && (
+                                                                                                                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>
+                                                                                                                        {sub.credits && `${sub.credits} CREDITS `}
+                                                                                                                        {sub.type && `• ${sub.type.toUpperCase()}`}
+                                                                                                                    </span>
+                                                                                                                )}
+                                                                                                            </button>
+                                                                                                        ))}
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            )
+                                                                                        ))}
+                                                                                        {sectionSubjects.every(sem => sem.subjects.length === 0) && (
+                                                                                            <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                                                                                                No subjects found for this branch.
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                ))}
+                                                                {getAvailableSectionsFor(year.id, expandedBranchId).length === 0 && (
+                                                                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', color: 'var(--color-text-muted)', padding: '1rem', fontSize: '0.875rem' }}>
+                                                                        No sections registered yet for this branch.
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+                                                            {year.branches.map(branch => (
+                                                                <button
+                                                                    key={branch.id}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setExpandedBranchId(branch.id);
+                                                                    }}
+                                                                    style={{
+                                                                        padding: '1rem',
+                                                                        background: 'var(--color-surface)',
+                                                                        border: '1px solid var(--color-border)',
+                                                                        borderRadius: '8px',
+                                                                        color: 'var(--color-primary-main)',
+                                                                        fontWeight: '600',
+                                                                        cursor: 'pointer',
+                                                                        transition: 'all 0.2s ease',
+                                                                        textAlign: 'center',
+                                                                        textTransform: 'uppercase'
+                                                                    }}
+                                                                    onMouseEnter={(e) => {
+                                                                        e.currentTarget.style.borderColor = 'var(--color-primary-main)';
+                                                                        e.currentTarget.style.backgroundColor = 'var(--color-primary-50)';
+                                                                    }}
+                                                                    onMouseLeave={(e) => {
+                                                                        e.currentTarget.style.borderColor = 'var(--color-border)';
+                                                                        e.currentTarget.style.backgroundColor = 'var(--color-surface)';
+                                                                    }}
+                                                                >
+                                                                    {branch.id.toUpperCase()}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )})}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            ) : (
+                <>
+                    {user?.role === 'faculty' && selectedFacultyClass && (
+                        <div style={{ padding: '0 1rem', marginBottom: '1rem', marginTop: '1rem' }}>
+                            <button 
+                                onClick={() => setSelectedFacultyClass(null)}
+                                className="btn-secondary"
+                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px' }}
                             >
-                                <span className="action-dot faculty"></span> Add Faculty
-                            </button>
-                            <button
-                                onClick={() => navigate('/admin/new')}
-                                className="admin-action-item"
-                                style={{
-                                    color: theme === 'dark' ? '#f8fafc' : 'inherit',
-                                    background: theme === 'dark' ? 'transparent' : 'inherit'
-                                }}
-                            >
-                                <span className="action-dot admin"></span> Add Admin
+                                <ArrowLeft size={16} /> Back to Classes
                             </button>
                         </div>
                     )}
-                </div>
-            </div>
-
-            <div className="admin-tabs">
+                    
+                    {(!user?.role || user?.role !== 'faculty') && (
+                        <div className="admin-tabs">
                 <button
                     className={`admin-tab ${activeTab === 'student' ? 'active' : ''}`}
                     onClick={() => setActiveTab('student')}
@@ -662,6 +1112,7 @@ const UserManagement = () => {
                     </button>
                 )}
             </div>
+            )}
 
             <div className="admin-filters-container">
                 <div className="admin-search-wrapper">
@@ -675,50 +1126,67 @@ const UserManagement = () => {
                     />
                 </div>
                 <div className="admin-filter-wrapper">
-                    <Filter className="admin-filter-icon" size={20} />
-                    <select
-                        className="form-select admin-filter-select"
+                    <CustomSelect
+                        className="admin-filter-select"
+                        icon={Filter}
                         value={selectedBranch}
-                        onChange={(e) => setSelectedBranch(e.target.value)}
-                    >
-                        <option value="">All Branches</option>
-{availableBranches.map(branch => (
-                            <option key={branch} value={branch} className="select-option">{branchFullNames[branch] || branch}</option>
-                        ))}
-                    </select>
+                        onChange={setSelectedBranch}
+                        placeholder="All Branches"
+                        options={[
+                            { value: '', label: 'All Branches' },
+                            ...availableBranches.map(branch => ({
+                                value: branch,
+                                label: branchFullNames[branch] || branch
+                            }))
+                        ]}
+                    />
                 </div>
-                <div className="admin-filter-wrapper">
-                    <Filter className="admin-filter-icon" size={20} />
-                    <select
-                        className="form-select admin-filter-select"
-                        value={selectedClass}
-                        onChange={(e) => setSelectedClass(e.target.value)}
+                {user?.role !== 'faculty' && (
+                    <div className="admin-filter-wrapper">
+                        <CustomSelect
+                            className="admin-filter-select"
+                            icon={Filter}
+                            value={selectedClass}
+                            onChange={setSelectedClass}
+                            placeholder="All Classes"
+                            options={[
+                                { value: '', label: 'All Classes' },
+                                ...availableClasses.map(cls => ({
+                                    value: cls,
+                                    label: cls
+                                }))
+                            ]}
+                        />
+                    </div>
+                )}
+                {user?.role !== 'faculty' && (
+                    <div className="admin-filter-wrapper">
+                        <CustomSelect
+                            className="admin-filter-select"
+                            icon={Mail}
+                            value={selectedMailStatus}
+                            onChange={setSelectedMailStatus}
+                            placeholder="All Mail Status"
+                            options={[
+                                { value: '', label: 'All Mail Status' },
+                                { value: 'sent', label: 'Mail Sent' },
+                                { value: 'not_sent', label: 'Mail Not Sent' }
+                            ]}
+                        />
+                    </div>
+                )}
+                <div className="flex items-center gap-2 ml-auto">
+                    <div className="bg-primary-50 text-primary-main px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap border border-primary-100 flex items-center gap-2 shadow-sm">
+                        <Users size={16} /> {filteredData.length} Students
+                    </div>
+                    <button
+                        className="btn-filter admin-download-btn"
+                        title="Download List"
+                        onClick={handleDownload}
                     >
-                        <option value="">All Classes</option>
-                        {availableClasses.map(cls => (
-                            <option key={cls} value={cls} className="select-option">{cls}</option>
-                        ))}
-                    </select>
+                        <Download size={20} />
+                    </button>
                 </div>
-                <div className="admin-filter-wrapper">
-                    <Mail className="admin-filter-icon" size={20} />
-                    <select
-                        className="form-select admin-filter-select"
-                        value={selectedMailStatus}
-                        onChange={(e) => setSelectedMailStatus(e.target.value)}
-                    >
-                        <option value="">All Mail Status</option>
-                        <option value="sent">Mail Sent</option>
-                        <option value="not_sent">Mail Not Sent</option>
-                    </select>
-                </div>
-                <button
-                    className="btn-filter admin-download-btn"
-                    title="Download List"
-                    onClick={handleDownload}
-                >
-                    <Download size={20} />
-                </button>
             </div>
 
             <div className="admin-table-container">
@@ -864,6 +1332,8 @@ const UserManagement = () => {
                     </table>
                 )}
             </div>
+            </>
+            )}
 
             {/* Add User Modal */}
             {isModalOpen && createPortal(

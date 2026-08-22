@@ -29,6 +29,8 @@ const Layout = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+
+
     const isContentPage = location.pathname.includes('/courses/') && 
                          (location.pathname.split('/').filter(Boolean).length >= 5); // /courses/:year/:sem/:sub/:unit (length 5 after filter)
                          

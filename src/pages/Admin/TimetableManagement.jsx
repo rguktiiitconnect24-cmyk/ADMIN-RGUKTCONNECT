@@ -1,7 +1,8 @@
-import { Calendar, Plus, Check, Trash2, Edit2, Loader2, Save, Clock, Link, X, Unlink } from 'lucide-react';
+import { Calendar, Plus, Check, Trash2, Edit2, Loader2, Save, Clock, Link, X, Unlink, Settings } from 'lucide-react';
 import LoadingTransition from '../../components/Common/LoadingTransition';
 import CustomSelect from '../../components/Common/CustomSelect';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../config/firebase';
 import { doc, getDoc, setDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
@@ -12,7 +13,7 @@ import './Admin.css';
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const periods = ["P1", "P2", "P3", "P4", "P5", "P6", "P7"];
 
-const timeline = [
+const defaultTimeline = [
     { start: '08:30', end: '09:30', label: 'P1', type: 'period', index: 0 },
     { start: '09:30', end: '10:30', label: 'P2', type: 'period', index: 1 },
     { start: '10:30', end: '10:40', label: 'Short Break', type: 'break' },
@@ -21,14 +22,16 @@ const timeline = [
     { start: '12:40', end: '13:40', label: 'Lunch Break', type: 'break' },
     { start: '13:40', end: '14:40', label: 'P5', type: 'period', index: 4 },
     { start: '14:40', end: '15:40', label: 'P6', type: 'period', index: 5 },
-    { start: '15:40', end: '15:50', label: 'Short Break', type: 'break' },
-    { start: '15:50', end: '16:50', label: 'P7', type: 'period', index: 6 }
+    { start: '15:40', end: '16:40', label: 'P7', type: 'period', index: 6 }
 ];
 
 const TimetableManagement = () => {
     const { showToast } = useToast();
     const { user } = useAuth();
     const [adminUser, setAdminUser] = useState(null);
+    const [timeline, setTimeline] = useState(defaultTimeline);
+    const [isEditingTimings, setIsEditingTimings] = useState(false);
+    const [tempTimeline, setTempTimeline] = useState([...defaultTimeline]);
     
     const branches = ['CSE(AI&ML)', 'CSE', 'ECE', 'EEE', 'CE', 'ME', 'MME', 'CHE']
         .filter(dept => isDepartmentAllowed(dept, user));
@@ -87,6 +90,38 @@ const TimetableManagement = () => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
+
+    // Fetch dynamic period timings
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const settingsRef = doc(db, "settings", "timetable");
+                const docSnap = await getDoc(settingsRef);
+                if (docSnap.exists() && docSnap.data().timeline) {
+                    setTimeline(docSnap.data().timeline);
+                }
+            } catch (error) {
+                console.error("Error fetching timetable settings:", error);
+            }
+        };
+        fetchSettings();
+    }, []);
+
+    const handleSaveTimings = async () => {
+        try {
+            setIsSaving(true);
+            const settingsRef = doc(db, "settings", "timetable");
+            await setDoc(settingsRef, { timeline: tempTimeline }, { merge: true });
+            setTimeline(tempTimeline);
+            setIsEditingTimings(false);
+            showToast("Period timings saved successfully.");
+        } catch (error) {
+            console.error("Error saving period timings:", error);
+            showToast("Failed to save period timings.", "error");
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const getCurrentPeriodInfo = () => {
         const now = currentTime;
@@ -157,11 +192,7 @@ const TimetableManagement = () => {
         });
         setSchedule(emptySchedule);
         setIsEditMode(true);
-        setSchedule(emptySchedule);
-        setIsEditMode(true);
     };
-
-
 
     const handleDelete = async () => {
         if (!window.confirm(`Are you sure you want to permanently delete the timetable for ${selectedBranch} Section ${selectedSection}?`)) return;
@@ -353,6 +384,9 @@ const TimetableManagement = () => {
                             <div className="flex flex-wrap justify-end gap-3 items-center w-auto">
                                 {!isEditMode && (
                                     <>
+                                        <button className="btn-secondary rounded-full shadow-sm" onClick={() => { setTempTimeline([...timeline]); setIsEditingTimings(true); }}>
+                                            <Clock size={16} /> Edit Period Timings
+                                        </button>
                                         <button className="btn-secondary rounded-full shadow-sm" style={{ color: '#ef4444' }} onClick={handleDelete}>
                                             <Trash2 size={16} /> Delete
                                         </button>
@@ -493,6 +527,122 @@ const TimetableManagement = () => {
                     </div>
                 )}
             </div>
+
+            {/* Edit Period Timings Modal */}
+            {isEditingTimings && createPortal(
+                <div className="modal-overlay">
+                    <div className="modal-content animate-scale-up" style={{ maxWidth: '600px' }}>
+                        <div className="modal-header">
+                            <div>
+                                <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                                    <Settings size={20} style={{ color: 'var(--color-primary-600)' }} />
+                                    Edit Period Timings
+                                </h3>
+                                <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginTop: '0.25rem', marginBottom: 0 }}>
+                                    Changes will apply globally to all schedules.
+                                </p>
+                            </div>
+                            <button onClick={() => setIsEditingTimings(false)} className="modal-close-btn">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div className="modal-body custom-scrollbar">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                {tempTimeline.map((slot, idx) => (
+                                    <div key={idx} style={{ 
+                                        padding: '1rem', 
+                                        borderRadius: '0.75rem', 
+                                        border: slot.type === 'period' ? '1px solid var(--color-primary-200)' : '1px dashed var(--color-border)', 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        gap: '1rem', 
+                                        background: slot.type === 'period' ? 'var(--color-surface)' : 'var(--color-background)' 
+                                    }}>
+                                        <div style={{ 
+                                            width: '90px', 
+                                            fontWeight: 'bold', 
+                                            fontSize: slot.type === 'period' ? '1.125rem' : '0.875rem', 
+                                            color: slot.type === 'period' ? 'var(--color-primary-600)' : 'var(--color-text-muted)' 
+                                        }}>
+                                            {slot.label}
+                                        </div>
+                                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                            <div style={{ flex: 1 }}>
+                                                <input 
+                                                    type="time" 
+                                                    value={slot.start} 
+                                                    onChange={(e) => {
+                                                        const newTimeline = [...tempTimeline];
+                                                        newTimeline[idx].start = e.target.value;
+                                                        setTempTimeline(newTimeline);
+                                                    }}
+                                                    className="form-input"
+                                                    style={{ fontFamily: 'monospace' }}
+                                                />
+                                            </div>
+                                            <span style={{ color: 'var(--color-text-muted)', fontWeight: 'bold' }}>-</span>
+                                            <div style={{ flex: 1 }}>
+                                                <input 
+                                                    type="time" 
+                                                    value={slot.end} 
+                                                    onChange={(e) => {
+                                                        const newTimeline = [...tempTimeline];
+                                                        newTimeline[idx].end = e.target.value;
+                                                        setTempTimeline(newTimeline);
+                                                    }}
+                                                    className="form-input"
+                                                    style={{ fontFamily: 'monospace' }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <button 
+                                            onClick={() => {
+                                                const newTimeline = tempTimeline.filter((_, i) => i !== idx);
+                                                if (slot.type === 'period') {
+                                                    let pIndex = 0;
+                                                    newTimeline.forEach(t => {
+                                                        if (t.type === 'period') {
+                                                            t.label = `P${pIndex + 1}`;
+                                                            t.index = pIndex;
+                                                            pIndex++;
+                                                        }
+                                                    });
+                                                }
+                                                setTempTimeline(newTimeline);
+                                            }}
+                                            style={{ color: '#ef4444', padding: '0.5rem', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '0.5rem' }}
+                                            className="hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                            title="Delete"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="modal-footer">
+                            <button 
+                                onClick={() => setIsEditingTimings(false)} 
+                                className="btn-secondary"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={handleSaveTimings} 
+                                disabled={isSaving}
+                                className="btn-primary"
+                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1.25rem' }}
+                            >
+                                {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                                Save Timings
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     );
 };

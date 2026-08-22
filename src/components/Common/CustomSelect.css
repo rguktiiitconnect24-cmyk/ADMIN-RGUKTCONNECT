@@ -139,6 +139,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  white-space: nowrap;
 }
 
 .custom-select-option:hover {

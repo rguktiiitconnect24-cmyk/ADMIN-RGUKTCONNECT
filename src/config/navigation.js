@@ -62,14 +62,6 @@ export const NAV_ITEMS = [
         hideOnMobile: true
     },
     {
-        id: 'admin-attendance',
-        label: 'Attendance',
-        path: '/admin/attendance',
-        icon: Database,
-        adminOnly: true,
-        hideOnMobile: true
-    },
-    {
         id: 'admin-notices',
         label: 'Notice Board',
         path: '/admin/notices',
@@ -115,7 +107,43 @@ export const NAV_ITEMS = [
         path: '/profile',
         icon: User,
         adminOnly: true
-    },
+    }
 ];
 
-export const FACULTY_NAV_ITEMS = [];
+export const FACULTY_NAV_ITEMS = [
+    {
+        id: 'faculty-dashboard',
+        label: 'Home',
+        path: '/admin/dashboard',
+        icon: LayoutDashboard,
+        adminOnly: false
+    },
+    {
+        id: 'faculty-users',
+        label: 'Students',
+        path: '/admin/users',
+        icon: Users,
+        adminOnly: false
+    },
+    {
+        id: 'faculty-courses',
+        label: 'Course Content',
+        path: '/admin/courses',
+        icon: BookOpen,
+        adminOnly: false
+    },
+    {
+        id: 'faculty-notices',
+        label: 'Notice Board',
+        path: '/admin/notices',
+        icon: Bell,
+        adminOnly: false
+    },
+    {
+        id: 'faculty-cgpa',
+        label: 'CGPA',
+        path: '/admin/cgpa',
+        icon: FileText,
+        adminOnly: false
+    }
+];

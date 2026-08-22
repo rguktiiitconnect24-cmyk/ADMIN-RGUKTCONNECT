@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { NAV_ITEMS } from '../../config/navigation';
+import { NAV_ITEMS, FACULTY_NAV_ITEMS } from '../../config/navigation';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { complaintsDb } from '../../config/firebase';
 import { Badge } from '@capawesome/capacitor-badge';
@@ -16,23 +16,28 @@ const BottomNav = () => {
     const isSubAdmin = user?.role === 'admin' && !isSuperAdmin;
 
     // Filter navigation items based on user role
-    const visibleItems = React.useMemo(() =>
-        NAV_ITEMS.filter(item => {
-            if (item.adminOnly && user?.role !== 'admin') return false;
-            if (user?.role === 'admin' && item.hideForAdmin) return false;
+    const visibleItems = React.useMemo(() => {
+        const userRole = (user?.role || '').toLowerCase();
+        
+        if (userRole === 'faculty') {
+            return FACULTY_NAV_ITEMS;
+        }
+        
+        return NAV_ITEMS.filter(item => {
+            if (item.adminOnly && userRole !== 'admin') return false;
+            if (userRole === 'admin' && item.hideForAdmin) return false;
             if (item.hideOnMobile) return false;
 
             // Check semi-admin permissions
-            if (user?.role === 'admin' && item.adminOnly && user?.permissions && user.permissions.length > 0) {
+            if (userRole === 'admin' && item.adminOnly && user?.permissions && user.permissions.length > 0) {
                 if (!user.permissions.includes('all') && !user.permissions.includes(item.id) && item.id !== 'admin-dashboard') {
                     return false;
                 }
             }
 
             return true;
-        }),
-        [user?.role, user?.permissions]
-    );
+        });
+    }, [user?.role, user?.permissions]);
 
     const [hasUnreadStudentReply, setHasUnreadStudentReply] = React.useState(false);
 

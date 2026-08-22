@@ -6,6 +6,7 @@ import { db, complaintsDb } from '../../config/firebase';
 import { collection, query, getDocs, limit, orderBy } from 'firebase/firestore';
 import { Html5Qrcode } from 'html5-qrcode';
 import { useAuth } from '../../context/AuthContext';
+import { motion } from 'framer-motion';
 import './Admin.css';
 
 const AdminDashboard = () => {
@@ -22,23 +23,6 @@ const AdminDashboard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [sessionStart] = useState(Date.now());
     const [liveUptime, setLiveUptime] = useState('00:00:00');
-
-    useEffect(() => {
-        const requestCameraPermission = async () => {
-            try {
-                // Use Html5Qrcode's built in camera request which handles platform differences better
-                const cameras = await Html5Qrcode.getCameras();
-                if (cameras && cameras.length > 0) {
-                    console.log("Camera access granted proactively.");
-                }
-            } catch (err) {
-                console.warn("Proactive camera permission request failed or denied:", err);
-            }
-        };
-
-        // Delay the prompt slightly to allow the dashboard to render first
-        setTimeout(requestCameraPermission, 1500);
-    }, []);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -106,7 +90,9 @@ const AdminDashboard = () => {
         fetchDashboardData();
     }, []);
 
-    const isSuperAdmin = !user?.permissions || user.permissions.includes('all');
+    const isSuperAdmin = user?.role === 'admin' && (!user?.permissions || user.permissions.includes('all'));
+    const isFaculty = user?.role === 'faculty';
+    const isSubAdmin = user?.role === 'admin' && !isSuperAdmin;
 
     if (isLoading) return <LoadingTransition message="Dashboard Loading" persistent />;
 
@@ -123,7 +109,7 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            {!isSuperAdmin && (
+            {isSubAdmin && (
                 <div className="sub-admin-welcome-container">
                     <div className="welcome-banner subadmin-banner">
                         <div className="welcome-icon-wrapper">
@@ -171,6 +157,52 @@ const AdminDashboard = () => {
                         )}
                     </div>
                 </div>
+            )}
+
+            {isFaculty && (
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    className="sub-admin-welcome-container"
+                >
+                    <div 
+                        className="welcome-banner subadmin-banner" 
+                        style={{
+                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', // Vibrant Emerald Gradient
+                            color: '#ffffff',
+                            boxShadow: '0 10px 25px -5px rgba(16, 185, 129, 0.3)'
+                        }}
+                    >
+                        <motion.div 
+                            className="welcome-icon-wrapper"
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                            style={{ background: 'rgba(255, 255, 255, 0.2)' }}
+                        >
+                            <BookOpen size={48} color="#ffffff" />
+                        </motion.div>
+                        <div className="welcome-text-wrapper">
+                            <motion.h2 
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3 }}
+                                style={{ color: '#ffffff', marginBottom: '0.5rem' }}
+                            >
+                                Welcome, {user?.displayName || user?.fullName || 'Faculty Member'}!
+                            </motion.h2>
+                            <motion.p
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.4 }}
+                                style={{ color: 'rgba(255, 255, 255, 0.9)' }}
+                            >
+                                You are logged into the Faculty Portal. Use the sidebar to navigate to your assigned modules and manage your classes.
+                            </motion.p>
+                        </div>
+                    </div>
+                </motion.div>
             )}
 
             {isSuperAdmin && (
@@ -278,15 +310,7 @@ const AdminDashboard = () => {
                         <p className="text-xs text-[var(--color-text-muted)] font-normal mt-1">View user feedback</p>
                     </div>
                 </div>
-                <div className="stat-card cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/attendance')}>
-                    <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
-                        <Database size={24} />
-                    </div>
-                    <div className="stat-info">
-                        <h3>Attendance Rates</h3>
-                        <p className="text-xs text-[var(--color-text-muted)] font-normal mt-1">Bulk upload Excel</p>
-                    </div>
-                </div>
+
                 <div className="stat-card cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/cgpa')}>
                     <div className="stat-icon" style={{ background: 'rgba(168, 85, 247, 0.1)', color: '#a855f7' }}>
                         <Award size={24} />
